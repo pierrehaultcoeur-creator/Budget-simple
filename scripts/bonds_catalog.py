@@ -21,7 +21,7 @@ API = (
     "esma_registers_firds_files/select"
 )
 OUT = Path("data/bonds-catalog.json")
-USER_AGENT = "Budget-Simplement-Bond-Catalog/1.0"
+USER_AGENT = "Budget-Simplement-Bond-Catalog/1.1"
 ISIN_RE = re.compile(r"^[A-Z]{2}[A-Z0-9]{9}[0-9]$")
 FILE_RE = re.compile(
     r"FULINS_D_(\d{8})_(\d+)of(\d+)\.zip$", re.IGNORECASE
@@ -44,27 +44,32 @@ def http_get(url: str, timeout: int = 180) -> bytes:
             last_error = exc
             if attempt < 2:
                 time.sleep(2 ** attempt)
-    raise RuntimeError(f"Request failed after 3 attempts: {url}: {last_error}")
+    raise RuntimeError(f"Request failed after 3 attempts: {last_error}")
 
 
 def xml_local_name(tag: str) -> str:
     return tag.rsplit("}", 1)[-1]
 
 
-def direct_child_text(node: ET.Element, child_name: str) -> str | None:
+def direct_child_text(node: ET.Element | None, name: str) -> str | None:
+    if node is None:
+        return None
     for child in list(node):
-        if xml_local_name(child.tag) == child_name:
-            value = (child.text or "").strip()
-            return value or None
+        if xml_local_name(child.tag) == name:
+            value = "".join(child.itertext()).strip()
+            if value:
+                return value
     return None
 
 
-def first_descendant_text(node: ET.Element, name: str) -> str | None:
+def first_descendant_text(
+    node: ET.Element | None, name: str
+) -> str | None:
     if node is None:
         return None
     for child in node.iter():
         if xml_local_name(child.tag) == name:
-            value = (child.text or "").strip()
+            value = "".join(child.itertext()).strip()
             if value:
                 return value
     return None
@@ -88,9 +93,11 @@ def query_esma_files(start: date, end: date) -> list[dict]:
     response = payload.get("response", {})
     docs = response.get("docs", [])
     found = int(response.get("numFound", len(docs)))
+
     if found > len(docs):
         raise RuntimeError(
-            f"ESMA returned {len(docs)} of {found} results; pagination required."
+            f"ESMA returned {len(docs)} of {found} results; "
+            "pagination is required."
         )
 
     results = []
@@ -98,10 +105,14 @@ def query_esma_files(start: date, end: date) -> list[dict]:
         link = doc.get("download_link")
         if not isinstance(link, str) or not link:
             continue
-        filename = urllib.parse.urlparse(link).path.rsplit("/", 1)[-1]
+
+        filename = urllib.parse.unquote(
+            urllib.parse.urlparse(link).path.rsplit("/", 1)[-1]
+        )
         match = FILE_RE.fullmatch(filename)
         if not match:
             continue
+
         results.append({
             "date": match.group(1),
             "part": int(match.group(2)),
@@ -109,6 +120,7 @@ def query_esma_files(start: date, end: date) -> list[dict]:
             "url": link,
             "filename": filename,
         })
+
     return results
 
 
@@ -122,64 +134,100 @@ def choose_complete_publication(files: list[dict]) -> list[dict]:
         totals = {item["total"] for item in group}
         if len(totals) != 1:
             continue
+
         expected = next(iter(totals))
         parts = [item["part"] for item in group]
-        if len(group) == expected and sorted(parts) == list(range(1, expected + 1)):
+        if (
+            len(group) == expected
+            and sorted(parts) == list(range(1, expected + 1))
+        ):
             return sorted(group, key=lambda item: item["part"])
+
     raise RuntimeError(
         "No complete FULINS_D publication found in ESMA results. "
         "No new catalogue has been written."
     )
 
 
+def parse_instrument(node: ET.Element) -> dict | None:
+    general = None
+    debt = None
+    trading = None
+
+    for child in node.iter():
+        name = xml_local_name(child.tag)
+        if name == "FinInstrmGnlAttrbts" and general is None:
+            general = child
+        elif name == "DebtInstrmAttrbts" and debt is None:
+            debt = child
+        elif name == "TradgVnRltdAttrbts" and trading is None:
+            trading = child
+
+    if general is None:
+        return None
+
+    isin = direct_child_text(general, "Id")
+    cfi = direct_child_text(general, "ClssfctnTp")
+
+    if not isin or not ISIN_RE.fullmatch(isin):
+        return None
+    if not cfi or not cfi.startswith("D"):
+        return None
+
+    return {
+        "isin": isin,
+        "name": direct_child_text(general, "FullNm"),
+        "shortName": direct_child_text(general, "ShrtNm"),
+        "cfi": cfi,
+        "currency": direct_child_text(general, "NtnlCcy"),
+        "maturityDate": first_descendant_text(debt, "MtrtyDt"),
+        "couponRate": (
+            first_descendant_text(debt, "Fxd")
+            or first_descendant_text(debt, "IntrstRate")
+        ),
+        "issuerLei": first_descendant_text(node, "Issr"),
+        "marketMic": first_descendant_text(trading, "Id"),
+    }
+
+
 def parse_xml(xml_bytes: bytes) -> list[dict]:
+    """Parse supported instrument containers and report diagnostics."""
     records = []
+    containers_seen = 0
+    valid_isins = 0
+    debt_records = 0
+
     try:
-        for _, node in ET.iterparse(io.BytesIO(xml_bytes), events=("end",)):
-            if xml_local_name(node.tag) != "FinInstrm":
-                continue
-            general = None
-            debt = None
-            trading = None
-            for child in node.iter():
-                lname = xml_local_name(child.tag)
-                if lname == "FinInstrmGnlAttrbts" and general is None:
-                    general = child
-                elif lname == "DebtInstrmAttrbts" and debt is None:
-                    debt = child
-                elif lname == "TradgVnRltdAttrbts" and trading is None:
-                    trading = child
-
-            if general is None:
-                node.clear()
-                continue
-            isin = direct_child_text(general, "Id")
-            cfi = direct_child_text(general, "ClssfctnTp")
-            if not isin or not ISIN_RE.fullmatch(isin):
-                node.clear()
-                continue
-            if not cfi or not cfi.startswith("D"):
-                node.clear()
-                continue
-
-            record = {
-                "isin": isin,
-                "name": direct_child_text(general, "FullNm"),
-                "shortName": direct_child_text(general, "ShrtNm"),
-                "cfi": cfi,
-                "currency": direct_child_text(general, "NtnlCcy"),
-                "maturityDate": first_descendant_text(debt, "MtrtyDt"),
-                "couponRate": (
-                    first_descendant_text(debt, "Fxd")
-                    or first_descendant_text(debt, "IntrstRate")
-                ),
-                "issuerLei": first_descendant_text(node, "Issr"),
-                "marketMic": first_descendant_text(trading, "Id"),
-            }
-            records.append(record)
-            node.clear()
+        root = ET.fromstring(xml_bytes)
     except ET.ParseError as exc:
         raise RuntimeError(f"Invalid XML payload: {exc}") from exc
+
+    # Inspect both known container names. Prefer actual instrument nodes
+    # when present; otherwise try RefData containers.
+    instruments = [
+        node for node in root.iter()
+        if xml_local_name(node.tag) == "FinInstrm"
+    ]
+    if not instruments:
+        instruments = [
+            node for node in root.iter()
+            if xml_local_name(node.tag) == "RefData"
+        ]
+
+    for node in instruments:
+        containers_seen += 1
+        record = parse_instrument(node)
+        if record is None:
+            continue
+
+        valid_isins += 1
+        debt_records += 1
+        records.append(record)
+
+    print(
+        f"XML diagnostics: containers={containers_seen}, "
+        f"valid debt ISINs={debt_records}, extracted={len(records)}"
+    )
     return records
 
 
@@ -192,18 +240,21 @@ def build_catalogue() -> dict:
     files = query_esma_files(today - timedelta(days=21), today)
     publication = choose_complete_publication(files)
     publication_date = publication[0]["date"]
+
     print(
-        f"Selected FULINS_D publication {publication_date}: "
+        f"Selected publication {publication_date}: "
         f"{len(publication)} part(s)"
     )
 
     deduplicated: dict[str, dict] = {}
     downloaded_bytes = 0
     xml_count = 0
+
     for item in publication:
         print(f"Downloading {item['filename']}")
         archive_data = http_get(item["url"])
         downloaded_bytes += len(archive_data)
+
         try:
             with zipfile.ZipFile(io.BytesIO(archive_data)) as archive:
                 xml_names = [
@@ -211,18 +262,30 @@ def build_catalogue() -> dict:
                     if name.lower().endswith(".xml")
                 ]
                 if not xml_names:
-                    raise RuntimeError(f"No XML member in {item['filename']}")
+                    raise RuntimeError(
+                        f"No XML member in {item['filename']}"
+                    )
+
                 for xml_name in xml_names:
                     xml_count += 1
                     with archive.open(xml_name) as member:
                         for record in parse_xml(member.read()):
                             old = deduplicated.get(record["isin"])
-                            if old is None or completeness(record) > completeness(old):
+                            if (
+                                old is None
+                                or completeness(record) > completeness(old)
+                            ):
                                 deduplicated[record["isin"]] = record
-        except zipfile.BadZipFile as exc:
-            raise RuntimeError(f"Invalid ZIP archive: {item['filename']}") from exc
 
-    records = sorted(deduplicated.values(), key=lambda row: row["isin"])
+        except zipfile.BadZipFile as exc:
+            raise RuntimeError(
+                f"Invalid ZIP archive: {item['filename']}"
+            ) from exc
+
+    records = sorted(
+        deduplicated.values(), key=lambda row: row["isin"]
+    )
+
     if len(records) < MIN_RECORDS:
         raise RuntimeError(
             f"Only {len(records)} unique debt ISIN(s) extracted; "
@@ -234,7 +297,9 @@ def build_catalogue() -> dict:
         "source": "ESMA FIRDS",
         "sourceFileType": "FULINS_D",
         "publicationDate": publication_date,
-        "generatedAt": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "generatedAt": datetime.now(timezone.utc).isoformat(
+            timespec="seconds"
+        ),
         "recordCount": len(records),
         "xmlFileCount": xml_count,
         "downloadedBytes": downloaded_bytes,
@@ -247,10 +312,12 @@ def main() -> int:
     OUT.parent.mkdir(parents=True, exist_ok=True)
     temp = OUT.with_suffix(".json.tmp")
     temp.write_text(
-        json.dumps(catalogue, ensure_ascii=False, separators=(",", ":")) + "\n",
+        json.dumps(catalogue, ensure_ascii=False, separators=(",", ":"))
+        + "\n",
         encoding="utf-8",
     )
     temp.replace(OUT)
+
     print(f"Catalogue saved: {OUT}")
     print(f"Unique debt ISINs: {catalogue['recordCount']}")
     return 0
@@ -262,4 +329,4 @@ if __name__ == "__main__":
     except Exception as error:
         print(f"ERROR: {error}", file=sys.stderr)
         raise SystemExit(1)
-  
+            
