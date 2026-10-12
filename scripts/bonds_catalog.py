@@ -168,11 +168,14 @@ def parse_xml(xml_bytes: bytes) -> list[dict]:
                 continue
 
             maturity, maturity_raw, maturity_status = normalized_maturity(debt)
+            cfi_group, instrument_type = classify_cfi(cfi)
             record = {
                 "isin": isin,
                 "name": direct_child_text(general, "FullNm"),
                 "shortName": direct_child_text(general, "ShrtNm"),
                 "cfi": cfi,
+                "cfiGroup": cfi_group,
+                "instrumentType": instrument_type,
                 "currency": direct_child_text(general, "NtnlCcy"),
                 "maturityDate": maturity,
                 "maturityDateRaw": maturity_raw,
@@ -193,6 +196,22 @@ def parse_xml(xml_bytes: bytes) -> list[dict]:
 
 
 MATURITY_SENTINELS = {"9999-12-31", "9999-12-30", "0000-00-00"}
+CFI_GROUP_LABELS = {
+    "DB": "Obligation (bond)",
+    "DC": "Obligation convertible",
+    "DW": "Obligation avec bons de souscription",
+    "DT": "Medium-term note",
+    "DS": "Produit structuré avec protection du capital",
+    "DE": "Produit structuré sans protection du capital",
+    "DY": "Instrument monétaire",
+    "DM": "Autre instrument de dette",
+}
+
+
+def classify_cfi(cfi: str | None) -> tuple[str | None, str]:
+    code = str(cfi or "").strip().upper()
+    group = code[:2] if len(code) >= 2 and code.startswith("D") else None
+    return group, CFI_GROUP_LABELS.get(group, "Instrument de dette — groupe CFI à vérifier")
 
 
 def normalized_maturity(debt: ET.Element | None) -> tuple[str | None, str | None, str | None]:
