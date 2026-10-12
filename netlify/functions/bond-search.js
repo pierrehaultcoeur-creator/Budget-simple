@@ -107,13 +107,41 @@ function exactIsinSearch(isin) {
   const result = canonicalBond(record);
   return result ? [result] : [];
 }
+function indexedIsinPrefixSearch(query, manifest) {
+  if (!/^[A-Z]{2}[A-Z0-9]{2,10}$/.test(query)) return null;
+  const index = readIsinIndex(query.slice(0, 2), manifest);
+  if (!index) return null;
+  const matches = Object.entries(index)
+    .filter(([isin]) => isin.startsWith(query))
+    .sort(([a], [b]) => a.localeCompare(b))
+    .slice(0, MAX_RESULTS);
+  if (!matches.length) return [];
+  const byShard = new Map();
+  for (const [isin, filename] of matches) {
+    if (!byShard.has(filename)) byShard.set(filename, new Set());
+    byShard.get(filename).add(isin);
+  }
+  const results = [];
+  for (const [filename, isins] of byShard) {
+    for (const raw of readShard(filename)) {
+      const isin = String(raw?.isin || raw?.ISIN || raw?.isinCode || '').replace(/\\s+/g, '').toUpperCase();
+      if (isins.has(isin)) {
+        const item = canonicalBond(raw);
+        if (item) results.push(item);
+      }
+    }
+  }
+  return results.slice(0, MAX_RESULTS);
+}
 function shardedCatalogSearch(q) {
   const manifest = readManifest();
   if (!manifest) return [];
   const key = normalize(q);
-  const isinQuery = String(q || '').replace(/\s+/g, '').toUpperCase();
+  const isinQuery = String(q || '').replace(/\\s+/g, '').toUpperCase();
   const exact = exactIsinSearch(isinQuery);
   if (exact !== null) return exact;
+  const prefixResults = indexedIsinPrefixSearch(isinQuery, manifest);
+  if (prefixResults !== null) return prefixResults;
   if (!manifest.hasSearchableNames && !/^[A-Z0-9]{4,12}$/.test(isinQuery)) return [];
   const results = [];
   for (const part of manifest.parts) {
@@ -129,7 +157,6 @@ function shardedCatalogSearch(q) {
   }
   return results;
 }
-
 function publicBond(record) {
   if (!record || !record.figi || !record.name) return null;
   return {
