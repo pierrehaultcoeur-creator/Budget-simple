@@ -46,6 +46,19 @@ test('canonical bond preserves missing maturity semantics and flags source senti
   assert.equal(bond.maturitySourceValue, '9999-12-31');
 });
 
+test('canonical bond withholds suspicious coupon and preserves source value', () => {
+  const bond = search._test.canonicalBond({
+    isin: 'GR0118017657',
+    name: 'GGB 3.375 2/25 GREECE',
+    couponRate: null,
+    couponRateRaw: '3375',
+    couponRateStatus: 'SUSPICIOUS_SOURCE_VALUE'
+  });
+  assert.equal(bond.coupon, null);
+  assert.equal(bond.couponStatus, 'SUSPICIOUS_SOURCE_VALUE');
+  assert.equal(bond.couponSourceValue, '3375');
+});
+
 test('invalid ISIN-like input does not claim an exact match', () => {
   assert.deepEqual(search._test.exactIsinSearch('NOT-AN-ISIN'), null);
 });
