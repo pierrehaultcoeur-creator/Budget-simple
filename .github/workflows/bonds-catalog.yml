@@ -52,8 +52,8 @@ jobs:
           assert all(r.get("cfi", "").startswith("D") for r in data["records"])
           print(f"Validated {len(isins)} unique debt instruments.")
           PY
-          python scripts/audit_bonds_catalog.py data/bonds-catalog.json > bond-catalog-quality-report.json
-          cat bond-catalog-quality-report.json
+          python scripts/audit_bonds_catalog.py data/bonds-catalog.json > /tmp/bond-catalog-quality-report.json
+          cat /tmp/bond-catalog-quality-report.json
           python scripts/split_bonds_catalog.py data/bonds-catalog.json data/bonds-catalog
           rm data/bonds-catalog.json
           python - <<'PY'
