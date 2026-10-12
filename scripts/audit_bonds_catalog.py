@@ -18,6 +18,8 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_INPUT = ROOT / "data" / "bonds-catalog.json"
 ISIN_RE = re.compile(r"^[A-Z]{2}[A-Z0-9]{9}[0-9]$")
 MATURITY_SENTINELS = {"9999-12-31", "9999-12-30", "0000-00-00"}
+BOND_LIKE_CFI_GROUPS = {"DB", "DC", "DW", "DT", "DA", "DG", "DN"}
+STRUCTURED_PRODUCT_CFI_GROUPS = {"DE", "DS"}
 
 
 def valid_isin_checksum(value: str) -> bool:
@@ -52,6 +54,8 @@ def audit_records(records: list[dict]) -> dict:
     coupon_non_numeric = 0
     suspicious_coupon = 0
     sample_sentinels = []
+    suspicious_coupon_samples = []
+    non_numeric_coupon_samples = []
 
     fields = ("name", "shortName", "currency", "maturityDate", "couponRate", "issuerLei", "marketMic")
     for record in records:
@@ -74,11 +78,12 @@ def audit_records(records: list[dict]) -> dict:
             if record.get(field) in (None, ""):
                 missing[field] += 1
 
-        maturity = str(record.get("maturityDate") or "").strip()
+        # Inspect raw source values too: normalized maturityDate may be null for a sentinel.
+        maturity = str(record.get("maturityDateRaw") or record.get("maturityDate") or "").strip()
         if maturity in MATURITY_SENTINELS:
             sentinel_maturities += 1
             if len(sample_sentinels) < 10:
-                sample_sentinels.append({"isin": isin, "maturityDate": maturity, "name": record.get("name")})
+                sample_sentinels.append({"isin": isin, "maturityDateRaw": maturity, "name": record.get("name")})
         elif maturity:
             # Accept ISO date or ISO datetime only; do not infer alternate formats.
             if not re.fullmatch(r"\d{4}-\d{2}-\d{2}(?:T.*)?", maturity):
@@ -90,9 +95,15 @@ def audit_records(records: list[dict]) -> dict:
                 number = float(str(coupon).replace(",", "."))
                 if not (-100 <= number <= 1000):
                     suspicious_coupon += 1
+                    if len(suspicious_coupon_samples) < 10:
+                        suspicious_coupon_samples.append({"isin": isin, "couponRate": coupon, "name": record.get("name")})
             except (TypeError, ValueError):
                 coupon_non_numeric += 1
+                if len(non_numeric_coupon_samples) < 10:
+                    non_numeric_coupon_samples.append({"isin": isin, "couponRate": coupon, "name": record.get("name")})
 
+    bond_like_count = sum(count for group, count in cfi_prefixes.items() if group in BOND_LIKE_CFI_GROUPS)
+    structured_product_count = sum(count for group, count in cfi_prefixes.items() if group in STRUCTURED_PRODUCT_CFI_GROUPS)
     return {
         "recordCount": total,
         "uniqueNonEmptyIsins": len(seen),
@@ -102,10 +113,17 @@ def audit_records(records: list[dict]) -> dict:
         "invalidIsinChecksumAmongShaped": valid_shape - valid_checksum,
         "missingFieldCounts": {field: missing[field] for field in fields},
         "cfiPrefixCounts": dict(sorted(cfi_prefixes.items())),
+        "bondLikeCfiGroups": sorted(BOND_LIKE_CFI_GROUPS),
+        "bondLikeInstrumentCount": bond_like_count,
+        "structuredProductCfiGroups": sorted(STRUCTURED_PRODUCT_CFI_GROUPS),
+        "structuredProductCount": structured_product_count,
+        "otherDebtInstrumentCount": total - bond_like_count - structured_product_count,
         "sentinelMaturityCount": sentinel_maturities,
         "malformedMaturityCount": malformed_maturities,
         "nonNumericCouponCount": coupon_non_numeric,
         "suspiciousCouponCount": suspicious_coupon,
+        "suspiciousCouponSamples": suspicious_coupon_samples,
+        "nonNumericCouponSamples": non_numeric_coupon_samples,
         "sentinelMaturitySamples": sample_sentinels,
     }
 
