@@ -5,9 +5,12 @@ const CATALOG_PATH = path.join(__dirname, '..', '..', 'bond-catalog.json');
 const SHARDED_DIR = path.join(__dirname, '..', '..', 'data', 'bonds-catalog');
 const MANIFEST_PATH = path.join(SHARDED_DIR, 'manifest.json');
 const SHARD_CACHE = new Map();
+const ISIN_INDEX_CACHE = new Map();
 const MAX_SHARD_CACHE = 3;
+const MAX_ISIN_INDEX_CACHE = 3;
 const OPENFIGI_URL = 'https://api.openfigi.com/v3/filter';
 const MAX_RESULTS = 30;
+const ISIN_RE = /^[A-Z]{2}[A-Z0-9]{9}[0-9]$/;
 
 function json(statusCode, body) {
   return {
@@ -50,6 +53,23 @@ function readShard(filename) {
     return [];
   }
 }
+function readIsinIndex(prefix, manifest) {
+  const entry = (manifest.isinIndexes || []).find(item => item.prefix === prefix);
+  if (!entry || !entry.file) return null;
+  if (ISIN_INDEX_CACHE.has(entry.file)) return ISIN_INDEX_CACHE.get(entry.file);
+  try {
+    const index = JSON.parse(fs.readFileSync(path.join(SHARDED_DIR, entry.file), 'utf8'));
+    if (!index || typeof index !== 'object' || Array.isArray(index)) return null;
+    ISIN_INDEX_CACHE.set(entry.file, index);
+    while (ISIN_INDEX_CACHE.size > MAX_ISIN_INDEX_CACHE) {
+      ISIN_INDEX_CACHE.delete(ISIN_INDEX_CACHE.keys().next().value);
+    }
+    return index;
+  } catch (error) {
+    console.error('Unable to read bond ISIN index', entry.file, error);
+    return null;
+  }
+}
 function canonicalBond(record) {
   if (typeof record === 'string') record = { isin: record };
   if (!record || typeof record !== 'object') return null;
@@ -72,21 +92,36 @@ function canonicalBond(record) {
     confidence: name ? 'catalog-record' : 'isin-only'
   };
 }
+function exactIsinSearch(isin) {
+  if (!ISIN_RE.test(isin)) return null;
+  const manifest = readManifest();
+  if (!manifest) return null;
+  const index = readIsinIndex(isin.slice(0, 2), manifest);
+  if (!index) return null;
+  const shardName = index[isin];
+  if (!shardName) return [];
+  const record = readShard(shardName).find(raw => {
+    const value = String(raw?.isin || raw?.ISIN || raw?.isinCode || '').replace(/\s+/g, '').toUpperCase();
+    return value === isin;
+  });
+  const result = canonicalBond(record);
+  return result ? [result] : [];
+}
 function shardedCatalogSearch(q) {
   const manifest = readManifest();
   if (!manifest) return [];
   const key = normalize(q);
   const isinQuery = String(q || '').replace(/\s+/g, '').toUpperCase();
-  const looksLikeIsinSearch = /^[A-Z0-9]{4,12}$/.test(isinQuery);
-  if (!manifest.hasSearchableNames && !looksLikeIsinSearch) return [];
+  const exact = exactIsinSearch(isinQuery);
+  if (exact && exact.length) return exact;
+  if (!manifest.hasSearchableNames && !/^[A-Z0-9]{4,12}$/.test(isinQuery)) return [];
   const results = [];
   for (const part of manifest.parts) {
     for (const raw of readShard(part.file)) {
       const item = canonicalBond(raw);
       if (!item) continue;
       const fields = [item.name, item.issuer, item.isin, item.figi].filter(Boolean).join(' ');
-      const exactIsin = /^[A-Z]{2}[A-Z0-9]{9}[0-9]$/.test(isinQuery) && item.isin === isinQuery;
-      if (exactIsin || normalize(fields).includes(key)) {
+      if (normalize(fields).includes(key)) {
         results.push(item);
         if (results.length >= MAX_RESULTS) return results;
       }
@@ -125,6 +160,9 @@ function publicBond(record) {
 function catalogSearch(q) {
   const key = normalize(q);
   if (!key) return [];
+  const isinQuery = String(q || '').replace(/\s+/g, '').toUpperCase();
+  const exact = exactIsinSearch(isinQuery);
+  if (exact && exact.length) return exact;
   const small = readCatalog().map(publicBond).filter(Boolean)
     .filter(x => normalize([x.name, x.issuer, x.isin, x.figi].filter(Boolean).join(' ')).includes(key))
     .slice(0, MAX_RESULTS);
@@ -177,7 +215,7 @@ async function openFigiSearch(q) {
   return Array.isArray(payload.data) ? payload.data.map(normalizeOpenFigi).filter(Boolean).slice(0, MAX_RESULTS) : [];
 }
 
-exports._test = { canonicalBond, shardedCatalogSearch, normalize };
+exports._test = { canonicalBond, shardedCatalogSearch, exactIsinSearch, normalize };
 
 exports.handler = async (event) => {
   const q = String(event?.queryStringParameters?.q || '').trim();
