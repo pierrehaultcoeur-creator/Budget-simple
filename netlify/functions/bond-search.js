@@ -77,8 +77,11 @@ function canonicalBond(record) {
   if (!isin) return null;
   const name = record.name || record.instrumentName || record.nameOfFinancialInstrument || null;
   return {
-    type: 'bond', id: record.id || record.figi || isin, figi: record.figi || null, isin,
-    name: name || `Obligation — ${isin}`, issuer: record.issuer || record.issuerName || null,
+    type: 'bond', assetClass: 'debt-instrument',
+    instrumentGroup: record.instrumentGroup || record.cfiGroup || (record.cfi ? String(record.cfi).slice(0, 2) : null),
+    instrumentType: record.instrumentType || null, cfi: record.cfi || null,
+    id: record.id || record.figi || isin, figi: record.figi || null, isin,
+    name: name || `Instrument de dette — ${isin}`, issuer: record.issuer || record.issuerName || null,
     issuerCountry: record.issuerCountry || record.countryOfIssuer || null,
     currency: record.currency || record.tradingCurrency || null,
     coupon: record.coupon ?? record.couponRate ?? null,
@@ -86,7 +89,7 @@ function canonicalBond(record) {
     issueDate: record.issueDate || null, maturity: record.maturity || record.maturityDate || null,
     maturityStatus: record.maturityStatus || record.maturityDateStatus || null,
     maturitySourceValue: record.maturitySourceValue || record.maturityDateRaw || null,
-    nominalValue: record.nominalValue ?? null, bondType: record.bondType || record.securityType || null,
+    nominalValue: record.nominalValue ?? null, bondType: record.bondType || record.securityType || record.instrumentType || null,
     status: record.status || 'IDENTIFIER_ONLY', market: record.market || null, mic: record.mic || null,
     symbol: isin, exchange: record.mic || record.market || 'ISIN',
     source: name ? 'ESMA debt instrument catalogue' : 'ESMA debt ISIN catalogue',
