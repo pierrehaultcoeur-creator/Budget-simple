@@ -137,7 +137,7 @@ function shardedCatalogSearch(q) {
   const manifest = readManifest();
   if (!manifest) return [];
   const key = normalize(q);
-  const isinQuery = String(q || '').replace(/\\s+/g, '').toUpperCase();
+  const isinQuery = String(q || '').replace(/\s+/g, '').toUpperCase();
   const exact = exactIsinSearch(isinQuery);
   if (exact !== null) return exact;
   const prefixResults = indexedIsinPrefixSearch(isinQuery, manifest);
