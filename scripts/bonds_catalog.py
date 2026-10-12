@@ -206,7 +206,10 @@ def normalized_maturity(debt: ET.Element | None) -> tuple[str | None, str | None
 
 
 def completeness(record: dict) -> int:
-    return sum(value not in (None, "") for value in record.values())
+    # Count only meaningful catalogue fields. Raw sentinel values and quality
+    # flags are provenance, not additional financial-data completeness.
+    fields = ("isin", "name", "shortName", "cfi", "currency", "maturityDate", "couponRate", "issuerLei", "marketMic")
+    return sum(record.get(field) not in (None, "") for field in fields)
 
 
 def build_catalogue() -> dict:
