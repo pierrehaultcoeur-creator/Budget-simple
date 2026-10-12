@@ -197,12 +197,16 @@ def parse_xml(xml_bytes: bytes) -> list[dict]:
 
 MATURITY_SENTINELS = {"9999-12-31", "9999-12-30", "0000-00-00"}
 CFI_GROUP_LABELS = {
+    "DA": "Titre adossé à des actifs (ABS)",
     "DB": "Obligation (bond)",
     "DC": "Obligation convertible",
+    "DD": "Certificat représentatif de dette",
     "DW": "Obligation avec bons de souscription",
     "DT": "Medium-term note",
     "DS": "Produit structuré avec protection du capital",
     "DE": "Produit structuré sans protection du capital",
+    "DG": "Titre adossé à des créances hypothécaires (MBS)",
+    "DN": "Obligation municipale",
     "DY": "Instrument monétaire",
     "DM": "Autre instrument de dette",
 }
