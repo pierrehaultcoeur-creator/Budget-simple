@@ -138,21 +138,21 @@ def parse_xml(xml_bytes: bytes) -> list[dict]:
     """Parse instrument records; tolerate XML namespaces and message wrappers."""
     records = []
     try:
-        # Instrument records in FULINS payloads are represented by FinInstrm.
+        # Instrument records in FULINS payloads are represented by RefData.
         for _, node in ET.iterparse(io.BytesIO(xml_bytes), events=("end",)):
-                if xml_local_name(node.tag) != "RefData":
-                    continue
-                general = None
-                debt = None
-                trading = None
-                for child in node.iter():
-                    lname = xml_local_name(child.tag)
-                    if lname == "FinInstrmGnlAttrbts" and general is None:
-                        general = child
-                    elif lname == "DebtInstrmAttrbts" and debt is None:
-                        debt = child
-                    elif lname == "TradgVnRltdAttrbts" and trading is None:
-                        trading = child
+            if xml_local_name(node.tag) != "RefData":
+                continue
+            general = None
+            debt = None
+            trading = None
+            for child in node.iter():
+                lname = xml_local_name(child.tag)
+                if lname == "FinInstrmGnlAttrbts" and general is None:
+                    general = child
+                elif lname == "DebtInstrmAttrbts" and debt is None:
+                    debt = child
+                elif lname == "TradgVnRltdAttrbts" and trading is None:
+                    trading = child
 
             if general is None:
                 node.clear()
