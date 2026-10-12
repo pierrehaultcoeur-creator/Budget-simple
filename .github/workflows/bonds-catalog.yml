@@ -63,7 +63,8 @@ jobs:
           print(f"- ISIN checksum failures: **{report['invalidIsinChecksumAmongShaped']:,}**")
           print(f"- Missing coupons: **{report['missingFieldCounts']['couponRate']:,}**")
           print(f"- Missing/sentinel maturities: **{report['missingFieldCounts']['maturityDate']:,}** / **{report['sentinelMaturityCount']:,} sentinels**")
-          print(f"- Bond-like CFI groups: **{report['bondLikeInstrumentCount']:,}**")
+          print(f"- Conventional bonds (CFI DB): **{report['conventionalBondCount']:,}**")
+          print(f"- Related debt instruments: **{report['relatedDebtCount']:,}**")
           print(f"- Structured-product CFI groups: **{report['structuredProductCount']:,}**")
           print(f"- Suspicious raw coupon values: **{report['suspiciousCouponCount']:,}**")
           PY
