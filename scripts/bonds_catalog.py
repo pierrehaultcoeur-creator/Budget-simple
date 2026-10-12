@@ -167,15 +167,16 @@ def parse_xml(xml_bytes: bytes) -> list[dict]:
                 node.clear()
                 continue
 
+            maturity, maturity_raw, maturity_status = normalized_maturity(debt)
             record = {
                 "isin": isin,
                 "name": direct_child_text(general, "FullNm"),
                 "shortName": direct_child_text(general, "ShrtNm"),
                 "cfi": cfi,
                 "currency": direct_child_text(general, "NtnlCcy"),
-                "maturityDate": (
-                    first_descendant_text(debt, "MtrtyDt") if debt is not None else None
-                ),
+                "maturityDate": maturity,
+                "maturityDateRaw": maturity_raw,
+                "maturityDateStatus": maturity_status,
                 "couponRate": (
                     first_descendant_text(debt, "Fxd")
                     or first_descendant_text(debt, "IntrstRate")
@@ -189,6 +190,19 @@ def parse_xml(xml_bytes: bytes) -> list[dict]:
     except ET.ParseError as exc:
         raise RuntimeError(f"Invalid XML payload: {exc}") from exc
     return records
+
+
+MATURITY_SENTINELS = {"9999-12-31", "9999-12-30", "0000-00-00"}
+
+
+def normalized_maturity(debt: ET.Element | None) -> tuple[str | None, str | None, str | None]:
+    """Keep source maturity data but never expose known sentinel dates as real dates."""
+    raw = first_descendant_text(debt, "MtrtyDt") if debt is not None else None
+    if not raw:
+        return None, None, None
+    if raw in MATURITY_SENTINELS:
+        return None, raw, "SENTINEL_UNSPECIFIED"
+    return raw, raw, "SOURCE_DATE"
 
 
 def completeness(record: dict) -> int:
