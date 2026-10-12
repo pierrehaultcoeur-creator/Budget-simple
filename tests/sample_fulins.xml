@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:example">
+  <FinInstrm>
+    <FinInstrmGnlAttrbts>
+      <Id>FR0000120271</Id>
+      <FullNm>Example Bond</FullNm>
+      <ShrtNm>EXAMPLE</ShrtNm>
+      <ClssfctnTp>DBFTFR</ClssfctnTp>
+      <NtnlCcy>EUR</NtnlCcy>
+    </FinInstrmGnlAttrbts>
+    <DebtInstrmAttrbts>
+      <MtrtyDt>2030-12-31</MtrtyDt>
+      <Fxd>3.25</Fxd>
+    </DebtInstrmAttrbts>
+    <TradgVnRltdAttrbts><Id>XPAR</Id></TradgVnRltdAttrbts>
+  </FinInstrm>
+  <FinInstrm>
+    <FinInstrmGnlAttrbts>
+      <Id>US0378331005</Id>
+      <FullNm>Example Equity</FullNm>
+      <ClssfctnTp>ESVUFR</ClssfctnTp>
+      <NtnlCcy>USD</NtnlCcy>
+    </FinInstrmGnlAttrbts>
+  </FinInstrm>
+</Document>

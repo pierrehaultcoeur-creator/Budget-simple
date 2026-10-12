@@ -1,0 +1,1 @@
+Generated shards and manifest are written here by scripts/split_bonds_catalog.py after the existing ESMA catalogue extraction/JSON validation step. Do not commit the monolithic data/bonds-catalog.json file; commit manifest.json and part-*.json instead.
