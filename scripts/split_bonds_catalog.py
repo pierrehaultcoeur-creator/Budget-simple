@@ -1,19 +1,20 @@
 #!/usr/bin/env python3
-"""Split the generated ESMA debt catalogue into GitHub-safe JSON shards.
+"""Split the ESMA debt catalogue into GitHub-safe shards and build ISIN indexes.
 
 Usage: python scripts/split_bonds_catalog.py [input.json] [output_dir]
 Defaults: data/bonds-catalog.json -> data/bonds-catalog/
-Each part is kept below 8 MiB (target), leaving room below GitHub's 100 MB/file cap.
-Supports catalog objects containing records/items/isins, or a top-level array.
+Each catalogue part targets 8 MiB. The ISIN index is partitioned by the first
+two ISIN letters so no single index file grows without bound.
 """
 from __future__ import annotations
-import json, os, sys, hashlib
+import json, sys, hashlib, re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / 'data' / 'bonds-catalog.json'
 OUT = Path(sys.argv[2]) if len(sys.argv) > 2 else ROOT / 'data' / 'bonds-catalog'
 TARGET_BYTES = 8 * 1024 * 1024
+ISIN_RE = re.compile(r'^[A-Z]{2}[A-Z0-9]{9}[0-9]$')
 
 
 def records_from(payload):
@@ -35,7 +36,6 @@ def compact_record(record):
     isin = str(record.get('isin') or record.get('ISIN') or record.get('isinCode') or '').replace(' ', '').upper()
     if not isin:
         return None
-    # Keep the source record's fields; add a canonical lower-case ISIN for consumers.
     out = dict(record)
     out['isin'] = isin
     out.setdefault('name', record.get('instrumentName') or record.get('nameOfFinancialInstrument'))
@@ -44,8 +44,10 @@ def compact_record(record):
 
 def write_shards(records):
     OUT.mkdir(parents=True, exist_ok=True)
-    for old in OUT.glob('part-*.json'):
-        old.unlink()
+    for pattern in ('part-*.json', 'isin-index-*.json', 'manifest.json'):
+        for old in OUT.glob(pattern):
+            old.unlink()
+
     shards, current, current_bytes = [], [], 2
     for raw in records:
         item = compact_record(raw)
@@ -61,7 +63,9 @@ def write_shards(records):
         current_bytes += extra
     if current:
         shards.append(current)
+
     manifest_parts = []
+    index_buckets = {}
     total = 0
     has_names = False
     for idx, shard in enumerate(shards, 1):
@@ -74,19 +78,38 @@ def write_shards(records):
         manifest_parts.append({'file': filename, 'records': len(shard), 'bytes': len(raw), 'sha256': hashlib.sha256(raw).hexdigest()})
         if len(raw) >= 100 * 1024 * 1024:
             raise RuntimeError(f'{filename} exceeds GitHub 100 MB limit')
+        for record in shard:
+            isin = str(record.get('isin') or '').upper()
+            if ISIN_RE.fullmatch(isin):
+                index_buckets.setdefault(isin[:2], {})[isin] = filename
+
+    index_files = []
+    for prefix, mapping in sorted(index_buckets.items()):
+        filename = f'isin-index-{prefix}.json'
+        target = OUT / filename
+        target.write_text(json.dumps(mapping, separators=(',', ':'), sort_keys=True) + '\n', encoding='utf-8')
+        raw = target.read_bytes()
+        if len(raw) >= 100 * 1024 * 1024:
+            raise RuntimeError(f'{filename} exceeds GitHub 100 MB limit')
+        index_files.append({'prefix': prefix, 'file': filename, 'entries': len(mapping), 'bytes': len(raw)})
+
     manifest = {
-        'version': 1,
+        'version': 2,
         'generatedAt': None,
         'sourceFile': SOURCE.name,
         'recordCount': total,
         'partCount': len(manifest_parts),
         'hasSearchableNames': has_names,
         'parts': manifest_parts,
+        'isinIndexes': index_files,
         'notes': 'ISIN discovery catalogue only; an ISIN is not a verified quote or a fully enriched bond record.'
     }
     (OUT / 'manifest.json').write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
-    print(f'Sharded {total:,} records into {len(manifest_parts)} files in {OUT}')
-    print(f'Largest part: {max((p["bytes"] for p in manifest_parts), default=0):,} bytes')
+    print(f'Sharded {total:,} records into {len(manifest_parts)} catalogue files.')
+    print(f'Built {sum(len(x) for x in index_buckets.values()):,} ISIN index entries across {len(index_files)} index files.')
+    print(f'Largest catalogue part: {max((p["bytes"] for p in manifest_parts), default=0):,} bytes')
+    print(f'Largest ISIN index: {max((x["bytes"] for x in index_files), default=0):,} bytes')
+
 
 if __name__ == '__main__':
     if not SOURCE.exists():
