@@ -145,15 +145,14 @@ def parse_xml(xml_bytes: bytes) -> list[dict]:
                 general = None
                 debt = None
                 trading = None
-
-            for child in node.iter():
-                lname = xml_local_name(child.tag)
-                if lname == "FinInstrmGnlAttrbts" and general is None:
-                    general = child
-                elif lname == "DebtInstrmAttrbts" and debt is None:
-                    debt = child
-                elif lname == "TradgVnRltdAttrbts" and trading is None:
-                    trading = child
+                for child in node.iter():
+                    lname = xml_local_name(child.tag)
+                    if lname == "FinInstrmGnlAttrbts" and general is None:
+                        general = child
+                    elif lname == "DebtInstrmAttrbts" and debt is None:
+                        debt = child
+                    elif lname == "TradgVnRltdAttrbts" and trading is None:
+                        trading = child
 
             if general is None:
                 node.clear()
