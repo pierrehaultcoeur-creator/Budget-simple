@@ -42,7 +42,7 @@ def compact_record(record):
     return out
 
 
-def write_shards(records):
+def write_shards(records, source_metadata=None):
     OUT.mkdir(parents=True, exist_ok=True)
     for pattern in ('part-*.json', 'isin-index-*.json', 'manifest.json'):
         for old in OUT.glob(pattern):
@@ -93,9 +93,13 @@ def write_shards(records):
             raise RuntimeError(f'{filename} exceeds GitHub 100 MB limit')
         index_files.append({'prefix': prefix, 'file': filename, 'entries': len(mapping), 'bytes': len(raw)})
 
+    source_metadata = source_metadata if isinstance(source_metadata, dict) else {}
     manifest = {
-        'version': 2,
-        'generatedAt': None,
+        'version': 3,
+        'generatedAt': source_metadata.get('generatedAt'),
+        'sourcePublicationDate': source_metadata.get('publicationDate'),
+        'source': source_metadata.get('source'),
+        'sourceFileType': source_metadata.get('sourceFileType'),
         'sourceFile': SOURCE.name,
         'recordCount': total,
         'partCount': len(manifest_parts),
@@ -115,4 +119,5 @@ if __name__ == '__main__':
     if not SOURCE.exists():
         raise SystemExit(f'Input catalogue not found: {SOURCE}')
     payload = json.loads(SOURCE.read_text(encoding='utf-8'))
-    write_shards(records_from(payload))
+    metadata = payload if isinstance(payload, dict) else {}
+    write_shards(records_from(payload), metadata)
