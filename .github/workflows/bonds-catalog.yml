@@ -64,6 +64,9 @@ jobs:
           print(f"Validated {manifest['recordCount']} records, {manifest['partCount']} shards and {len(manifest.get('isinIndexes', []))} ISIN indexes.")
           PY
 
+      - name: Test exact and partial ISIN search
+        run: node --test netlify/functions/bond-search.test.js
+
       - name: Commit catalogue shards only when changed
         run: |
           git config user.name "github-actions[bot]"
