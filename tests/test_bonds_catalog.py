@@ -9,6 +9,13 @@ SPEC.loader.exec_module(module)
 
 
 class ParserTests(unittest.TestCase):
+    def test_cfi_groups_distinguish_bonds_from_structured_products(self):
+        self.assertEqual(module.classify_cfi("DBVUPN"), ("DB", "Obligation (bond)"))
+        self.assertEqual(
+            module.classify_cfi("DEXXXX"),
+            ("DE", "Produit structuré sans protection du capital"),
+        )
+
     def test_maturity_sentinel_is_not_a_real_maturity(self):
         sentinel = module.ET.fromstring(
             "<DebtInstrmAttrbts><MtrtyDt>9999-12-31</MtrtyDt></DebtInstrmAttrbts>"
