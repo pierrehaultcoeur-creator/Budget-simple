@@ -2,6 +2,9 @@ name: Build ESMA bond catalogue
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - feature/bond-search-index
   schedule:
     # Sundays at 10:30 UTC, after ESMA's weekly full-file publication window.
     - cron: "30 10 * * 0"
