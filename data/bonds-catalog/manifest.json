@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "generatedAt": null,
   "sourceFile": "bonds-catalog.json",
   "recordCount": 630565,
@@ -125,6 +125,512 @@
       "records": 10874,
       "bytes": 2660156,
       "sha256": "95fe3bd89cab3befcadd95edd497b52a42dea92f694c9ac625f04caa51eb2ba0"
+    }
+  ],
+  "isinIndexes": [
+    {
+      "prefix": "AE",
+      "file": "isin-index-AE.json",
+      "entries": 6,
+      "bytes": 194
+    },
+    {
+      "prefix": "AR",
+      "file": "isin-index-AR.json",
+      "entries": 41,
+      "bytes": 1314
+    },
+    {
+      "prefix": "AT",
+      "file": "isin-index-AT.json",
+      "entries": 4869,
+      "bytes": 155810
+    },
+    {
+      "prefix": "AU",
+      "file": "isin-index-AU.json",
+      "entries": 1594,
+      "bytes": 51010
+    },
+    {
+      "prefix": "BE",
+      "file": "isin-index-BE.json",
+      "entries": 1484,
+      "bytes": 47490
+    },
+    {
+      "prefix": "BG",
+      "file": "isin-index-BG.json",
+      "entries": 178,
+      "bytes": 5698
+    },
+    {
+      "prefix": "BM",
+      "file": "isin-index-BM.json",
+      "entries": 1,
+      "bytes": 34
+    },
+    {
+      "prefix": "BR",
+      "file": "isin-index-BR.json",
+      "entries": 35,
+      "bytes": 1122
+    },
+    {
+      "prefix": "CA",
+      "file": "isin-index-CA.json",
+      "entries": 2370,
+      "bytes": 75842
+    },
+    {
+      "prefix": "CH",
+      "file": "isin-index-CH.json",
+      "entries": 42496,
+      "bytes": 1359874
+    },
+    {
+      "prefix": "CL",
+      "file": "isin-index-CL.json",
+      "entries": 30,
+      "bytes": 962
+    },
+    {
+      "prefix": "CN",
+      "file": "isin-index-CN.json",
+      "entries": 8,
+      "bytes": 258
+    },
+    {
+      "prefix": "CO",
+      "file": "isin-index-CO.json",
+      "entries": 27,
+      "bytes": 866
+    },
+    {
+      "prefix": "CY",
+      "file": "isin-index-CY.json",
+      "entries": 62,
+      "bytes": 1986
+    },
+    {
+      "prefix": "CZ",
+      "file": "isin-index-CZ.json",
+      "entries": 177,
+      "bytes": 5666
+    },
+    {
+      "prefix": "DE",
+      "file": "isin-index-DE.json",
+      "entries": 311772,
+      "bytes": 9976706
+    },
+    {
+      "prefix": "DK",
+      "file": "isin-index-DK.json",
+      "entries": 1474,
+      "bytes": 47170
+    },
+    {
+      "prefix": "EE",
+      "file": "isin-index-EE.json",
+      "entries": 42,
+      "bytes": 1346
+    },
+    {
+      "prefix": "EG",
+      "file": "isin-index-EG.json",
+      "entries": 184,
+      "bytes": 5890
+    },
+    {
+      "prefix": "ES",
+      "file": "isin-index-ES.json",
+      "entries": 2529,
+      "bytes": 80930
+    },
+    {
+      "prefix": "EU",
+      "file": "isin-index-EU.json",
+      "entries": 280,
+      "bytes": 8962
+    },
+    {
+      "prefix": "FI",
+      "file": "isin-index-FI.json",
+      "entries": 543,
+      "bytes": 17378
+    },
+    {
+      "prefix": "FR",
+      "file": "isin-index-FR.json",
+      "entries": 30893,
+      "bytes": 988578
+    },
+    {
+      "prefix": "GB",
+      "file": "isin-index-GB.json",
+      "entries": 1073,
+      "bytes": 34338
+    },
+    {
+      "prefix": "GE",
+      "file": "isin-index-GE.json",
+      "entries": 1,
+      "bytes": 34
+    },
+    {
+      "prefix": "GG",
+      "file": "isin-index-GG.json",
+      "entries": 3,
+      "bytes": 98
+    },
+    {
+      "prefix": "GH",
+      "file": "isin-index-GH.json",
+      "entries": 3,
+      "bytes": 98
+    },
+    {
+      "prefix": "GR",
+      "file": "isin-index-GR.json",
+      "entries": 240,
+      "bytes": 7682
+    },
+    {
+      "prefix": "HK",
+      "file": "isin-index-HK.json",
+      "entries": 319,
+      "bytes": 10210
+    },
+    {
+      "prefix": "HR",
+      "file": "isin-index-HR.json",
+      "entries": 38,
+      "bytes": 1218
+    },
+    {
+      "prefix": "HU",
+      "file": "isin-index-HU.json",
+      "entries": 432,
+      "bytes": 13826
+    },
+    {
+      "prefix": "ID",
+      "file": "isin-index-ID.json",
+      "entries": 67,
+      "bytes": 2146
+    },
+    {
+      "prefix": "IE",
+      "file": "isin-index-IE.json",
+      "entries": 1079,
+      "bytes": 34530
+    },
+    {
+      "prefix": "IL",
+      "file": "isin-index-IL.json",
+      "entries": 59,
+      "bytes": 1890
+    },
+    {
+      "prefix": "IS",
+      "file": "isin-index-IS.json",
+      "entries": 251,
+      "bytes": 8034
+    },
+    {
+      "prefix": "IT",
+      "file": "isin-index-IT.json",
+      "entries": 4833,
+      "bytes": 154658
+    },
+    {
+      "prefix": "JE",
+      "file": "isin-index-JE.json",
+      "entries": 582,
+      "bytes": 18626
+    },
+    {
+      "prefix": "JP",
+      "file": "isin-index-JP.json",
+      "entries": 528,
+      "bytes": 16898
+    },
+    {
+      "prefix": "KR",
+      "file": "isin-index-KR.json",
+      "entries": 88,
+      "bytes": 2818
+    },
+    {
+      "prefix": "KY",
+      "file": "isin-index-KY.json",
+      "entries": 6,
+      "bytes": 194
+    },
+    {
+      "prefix": "KZ",
+      "file": "isin-index-KZ.json",
+      "entries": 48,
+      "bytes": 1538
+    },
+    {
+      "prefix": "LI",
+      "file": "isin-index-LI.json",
+      "entries": 18,
+      "bytes": 578
+    },
+    {
+      "prefix": "LT",
+      "file": "isin-index-LT.json",
+      "entries": 64,
+      "bytes": 2050
+    },
+    {
+      "prefix": "LU",
+      "file": "isin-index-LU.json",
+      "entries": 274,
+      "bytes": 8770
+    },
+    {
+      "prefix": "LV",
+      "file": "isin-index-LV.json",
+      "entries": 42,
+      "bytes": 1346
+    },
+    {
+      "prefix": "MO",
+      "file": "isin-index-MO.json",
+      "entries": 2,
+      "bytes": 66
+    },
+    {
+      "prefix": "MT",
+      "file": "isin-index-MT.json",
+      "entries": 461,
+      "bytes": 14754
+    },
+    {
+      "prefix": "MX",
+      "file": "isin-index-MX.json",
+      "entries": 51,
+      "bytes": 1634
+    },
+    {
+      "prefix": "MY",
+      "file": "isin-index-MY.json",
+      "entries": 68,
+      "bytes": 2178
+    },
+    {
+      "prefix": "NA",
+      "file": "isin-index-NA.json",
+      "entries": 1,
+      "bytes": 34
+    },
+    {
+      "prefix": "NG",
+      "file": "isin-index-NG.json",
+      "entries": 1,
+      "bytes": 34
+    },
+    {
+      "prefix": "NL",
+      "file": "isin-index-NL.json",
+      "entries": 1097,
+      "bytes": 35106
+    },
+    {
+      "prefix": "NO",
+      "file": "isin-index-NO.json",
+      "entries": 2576,
+      "bytes": 82434
+    },
+    {
+      "prefix": "NZ",
+      "file": "isin-index-NZ.json",
+      "entries": 140,
+      "bytes": 4482
+    },
+    {
+      "prefix": "OM",
+      "file": "isin-index-OM.json",
+      "entries": 2,
+      "bytes": 66
+    },
+    {
+      "prefix": "PA",
+      "file": "isin-index-PA.json",
+      "entries": 6,
+      "bytes": 194
+    },
+    {
+      "prefix": "PE",
+      "file": "isin-index-PE.json",
+      "entries": 14,
+      "bytes": 450
+    },
+    {
+      "prefix": "PH",
+      "file": "isin-index-PH.json",
+      "entries": 33,
+      "bytes": 1058
+    },
+    {
+      "prefix": "PL",
+      "file": "isin-index-PL.json",
+      "entries": 892,
+      "bytes": 28546
+    },
+    {
+      "prefix": "PT",
+      "file": "isin-index-PT.json",
+      "entries": 416,
+      "bytes": 13314
+    },
+    {
+      "prefix": "QM",
+      "file": "isin-index-QM.json",
+      "entries": 4,
+      "bytes": 130
+    },
+    {
+      "prefix": "QO",
+      "file": "isin-index-QO.json",
+      "entries": 3,
+      "bytes": 98
+    },
+    {
+      "prefix": "QS",
+      "file": "isin-index-QS.json",
+      "entries": 15,
+      "bytes": 482
+    },
+    {
+      "prefix": "RO",
+      "file": "isin-index-RO.json",
+      "entries": 277,
+      "bytes": 8866
+    },
+    {
+      "prefix": "RS",
+      "file": "isin-index-RS.json",
+      "entries": 9,
+      "bytes": 290
+    },
+    {
+      "prefix": "RU",
+      "file": "isin-index-RU.json",
+      "entries": 43,
+      "bytes": 1378
+    },
+    {
+      "prefix": "SA",
+      "file": "isin-index-SA.json",
+      "entries": 3,
+      "bytes": 98
+    },
+    {
+      "prefix": "SE",
+      "file": "isin-index-SE.json",
+      "entries": 3656,
+      "bytes": 116994
+    },
+    {
+      "prefix": "SG",
+      "file": "isin-index-SG.json",
+      "entries": 343,
+      "bytes": 10978
+    },
+    {
+      "prefix": "SI",
+      "file": "isin-index-SI.json",
+      "entries": 60,
+      "bytes": 1922
+    },
+    {
+      "prefix": "SK",
+      "file": "isin-index-SK.json",
+      "entries": 245,
+      "bytes": 7842
+    },
+    {
+      "prefix": "SM",
+      "file": "isin-index-SM.json",
+      "entries": 2,
+      "bytes": 66
+    },
+    {
+      "prefix": "TH",
+      "file": "isin-index-TH.json",
+      "entries": 51,
+      "bytes": 1634
+    },
+    {
+      "prefix": "TN",
+      "file": "isin-index-TN.json",
+      "entries": 1,
+      "bytes": 34
+    },
+    {
+      "prefix": "TR",
+      "file": "isin-index-TR.json",
+      "entries": 50,
+      "bytes": 1602
+    },
+    {
+      "prefix": "TW",
+      "file": "isin-index-TW.json",
+      "entries": 2,
+      "bytes": 66
+    },
+    {
+      "prefix": "UA",
+      "file": "isin-index-UA.json",
+      "entries": 1,
+      "bytes": 34
+    },
+    {
+      "prefix": "UG",
+      "file": "isin-index-UG.json",
+      "entries": 1,
+      "bytes": 34
+    },
+    {
+      "prefix": "US",
+      "file": "isin-index-US.json",
+      "entries": 43447,
+      "bytes": 1390306
+    },
+    {
+      "prefix": "XC",
+      "file": "isin-index-XC.json",
+      "entries": 1,
+      "bytes": 34
+    },
+    {
+      "prefix": "XF",
+      "file": "isin-index-XF.json",
+      "entries": 1,
+      "bytes": 34
+    },
+    {
+      "prefix": "XS",
+      "file": "isin-index-XS.json",
+      "entries": 165405,
+      "bytes": 5292962
+    },
+    {
+      "prefix": "ZA",
+      "file": "isin-index-ZA.json",
+      "entries": 38,
+      "bytes": 1218
+    },
+    {
+      "prefix": "ZZ",
+      "file": "isin-index-ZZ.json",
+      "entries": 4,
+      "bytes": 130
     }
   ],
   "notes": "ISIN discovery catalogue only; an ISIN is not a verified quote or a fully enriched bond record."
