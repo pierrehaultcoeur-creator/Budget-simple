@@ -54,6 +54,19 @@ jobs:
           PY
           python scripts/audit_bonds_catalog.py data/bonds-catalog.json > /tmp/bond-catalog-quality-report.json
           cat /tmp/bond-catalog-quality-report.json
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json
+          report = json.load(open("/tmp/bond-catalog-quality-report.json", encoding="utf-8"))
+          print("## ESMA catalogue quality audit")
+          print(f"- Records: **{report['recordCount']:,}**")
+          print(f"- Unique ISINs: **{report['uniqueNonEmptyIsins']:,}**; duplicates: **{report['duplicateIsins']:,}**")
+          print(f"- ISIN checksum failures: **{report['invalidIsinChecksumAmongShaped']:,}**")
+          print(f"- Missing coupons: **{report['missingFieldCounts']['couponRate']:,}**")
+          print(f"- Missing/sentinel maturities: **{report['missingFieldCounts']['maturityDate']:,}** / **{report['sentinelMaturityCount']:,} sentinels**")
+          print(f"- Bond-like CFI groups: **{report['bondLikeInstrumentCount']:,}**")
+          print(f"- Structured-product CFI groups: **{report['structuredProductCount']:,}**")
+          print(f"- Suspicious raw coupon values: **{report['suspiciousCouponCount']:,}**")
+          PY
           python scripts/split_bonds_catalog.py data/bonds-catalog.json data/bonds-catalog
           rm data/bonds-catalog.json
           python - <<'PY'
@@ -68,6 +81,14 @@ jobs:
           assert all((Path("data/bonds-catalog") / item["file"]).exists() for item in manifest.get("isinIndexes", []))
           print(f"Validated {manifest['recordCount']} records, {manifest['partCount']} shards and {len(manifest.get('isinIndexes', []))} ISIN indexes.")
           PY
+
+      - name: Upload catalogue quality audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: bond-catalog-quality-report
+          path: /tmp/bond-catalog-quality-report.json
+          if-no-files-found: error
+          retention-days: 30
 
       - name: Test exact and partial ISIN search
         run: node --test netlify/functions/bond-search.test.js
@@ -99,5 +120,9 @@ jobs:
             echo "Catalogue unchanged; no commit needed."
           else
             git commit -m "Update ESMA bond catalogue"
+            # Human/code commits can land while the full catalogue is downloading.
+            # Rebase our generated shards onto the latest branch before pushing.
+            git fetch origin "$GITHUB_REF_NAME"
+            git rebase "origin/$GITHUB_REF_NAME"
             git push
           fi
