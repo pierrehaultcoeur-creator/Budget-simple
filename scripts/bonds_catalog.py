@@ -140,7 +140,7 @@ def parse_xml(xml_bytes: bytes) -> list[dict]:
     try:
         # Instrument records in FULINS payloads are represented by RefData.
         for _, node in ET.iterparse(io.BytesIO(xml_bytes), events=("end",)):
-            if xml_local_name(node.tag) != "RefData":
+            if xml_local_name(node.tag) not in {"RefData", "FinInstrm"}:
                 continue
             general = None
             debt = None
