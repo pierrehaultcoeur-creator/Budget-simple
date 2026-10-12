@@ -33,6 +33,19 @@ test('partial ISIN prefix lookup returns only matching ISINs', () => {
   assert.ok(results.every(item => item.isin.startsWith(prefix)));
 });
 
+test('canonical bond preserves missing maturity semantics and flags source sentinel', () => {
+  const bond = search._test.canonicalBond({
+    isin: 'FR0000047607',
+    name: 'Example perpetual bond',
+    maturityDate: null,
+    maturityDateRaw: '9999-12-31',
+    maturityDateStatus: 'SENTINEL_UNSPECIFIED'
+  });
+  assert.equal(bond.maturity, null);
+  assert.equal(bond.maturityStatus, 'SENTINEL_UNSPECIFIED');
+  assert.equal(bond.maturitySourceValue, '9999-12-31');
+});
+
 test('invalid ISIN-like input does not claim an exact match', () => {
   assert.deepEqual(search._test.exactIsinSearch('NOT-AN-ISIN'), null);
 });
