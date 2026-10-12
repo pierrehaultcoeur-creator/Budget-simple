@@ -9,6 +9,22 @@ SPEC.loader.exec_module(module)
 
 
 class ParserTests(unittest.TestCase):
+    def test_maturity_sentinel_is_not_a_real_maturity(self):
+        sentinel = module.ET.fromstring(
+            "<DebtInstrmAttrbts><MtrtyDt>9999-12-31</MtrtyDt></DebtInstrmAttrbts>"
+        )
+        self.assertEqual(
+            module.normalized_maturity(sentinel),
+            (None, "9999-12-31", "SENTINEL_UNSPECIFIED"),
+        )
+        real_date = module.ET.fromstring(
+            "<DebtInstrmAttrbts><MtrtyDt>2030-12-31</MtrtyDt></DebtInstrmAttrbts>"
+        )
+        self.assertEqual(
+            module.normalized_maturity(real_date),
+            ("2030-12-31", "2030-12-31", "SOURCE_DATE"),
+        )
+
     def test_debt_filter_and_fields(self):
         xml = (ROOT / "tests" / "sample_fulins.xml").read_bytes()
         records = module.parse_xml(xml)
