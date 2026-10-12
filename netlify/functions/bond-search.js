@@ -113,7 +113,7 @@ function shardedCatalogSearch(q) {
   const key = normalize(q);
   const isinQuery = String(q || '').replace(/\s+/g, '').toUpperCase();
   const exact = exactIsinSearch(isinQuery);
-  if (exact && exact.length) return exact;
+  if (exact !== null) return exact;
   if (!manifest.hasSearchableNames && !/^[A-Z0-9]{4,12}$/.test(isinQuery)) return [];
   const results = [];
   for (const part of manifest.parts) {
