@@ -30,7 +30,7 @@ jobs:
           python-version: "3.12"
 
       - name: Run offline parser regression test
-        run: python -m unittest tests.test_bonds_catalog tests.test_split_bonds_catalog
+        run: python -m unittest tests.test_bonds_catalog tests.test_split_bonds_catalog tests.test_audit_bonds_catalog
 
       - name: Build catalogue from ESMA
         run: python scripts/bonds_catalog.py
@@ -52,6 +52,8 @@ jobs:
           assert all(r.get("cfi", "").startswith("D") for r in data["records"])
           print(f"Validated {len(isins)} unique debt instruments.")
           PY
+          python scripts/audit_bonds_catalog.py data/bonds-catalog.json > bond-catalog-quality-report.json
+          cat bond-catalog-quality-report.json
           python scripts/split_bonds_catalog.py data/bonds-catalog.json data/bonds-catalog
           rm data/bonds-catalog.json
           python - <<'PY'
