@@ -168,6 +168,12 @@ def parse_xml(xml_bytes: bytes) -> list[dict]:
                 continue
 
             maturity, maturity_raw, maturity_status = normalized_maturity(debt)
+            coupon_raw = (
+                first_descendant_text(debt, "Fxd")
+                or first_descendant_text(debt, "IntrstRate")
+                if debt is not None else None
+            )
+            coupon, coupon_status = normalized_coupon(coupon_raw)
             cfi_group, instrument_type = classify_cfi(cfi)
             record = {
                 "isin": isin,
@@ -180,11 +186,9 @@ def parse_xml(xml_bytes: bytes) -> list[dict]:
                 "maturityDate": maturity,
                 "maturityDateRaw": maturity_raw,
                 "maturityDateStatus": maturity_status,
-                "couponRate": (
-                    first_descendant_text(debt, "Fxd")
-                    or first_descendant_text(debt, "IntrstRate")
-                    if debt is not None else None
-                ),
+                "couponRate": coupon,
+                "couponRateRaw": coupon_raw,
+                "couponRateStatus": coupon_status,
                 "issuerLei": first_descendant_text(node, "Issr"),
                 "marketMic": first_descendant_text(trading, "Id") if trading is not None else None,
             }
@@ -216,6 +220,25 @@ def classify_cfi(cfi: str | None) -> tuple[str | None, str]:
     code = str(cfi or "").strip().upper()
     group = code[:2] if len(code) >= 2 and code.startswith("D") else None
     return group, CFI_GROUP_LABELS.get(group, "Instrument de dette — groupe CFI à vérifier")
+
+
+def normalized_coupon(raw: str | None) -> tuple[str | None, str | None]:
+    """Accept ESMA coupon percentages only when plausibly expressed as percentages.
+
+    ESMA reporting instructions define this field as a percentage (e.g. 3.375
+    means 3.375%). Values above 100 are withheld from the usable coupon field
+    and retained verbatim for audit; they are never silently rescaled.
+    """
+    if raw is None or not str(raw).strip():
+        return None, None
+    value = str(raw).strip().replace(",", ".")
+    try:
+        number = float(value)
+    except ValueError:
+        return None, "INVALID_SOURCE_VALUE"
+    if not (-100 <= number <= 100):
+        return None, "SUSPICIOUS_SOURCE_VALUE"
+    return value, "SOURCE_PERCENTAGE"
 
 
 def normalized_maturity(debt: ET.Element | None) -> tuple[str | None, str | None, str | None]:
