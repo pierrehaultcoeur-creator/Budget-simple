@@ -25,6 +25,23 @@ class ParserTests(unittest.TestCase):
             ("2030-12-31", "2030-12-31", "SOURCE_DATE"),
         )
 
+    def test_sentinel_metadata_does_not_inflate_record_completeness(self):
+        real = {
+            "isin": "FR0000047607",
+            "name": "Example bond",
+            "maturityDate": "2030-12-31",
+            "couponRate": "3.25",
+        }
+        sentinel = {
+            "isin": "FR0000047607",
+            "name": "Example bond",
+            "maturityDate": None,
+            "maturityDateRaw": "9999-12-31",
+            "maturityDateStatus": "SENTINEL_UNSPECIFIED",
+            "couponRate": "3.25",
+        }
+        self.assertGreater(module.completeness(real), module.completeness(sentinel))
+
     def test_debt_filter_and_fields(self):
         xml = (ROOT / "tests" / "sample_fulins.xml").read_bytes()
         records = module.parse_xml(xml)
