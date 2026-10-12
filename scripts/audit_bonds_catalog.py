@@ -18,8 +18,26 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_INPUT = ROOT / "data" / "bonds-catalog.json"
 ISIN_RE = re.compile(r"^[A-Z]{2}[A-Z0-9]{9}[0-9]$")
 MATURITY_SENTINELS = {"9999-12-31", "9999-12-30", "0000-00-00"}
-BOND_LIKE_CFI_GROUPS = {"DB", "DC", "DW", "DT", "DA", "DG", "DN"}
+# CFI group labels follow ESMA's published ISO 10962 group descriptions.
+# Keep ordinary bonds separate from related debt classes and structured products.
+CFI_GROUP_LABELS = {
+    "DA": "Asset-backed securities",
+    "DB": "Bonds",
+    "DC": "Convertible bonds",
+    "DD": "Depositary receipts on debt instruments",
+    "DE": "Structured instruments without capital protection",
+    "DG": "Mortgage-backed securities",
+    "DM": "Miscellaneous debt instruments",
+    "DN": "Municipal bonds",
+    "DS": "Structured instruments with capital protection",
+    "DT": "Medium-term notes",
+    "DW": "Warrants attached to debt instruments",
+    "DY": "Other debt instruments",
+}
+CONVENTIONAL_BOND_CFI_GROUPS = {"DB"}
+RELATED_DEBT_CFI_GROUPS = {"DA", "DC", "DD", "DG", "DM", "DN", "DT", "DW"}
 STRUCTURED_PRODUCT_CFI_GROUPS = {"DE", "DS"}
+OTHER_DEBT_CFI_GROUPS = {"DY"}
 
 
 def valid_isin_checksum(value: str) -> bool:
@@ -102,8 +120,11 @@ def audit_records(records: list[dict]) -> dict:
                 if len(non_numeric_coupon_samples) < 10:
                     non_numeric_coupon_samples.append({"isin": isin, "couponRateRaw": coupon, "name": record.get("name")})
 
-    bond_like_count = sum(count for group, count in cfi_prefixes.items() if group in BOND_LIKE_CFI_GROUPS)
+    conventional_bond_count = sum(count for group, count in cfi_prefixes.items() if group in CONVENTIONAL_BOND_CFI_GROUPS)
+    related_debt_count = sum(count for group, count in cfi_prefixes.items() if group in RELATED_DEBT_CFI_GROUPS)
     structured_product_count = sum(count for group, count in cfi_prefixes.items() if group in STRUCTURED_PRODUCT_CFI_GROUPS)
+    other_debt_count = sum(count for group, count in cfi_prefixes.items() if group in OTHER_DEBT_CFI_GROUPS)
+    unclassified_cfi_count = total - conventional_bond_count - related_debt_count - structured_product_count - other_debt_count
     return {
         "recordCount": total,
         "uniqueNonEmptyIsins": len(seen),
@@ -113,11 +134,16 @@ def audit_records(records: list[dict]) -> dict:
         "invalidIsinChecksumAmongShaped": valid_shape - valid_checksum,
         "missingFieldCounts": {field: missing[field] for field in fields},
         "cfiPrefixCounts": dict(sorted(cfi_prefixes.items())),
-        "bondLikeCfiGroups": sorted(BOND_LIKE_CFI_GROUPS),
-        "bondLikeInstrumentCount": bond_like_count,
+        "cfiGroupLabels": CFI_GROUP_LABELS,
+        "conventionalBondCfiGroups": sorted(CONVENTIONAL_BOND_CFI_GROUPS),
+        "conventionalBondCount": conventional_bond_count,
+        "relatedDebtCfiGroups": sorted(RELATED_DEBT_CFI_GROUPS),
+        "relatedDebtCount": related_debt_count,
         "structuredProductCfiGroups": sorted(STRUCTURED_PRODUCT_CFI_GROUPS),
         "structuredProductCount": structured_product_count,
-        "otherDebtInstrumentCount": total - bond_like_count - structured_product_count,
+        "otherDebtCfiGroups": sorted(OTHER_DEBT_CFI_GROUPS),
+        "otherDebtCount": other_debt_count,
+        "unclassifiedCfiCount": unclassified_cfi_count,
         "sentinelMaturityCount": sentinel_maturities,
         "malformedMaturityCount": malformed_maturities,
         "nonNumericCouponCount": coupon_non_numeric,
