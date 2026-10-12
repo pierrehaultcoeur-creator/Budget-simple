@@ -27,7 +27,7 @@ jobs:
           python-version: "3.12"
 
       - name: Run offline parser regression test
-        run: python -m unittest tests.test_bonds_catalog
+        run: python -m unittest tests.test_bonds_catalog tests.test_split_bonds_catalog
 
       - name: Build catalogue from ESMA
         run: python scripts/bonds_catalog.py
@@ -58,7 +58,10 @@ jobs:
           assert manifest["recordCount"] > 0
           assert manifest["partCount"] == len(manifest["parts"])
           assert all(part["bytes"] < 100 * 1024 * 1024 for part in manifest["parts"])
-          print(f"Validated {manifest['recordCount']} records in {manifest['partCount']} shards.")
+          assert sum(item["entries"] for item in manifest.get("isinIndexes", [])) == manifest["recordCount"]
+          assert all(item["bytes"] < 100 * 1024 * 1024 for item in manifest.get("isinIndexes", []))
+          assert all((Path("data/bonds-catalog") / item["file"]).exists() for item in manifest.get("isinIndexes", []))
+          print(f"Validated {manifest['recordCount']} records, {manifest['partCount']} shards and {len(manifest.get('isinIndexes', []))} ISIN indexes.")
           PY
 
       - name: Commit catalogue shards only when changed
