@@ -89,18 +89,18 @@ def audit_records(records: list[dict]) -> dict:
             if not re.fullmatch(r"\d{4}-\d{2}-\d{2}(?:T.*)?", maturity):
                 malformed_maturities += 1
 
-        coupon = record.get("couponRate")
+        coupon = record.get("couponRateRaw") or record.get("couponRate")
         if coupon not in (None, ""):
             try:
                 number = float(str(coupon).replace(",", "."))
-                if not (-100 <= number <= 1000):
+                if not (-100 <= number <= 100):
                     suspicious_coupon += 1
                     if len(suspicious_coupon_samples) < 10:
-                        suspicious_coupon_samples.append({"isin": isin, "couponRate": coupon, "name": record.get("name")})
+                        suspicious_coupon_samples.append({"isin": isin, "couponRateRaw": coupon, "couponRateStatus": record.get("couponRateStatus"), "name": record.get("name")})
             except (TypeError, ValueError):
                 coupon_non_numeric += 1
                 if len(non_numeric_coupon_samples) < 10:
-                    non_numeric_coupon_samples.append({"isin": isin, "couponRate": coupon, "name": record.get("name")})
+                    non_numeric_coupon_samples.append({"isin": isin, "couponRateRaw": coupon, "name": record.get("name")})
 
     bond_like_count = sum(count for group, count in cfi_prefixes.items() if group in BOND_LIKE_CFI_GROUPS)
     structured_product_count = sum(count for group, count in cfi_prefixes.items() if group in STRUCTURED_PRODUCT_CFI_GROUPS)
