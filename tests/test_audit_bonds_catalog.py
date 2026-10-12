@@ -33,6 +33,23 @@ class BondCatalogueAuditTests(unittest.TestCase):
         self.assertEqual(report["sentinelMaturityCount"], 1)
         self.assertEqual(report["missingFieldCounts"]["couponRate"], 1)
         self.assertEqual(report["cfiPrefixCounts"]["DB"], 1)
+        self.assertEqual(report["conventionalBondCount"], 1)
+        self.assertEqual(report["relatedDebtCount"], 0)
+        self.assertEqual(report["structuredProductCount"], 0)
+
+    def test_cfi_groups_are_not_all_mislabeled_as_conventional_bonds(self):
+        report = module.audit_records([
+            {"isin": "FR0000047607", "cfi": "DBVUPN"},
+            {"isin": "US0378331005", "cfi": "DEXXXX"},
+            {"isin": "GB0002634946", "cfi": "DNXXXX"},
+            {"isin": "US5949181045", "cfi": "DYXXXX"},
+        ])
+        self.assertEqual(report["conventionalBondCount"], 1)
+        self.assertEqual(report["structuredProductCount"], 1)
+        self.assertEqual(report["relatedDebtCount"], 1)
+        self.assertEqual(report["otherDebtCount"], 1)
+        self.assertEqual(report["unclassifiedCfiCount"], 0)
+        self.assertEqual(report["cfiGroupLabels"]["DB"], "Bonds")
 
     def test_detects_duplicate_isins_and_bad_coupon(self):
         report = module.audit_records([
