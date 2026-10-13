@@ -51,6 +51,14 @@ class BondCatalogueAuditTests(unittest.TestCase):
         self.assertEqual(report["unclassifiedCfiCount"], 0)
         self.assertEqual(report["cfiGroupLabels"]["DB"], "Bonds")
 
+    def test_rejects_impossible_maturity_calendar_dates(self):
+        report = module.audit_records([
+            {"isin": "FR0000047607", "maturityDate": "2026-02-31"},
+            {"isin": "US0378331005", "maturityDate": "2028-06-30T00:00:00Z"},
+            {"isin": "GB0002634946", "maturityDate": "not-a-date"},
+        ])
+        self.assertEqual(report["malformedMaturityCount"], 2)
+
     def test_detects_duplicate_isins_and_bad_coupon(self):
         report = module.audit_records([
             {"isin": "FR0000047607", "couponRate": "unknown"},
