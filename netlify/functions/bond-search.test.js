@@ -246,6 +246,34 @@ test('name index normalization handles accents and punctuation consistently', ()
   assert.equal(normalize('  BANQUE   EXEMPLE  '), 'banque exemple');
 });
 
+test('reordered partial name tokens still find the real catalogue record', () => {
+  let sample = null;
+  for (const part of manifest.parts) {
+    const shard = JSON.parse(fs.readFileSync(path.join(catalogueDir, part.file), 'utf8'));
+    const records = Array.isArray(shard) ? shard : (shard.records || shard.items || []);
+    sample = records.find(record => {
+      if (typeof record.name !== 'string') return false;
+      const tokens = search._test.normalize(record.name).split(' ').filter(token => token.length >= 4);
+      return tokens.length >= 2 && tokens[0] !== tokens[1];
+    });
+    if (sample) break;
+  }
+  assert.ok(sample, 'Expected a real catalogue name with two tokens of at least four characters');
+  const tokens = search._test.normalize(sample.name).split(' ').filter(token => token.length >= 4);
+  const query = `${tokens[1].slice(0, 3)} ${tokens[0].slice(0, 3)}`;
+  const candidates = search._test.indexedNameParts(query, manifest);
+  assert.ok(Array.isArray(candidates), 'Expected the partial multi-token query to use the name index');
+  const results = search._test.shardedCatalogSearch(query);
+  assert.ok(results.some(item => item.isin === sample.isin),
+    `Expected partial reordered query "${query}" to find ISIN ${sample.isin} (${sample.name})`);
+});
+
+test('repeated query tokens do not create unrelated name matches', () => {
+  const score = search._test.scoreCatalogRecord;
+  assert.equal(score({ name: 'Banque Exemple 2030', issuer: 'Autre' }, 'banque banque'), 0,
+    'Expected repeated query terms not to match a name that contains the token only once');
+});
+
 test('name search falls back to all shards for queries shorter than a trigram', () => {
   const candidates = search._test.indexedNameParts('ab', manifest);
   assert.equal(candidates, null);
