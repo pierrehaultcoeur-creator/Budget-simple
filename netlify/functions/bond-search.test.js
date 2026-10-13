@@ -148,8 +148,12 @@ test('name search ranking prioritizes exact names over prefixes and issuer match
   assert.ok(score({ name: 'Exemple Banque 2030', issuer: 'Autre' }, query)
     > score({ name: 'Autre titre', issuer: 'Banque Exemple' }, query),
     'Expected reordered name tokens to rank above an issuer-only match');
+  assert.ok(score({ name: 'Exemple Banque 2030', issuer: 'Autre' }, 'exemp banq') > 0,
+    'Expected reordered partial tokens to find a bond name');
   assert.ok(score({ name: 'Autre titre', issuer: 'Exemple Banque' }, query) > 0,
     'Expected reordered issuer tokens to remain searchable');
+  assert.equal(score({ name: 'Exemple Banque 2030', issuer: 'Autre' }, 'ex ba'), 0,
+    'Expected very short tokens not to create loose token-prefix matches');
   assert.equal(score({ name: 'Sans rapport', issuer: 'Autre' }, query), 0);
 });
 
