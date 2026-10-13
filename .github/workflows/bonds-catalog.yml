@@ -80,7 +80,23 @@ jobs:
           assert sum(item["entries"] for item in manifest.get("isinIndexes", [])) == manifest["recordCount"]
           assert all(item["bytes"] < 100 * 1024 * 1024 for item in manifest.get("isinIndexes", []))
           assert all((Path("data/bonds-catalog") / item["file"]).exists() for item in manifest.get("isinIndexes", []))
-          print(f"Validated {manifest['recordCount']} records, {manifest['partCount']} shards and {len(manifest.get('isinIndexes', []))} ISIN indexes.")
+          name_indexes = manifest.get("nameIndexes", [])
+          assert manifest.get("hasSearchableNames") == bool(name_indexes), "Name-index manifest flag does not match generated indexes"
+          assert all(item["bytes"] < 100 * 1024 * 1024 for item in name_indexes)
+          shard_names = {part["file"] for part in manifest["parts"]}
+          indexed_trigrams = 0
+          for item in name_indexes:
+              index_path = Path("data/bonds-catalog") / item["file"]
+              assert index_path.exists(), f"Missing name index file: {item['file']}"
+              index = json.loads(index_path.read_text(encoding="utf-8"))
+              assert isinstance(index, dict), f"Name index is not an object: {item['file']}"
+              assert len(index) == item["trigrams"], f"Name-index trigram count mismatch: {item['file']}"
+              for gram, files in index.items():
+                  assert len(gram) == 3, f"Invalid trigram {gram!r} in {item['file']}"
+                  assert isinstance(files, list) and files, f"Empty shard list for trigram {gram!r}"
+                  assert set(files) <= shard_names, f"Name index references unknown shards for {gram!r}"
+                  indexed_trigrams += 1
+          print(f"Validated {manifest['recordCount']} records, {manifest['partCount']} shards, {len(manifest.get('isinIndexes', []))} ISIN indexes and {indexed_trigrams} name trigrams across {len(name_indexes)} name indexes.")
           PY
 
       - name: Upload catalogue quality audit
