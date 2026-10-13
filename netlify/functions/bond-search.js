@@ -187,14 +187,34 @@ function readNameIndex(file) {
 }
 function indexedNameParts(key, manifest) {
   if (key.length < 3 || !Array.isArray(manifest.nameIndexes)) return null;
-  const firstGram = key.slice(0, 3);
-  const prefix = firstGram[0];
-  const entry = manifest.nameIndexes.find(item => item.prefix === prefix);
-  if (!entry) return [];
-  const index = readNameIndex(entry.file);
-  if (!index || !Array.isArray(index[firstGram])) return [];
-  const files = new Set(index[firstGram]);
-  return manifest.parts.filter(part => files.has(part.file));
+
+  // Match each searchable token independently so reordered terms remain searchable.
+  // Intersecting the shard sets for each token's trigrams reduces work without
+  // requiring the tokens to appear next to each other in the same order.
+  const tokens = key.split(' ').filter(token => token.length >= 3);
+  if (!tokens.length) return null;
+
+  let candidateFiles = null;
+  for (const token of tokens) {
+    let tokenFiles = null;
+    for (let i = 0; i <= token.length - 3; i += 1) {
+      const gram = token.slice(i, i + 3);
+      const entry = manifest.nameIndexes.find(item => item.prefix === gram[0]);
+      if (!entry) return [];
+      const index = readNameIndex(entry.file);
+      if (!index || !Array.isArray(index[gram])) return [];
+      const gramFiles = new Set(index[gram]);
+      tokenFiles = tokenFiles === null
+        ? gramFiles
+        : new Set([...tokenFiles].filter(file => gramFiles.has(file)));
+      if (!tokenFiles.size) return [];
+    }
+    candidateFiles = candidateFiles === null
+      ? tokenFiles
+      : new Set([...candidateFiles].filter(file => tokenFiles.has(file)));
+    if (!candidateFiles.size) return [];
+  }
+  return manifest.parts.filter(part => candidateFiles.has(part.file));
 }
 
 function scoreCatalogRecord(item, key) {
