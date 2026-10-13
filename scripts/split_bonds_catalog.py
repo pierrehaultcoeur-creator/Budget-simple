@@ -65,7 +65,8 @@ def write_shards(records, source_metadata=None):
         shards.append(current)
 
     manifest_parts = []
-    index_buckets = {}\n    name_index_buckets = {}
+    index_buckets = {}
+    name_index_buckets = {}
     total = 0
     has_names = False
     for idx, shard in enumerate(shards, 1):
@@ -98,7 +99,7 @@ def write_shards(records, source_metadata=None):
         filename = f'name-index-{prefix}.json'
         serializable = {gram: sorted(files) for gram, files in sorted(mapping.items())}
         target = OUT / filename
-        target.write_text(json.dumps(serializable, separators=(',', ':'), sort_keys=True) + '\\n', encoding='utf-8')
+        target.write_text(json.dumps(serializable, separators=(',', ':'), sort_keys=True) + '\n', encoding='utf-8')
         raw = target.read_bytes()
         if len(raw) >= 100 * 1024 * 1024:
             raise RuntimeError(f'{filename} exceeds GitHub 100 MB limit')
@@ -116,14 +117,17 @@ def write_shards(records, source_metadata=None):
         'partCount': len(manifest_parts),
         'hasSearchableNames': has_names,
         'parts': manifest_parts,
-        'isinIndexes': index_files,\n        'nameIndexes': name_index_files,
+        'isinIndexes': index_files,
+        'nameIndexes': name_index_files,
         'notes': 'ISIN discovery catalogue only; an ISIN is not a verified quote or a fully enriched bond record.'
     }
     (OUT / 'manifest.json').write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
     print(f'Sharded {total:,} records into {len(manifest_parts)} catalogue files.')
     print(f'Built {sum(len(x) for x in index_buckets.values()):,} ISIN index entries across {len(index_files)} index files.')
     print(f'Largest catalogue part: {max((p["bytes"] for p in manifest_parts), default=0):,} bytes')
-    print(f'Largest ISIN index: {max((x["bytes"] for x in index_files), default=0):,} bytes')\n    print(f'Built {sum(x["trigrams"] for x in name_index_files):,} name trigrams across {len(name_index_files)} index files.')\n    print(f'Largest name index: {max((x["bytes"] for x in name_index_files), default=0):,} bytes')
+    print(f'Largest ISIN index: {max((x["bytes"] for x in index_files), default=0):,} bytes')
+    print(f'Built {sum(x["trigrams"] for x in name_index_files):,} name trigrams across {len(name_index_files)} index files.')
+    print(f'Largest name index: {max((x["bytes"] for x in name_index_files), default=0):,} bytes')
 
 
 if __name__ == '__main__':
