@@ -62,3 +62,14 @@ test('canonical bond withholds suspicious coupon and preserves source value', ()
 test('invalid ISIN-like input does not claim an exact match', () => {
   assert.deepEqual(search._test.exactIsinSearch('NOT-AN-ISIN'), null);
 });
+
+test('catalogue search can find a real record by its name', () => {
+  const shardName = manifest.parts[0].file;
+  const shard = JSON.parse(fs.readFileSync(path.join(catalogueDir, shardName), 'utf8'));
+  const records = Array.isArray(shard) ? shard : (shard.records || shard.items || []);
+  const sample = records.find(record => typeof record.name === 'string' && record.name.trim().length >= 8);
+  assert.ok(sample, 'Expected a named record in the first catalogue shard');
+  const query = sample.name.trim();
+  const results = search._test.shardedCatalogSearch(query);
+  assert.ok(results.some(item => item.isin === sample.isin), `Expected name search to find ISIN ${sample.isin}`);
+});
