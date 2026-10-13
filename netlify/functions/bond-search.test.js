@@ -95,3 +95,23 @@ test('public search handler returns a real catalogue record for a name query', a
   assert.ok(payload.results.some(item => item.isin === sample.isin),
     `Expected public handler to return ISIN ${sample.isin} for name query`);
 });
+
+test('OpenFIGI fallback never presents unverified coupon or dates as trusted terms', () => {
+  const candidate = search._test.normalizeOpenFigi({
+    figi: 'BBG000000001',
+    name: 'Example corporate bond',
+    marketSector: 'Corp',
+    coupon: 8.75,
+    issueDate: '2024-01-01',
+    maturity: '2034-01-01'
+  });
+  assert.ok(candidate);
+  assert.equal(candidate.isin, null);
+  assert.equal(candidate.coupon, null);
+  assert.equal(candidate.couponStatus, 'NOT_VERIFIED_EXTERNAL_SOURCE');
+  assert.equal(candidate.issueDate, null);
+  assert.equal(candidate.maturity, null);
+  assert.equal(candidate.maturityStatus, 'NOT_VERIFIED_EXTERNAL_SOURCE');
+  assert.equal(candidate.status, 'CANDIDATE_NOT_VERIFIED');
+  assert.equal(candidate.confidence, 'candidate-only');
+});

@@ -243,19 +243,23 @@ function normalizeOpenFigi(item) {
     issuer: null,
     issuerCountry: null,
     currency: item.currency || null,
-    coupon: Number.isFinite(Number(item.coupon)) ? Number(item.coupon) : null,
+    // OpenFIGI search candidates are not yet identity-verified against an ISIN.
+    // Do not display coupon or dates as trusted financial terms from this fallback.
+    coupon: null,
+    couponStatus: 'NOT_VERIFIED_EXTERNAL_SOURCE',
     couponType: null,
     couponFrequency: null,
-    issueDate: item.issueDate || null,
-    maturity: item.maturity || null,
+    issueDate: null,
+    maturity: null,
+    maturityStatus: 'NOT_VERIFIED_EXTERNAL_SOURCE',
     nominalValue: null,
     bondType: item.securityType2 || item.securityType || item.marketSector || null,
-    status: 'UNKNOWN',
+    status: 'CANDIDATE_NOT_VERIFIED',
     market: item.exchCode || null,
     mic: item.micCode || null,
-    source: 'OpenFIGI',
-    sourceUpdatedAt: new Date().toISOString(),
-    confidence: 'identifier-search'
+    source: 'OpenFIGI — correspondance à vérifier',
+    sourceUpdatedAt: null,
+    confidence: 'candidate-only'
   };
 }
 
@@ -272,7 +276,7 @@ async function openFigiSearch(q) {
   return Array.isArray(payload.data) ? payload.data.map(normalizeOpenFigi).filter(Boolean).slice(0, MAX_RESULTS) : [];
 }
 
-exports._test = { canonicalBond, shardedCatalogSearch, exactIsinSearch, normalize };
+exports._test = { canonicalBond, shardedCatalogSearch, exactIsinSearch, normalize, normalizeOpenFigi };
 
 exports.handler = async (event) => {
   const q = String(event?.queryStringParameters?.q || '').trim();
