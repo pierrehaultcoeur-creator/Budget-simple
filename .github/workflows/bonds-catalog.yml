@@ -124,6 +124,19 @@ jobs:
             # Human/code commits can land while the full catalogue is downloading.
             # Rebase our generated shards onto the latest branch before pushing.
             git fetch origin "$GITHUB_REF_NAME"
-            git rebase "origin/$GITHUB_REF_NAME"
+            # The generated manifest changes on every build (timestamp/source publication).
+            # If a code commit lands during the download, preserve this run's manifest
+            # while replaying the catalogue commit on top of the latest branch.
+            if ! git rebase "origin/$GITHUB_REF_NAME"; then
+              if git diff --name-only --diff-filter=U | grep -qx "data/bonds-catalog/manifest.json"; then
+                git checkout --theirs data/bonds-catalog/manifest.json
+                git add data/bonds-catalog/manifest.json
+                GIT_EDITOR=true git rebase --continue
+              else
+                git rebase --abort
+                echo "Rebase conflict outside generated manifest; refusing automatic resolution."
+                exit 1
+              fi
+            fi
             git push
           fi
