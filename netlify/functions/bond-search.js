@@ -191,7 +191,7 @@ function indexedNameParts(key, manifest) {
   // Match each searchable token independently so reordered terms remain searchable.
   // Intersecting the shard sets for each token's trigrams reduces work without
   // requiring the tokens to appear next to each other in the same order.
-  const tokens = key.split(' ').filter(token => token.length >= 3);
+  const tokens = [...new Set(key.split(' ').filter(token => token.length >= 3))];
   if (!tokens.length) return null;
 
   let candidateFiles = null;
