@@ -205,9 +205,16 @@ function scoreCatalogRecord(item, key) {
   if (name && name === key) return 1000;
   if (name && name.startsWith(key)) return 800;
   if (name && name.includes(key)) return 600;
+  // Allow users to find the same instrument when they type its name tokens
+  // in a different order, while keeping contiguous name matches higher ranked.
+  const queryTokens = key.split(' ').filter(Boolean);
+  const nameTokens = name.split(' ').filter(Boolean);
+  const issuerTokens = issuer.split(' ').filter(Boolean);
+  if (queryTokens.length > 1 && queryTokens.every(token => nameTokens.includes(token))) return 550;
   if (issuer && issuer === key) return 500;
   if (issuer && issuer.startsWith(key)) return 450;
   if (issuer && issuer.includes(key)) return 400;
+  if (queryTokens.length > 1 && queryTokens.every(token => issuerTokens.includes(token))) return 350;
   if (isin && isin.includes(key)) return 300;
   if (figi && figi.includes(key)) return 200;
   return 0;
