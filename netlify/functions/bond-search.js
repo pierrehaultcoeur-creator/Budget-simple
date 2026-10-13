@@ -100,6 +100,11 @@ function canonicalBond(record) {
   const isin = String(record.isin || record.ISIN || record.isinCode || '').replace(/\s+/g, '').toUpperCase();
   if (!isin) return null;
   const name = record.name || record.instrumentName || record.nameOfFinancialInstrument || null;
+  const maturitySourceValue = record.maturitySourceValue || record.maturityDateRaw || null;
+  const sourceMaturity = record.maturity || record.maturityDate || null;
+  const maturityIsSentinel = ['9999-12-31', '9999-12-30', '0000-00-00'].includes(String(maturitySourceValue || sourceMaturity || '').trim());
+  const maturityStatus = record.maturityStatus || record.maturityDateStatus || (maturityIsSentinel ? 'SENTINEL_UNSPECIFIED' : null);
+  const maturity = maturityStatus === 'SENTINEL_UNSPECIFIED' || maturityIsSentinel ? null : sourceMaturity;
   return {
     type: 'bond', assetClass: 'debt-instrument',
     instrumentGroup: record.instrumentGroup || record.cfiGroup || (record.cfi ? String(record.cfi).slice(0, 2) : null),
@@ -113,9 +118,9 @@ function canonicalBond(record) {
     couponStatus: record.couponStatus || record.couponRateStatus || null,
     couponSourceValue: record.couponSourceValue || record.couponRateRaw || null,
     couponType: record.couponType || null, couponFrequency: record.couponFrequency || null,
-    issueDate: record.issueDate || null, maturity: record.maturity || record.maturityDate || null,
-    maturityStatus: record.maturityStatus || record.maturityDateStatus || null,
-    maturitySourceValue: record.maturitySourceValue || record.maturityDateRaw || null,
+    issueDate: record.issueDate || null, maturity,
+    maturityStatus,
+    maturitySourceValue,
     nominalValue: record.nominalValue ?? null, bondType: record.bondType || record.securityType || record.instrumentType || null,
     status: record.status || 'IDENTIFIER_ONLY', market: record.market || null, mic: record.mic || null,
     symbol: isin, exchange: record.mic || record.market || 'ISIN',
