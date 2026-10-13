@@ -70,6 +70,24 @@ function readIsinIndex(prefix, manifest) {
     return null;
   }
 }
+function cfiGroupLabel(group) {
+  const labels = {
+    DA: 'Titre adossé à des actifs (ABS)',
+    DB: 'Obligation classique (CFI DB)',
+    DC: 'Obligation convertible',
+    DD: 'Certificat représentatif de dette',
+    DE: 'Produit structuré sans protection du capital',
+    DG: 'Titre adossé à des créances hypothécaires (MBS)',
+    DM: 'Autre instrument de dette',
+    DN: 'Obligation municipale',
+    DS: 'Produit structuré avec protection du capital',
+    DT: 'Medium-term note',
+    DW: 'Obligation avec bons de souscription',
+    DY: 'Autre instrument de dette'
+  };
+  return labels[String(group || '').slice(0, 2).toUpperCase()] || 'Instrument de dette — classification CFI à vérifier';
+}
+
 function canonicalBond(record) {
   if (typeof record === 'string') record = { isin: record };
   if (!record || typeof record !== 'object') return null;
@@ -79,6 +97,7 @@ function canonicalBond(record) {
   return {
     type: 'bond', assetClass: 'debt-instrument',
     instrumentGroup: record.instrumentGroup || record.cfiGroup || (record.cfi ? String(record.cfi).slice(0, 2) : null),
+    instrumentLabel: cfiGroupLabel(record.instrumentGroup || record.cfiGroup || (record.cfi ? String(record.cfi).slice(0, 2) : null)),
     instrumentType: record.instrumentType || null, cfi: record.cfi || null,
     id: record.id || record.figi || isin, figi: record.figi || null, isin,
     name: name || `Instrument de dette — ${isin}`, issuer: record.issuer || record.issuerName || null,
