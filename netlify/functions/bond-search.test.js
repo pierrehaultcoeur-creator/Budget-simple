@@ -46,6 +46,13 @@ test('canonical bond preserves missing maturity semantics and flags source senti
   assert.equal(bond.maturitySourceValue, '9999-12-31');
 });
 
+test('canonical bond labels conventional bonds separately from structured products', () => {
+  const conventional = search._test.canonicalBond({ isin: 'FR0000047607', name: 'Example bond', cfi: 'DBXXXX' });
+  const structured = search._test.canonicalBond({ isin: 'FR0000047608', name: 'Example structured instrument', cfi: 'DEXXXX' });
+  assert.equal(conventional.instrumentLabel, 'Obligation classique (CFI DB)');
+  assert.equal(structured.instrumentLabel, 'Produit structuré sans protection du capital');
+});
+
 test('canonical bond withholds suspicious coupon and preserves source value', () => {
   const bond = search._test.canonicalBond({
     isin: 'GR0118017657',
