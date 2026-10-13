@@ -183,6 +183,26 @@ test('name trigram index actually narrows candidate shards for a real catalogue 
     `Expected trigram index for "${sample.name}" to include its source shard ${shardName}`);
 });
 
+test('catalogue search finds a real bond when name tokens are reordered', () => {
+  let sample = null;
+  for (const part of manifest.parts) {
+    const shard = JSON.parse(fs.readFileSync(path.join(catalogueDir, part.file), 'utf8'));
+    const records = Array.isArray(shard) ? shard : (shard.records || shard.items || []);
+    sample = records.find(record => {
+      if (typeof record.name !== 'string') return false;
+      const tokens = search._test.normalize(record.name).split(' ').filter(Boolean);
+      return tokens.length >= 2 && tokens[0].length >= 3 && tokens[1].length >= 3 && tokens[0] !== tokens[1];
+    });
+    if (sample) break;
+  }
+  assert.ok(sample, 'Expected a real catalogue name with at least two searchable tokens');
+  const tokens = search._test.normalize(sample.name).split(' ').filter(Boolean);
+  const reorderedQuery = `${tokens[1]} ${tokens[0]}`;
+  const results = search._test.shardedCatalogSearch(reorderedQuery);
+  assert.ok(results.some(item => item.isin === sample.isin),
+    `Expected reordered query "${reorderedQuery}" to find ISIN ${sample.isin} (${sample.name})`);
+});
+
 test('name index normalization handles accents and punctuation consistently', () => {
   const normalize = search._test.normalize;
   assert.equal(normalize('Émission — Société Générale 2030'), 'emission societe generale 2030');
