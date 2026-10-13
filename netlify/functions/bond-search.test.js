@@ -46,6 +46,28 @@ test('canonical bond preserves missing maturity semantics and flags source senti
   assert.equal(bond.maturitySourceValue, '9999-12-31');
 });
 
+test('canonical bond never exposes sentinel maturity dates as real maturities', () => {
+  const fromRawValue = search._test.canonicalBond({
+    isin: 'FR0000047607',
+    name: 'Example perpetual bond',
+    maturityDate: '9999-12-31'
+  });
+  assert.equal(fromRawValue.maturity, null);
+  assert.equal(fromRawValue.maturityStatus, 'SENTINEL_UNSPECIFIED');
+  assert.equal(fromRawValue.maturitySourceValue, '9999-12-31');
+
+  const fromNormalizedStatus = search._test.canonicalBond({
+    isin: 'FR0000047608',
+    name: 'Example perpetual bond',
+    maturityDate: '2030-01-01',
+    maturityDateRaw: '9999-12-31',
+    maturityDateStatus: 'SENTINEL_UNSPECIFIED'
+  });
+  assert.equal(fromNormalizedStatus.maturity, null);
+  assert.equal(fromNormalizedStatus.maturityStatus, 'SENTINEL_UNSPECIFIED');
+  assert.equal(fromNormalizedStatus.maturitySourceValue, '9999-12-31');
+});
+
 test('canonical bond labels conventional bonds separately from structured products', () => {
   const conventional = search._test.canonicalBond({ isin: 'FR0000047607', name: 'Example bond', cfi: 'DBXXXX' });
   const structured = search._test.canonicalBond({ isin: 'FR0000047608', name: 'Example structured instrument', cfi: 'DEXXXX' });
