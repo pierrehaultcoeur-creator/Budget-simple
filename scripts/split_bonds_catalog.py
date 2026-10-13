@@ -14,7 +14,18 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCE = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / 'data' / 'bonds-catalog.json'
 OUT = Path(sys.argv[2]) if len(sys.argv) > 2 else ROOT / 'data' / 'bonds-catalog'
 TARGET_BYTES = 8 * 1024 * 1024
-ISIN_RE = re.compile(r'^[A-Z]{2}[A-Z0-9]{9}[0-9]
+ISIN_RE = re.compile(r'^[A-Z]{2}[A-Z0-9]{9}[0-9]$')
+NAME_INDEX_PREFIX = 'name-index-'
+
+def normalize_search(value):
+    text = unicodedata.normalize('NFKD', str(value or ''))
+    text = ''.join(char for char in text if not unicodedata.combining(char))
+    return re.sub(r'[^a-z0-9]+', ' ', text.lower()).strip()
+
+def trigrams(value):
+    normalized = normalize_search(value)
+    return {normalized[i:i + 3] for i in range(len(normalized) - 2) if normalized[i:i + 3].strip()}
+
 
 
 def records_from(payload):
