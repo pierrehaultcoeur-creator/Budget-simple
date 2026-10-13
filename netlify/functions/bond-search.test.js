@@ -125,3 +125,29 @@ test('name search ranking prioritizes exact names over prefixes and issuer match
     < score({ name: 'Banque Exemple 2030', issuer: 'Autre' }, query));
   assert.equal(score({ name: 'Sans rapport', issuer: 'Autre' }, query), 0);
 });
+
+test('name trigram index narrows candidate shards for a real catalogue name', () => {
+  const shardName = manifest.parts[0].file;
+  const shard = JSON.parse(fs.readFileSync(path.join(catalogueDir, shardName), 'utf8'));
+  const records = Array.isArray(shard) ? shard : (shard.records || shard.items || []);
+  const sample = records.find(record => typeof record.name === 'string' && search._test.normalize(record.name).length >= 3);
+  assert.ok(sample, 'Expected a searchable name in the first catalogue shard');
+
+  const key = search._test.normalize(sample.name);
+  const candidates = search._test.indexedNameParts(key, manifest);
+  assert.ok(Array.isArray(candidates), 'Expected a usable trigram index');
+  assert.ok(candidates.some(part => part.file === shardName),
+    `Expected trigram index for "${sample.name}" to include ${shardName}`);
+});
+
+test('name index normalization handles accents and punctuation consistently', () => {
+  const normalize = search._test.normalize;
+  assert.equal(normalize('Émission — Société Générale 2030'), 'emission societe generale 2030');
+  assert.equal(normalize('Banque.Exemple/2030'), 'banque exemple 2030');
+  assert.equal(normalize('  BANQUE   EXEMPLE  '), 'banque exemple');
+});
+
+test('name search falls back to all shards for queries shorter than a trigram', () => {
+  const candidates = search._test.indexedNameParts('ab', manifest);
+  assert.equal(candidates, null);
+});
