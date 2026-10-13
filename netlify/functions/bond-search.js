@@ -227,7 +227,7 @@ function scoreCatalogRecord(item, key) {
   if (name && name.includes(key)) return 600;
   // Allow users to find the same instrument when they type its name tokens
   // in a different order, while keeping contiguous name matches higher ranked.
-  const queryTokens = key.split(' ').filter(Boolean);
+  const queryTokens = [...new Set(key.split(' ').filter(Boolean))];
   const nameTokens = name.split(' ').filter(Boolean);
   const issuerTokens = issuer.split(' ').filter(Boolean);
   if (queryTokens.length > 1 && queryTokens.every(token => nameTokens.includes(token))) return 550;
