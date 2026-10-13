@@ -94,6 +94,11 @@ def write_shards(records, source_metadata=None):
             isin = str(record.get('isin') or '').upper()
             if ISIN_RE.fullmatch(isin):
                 index_buckets.setdefault(isin[:2], {})[isin] = filename
+                searchable = ' '.join(str(record.get(field) or '') for field in (
+                    'name', 'issuer', 'instrumentName', 'nameOfFinancialInstrument'
+                ))
+                for gram in trigrams(searchable):
+                    name_index_buckets.setdefault(gram[0], {}).setdefault(gram, set()).add(filename)
 
     index_files = []
     for prefix, mapping in sorted(index_buckets.items()):
