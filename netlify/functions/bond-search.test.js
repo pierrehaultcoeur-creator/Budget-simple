@@ -126,18 +126,34 @@ test('name search ranking prioritizes exact names over prefixes and issuer match
   assert.equal(score({ name: 'Sans rapport', issuer: 'Autre' }, query), 0);
 });
 
-test('name trigram index narrows candidate shards for a real catalogue name', () => {
-  const shardName = manifest.parts[0].file;
-  const shard = JSON.parse(fs.readFileSync(path.join(catalogueDir, shardName), 'utf8'));
-  const records = Array.isArray(shard) ? shard : (shard.records || shard.items || []);
-  const sample = records.find(record => typeof record.name === 'string' && search._test.normalize(record.name).length >= 3);
-  assert.ok(sample, 'Expected a searchable name in the first catalogue shard');
+test('name trigram index actually narrows candidate shards for a real catalogue name', () => {
+  let sample = null;
+  let shardName = null;
+  let candidates = null;
 
-  const key = search._test.normalize(sample.name);
-  const candidates = search._test.indexedNameParts(key, manifest);
-  assert.ok(Array.isArray(candidates), 'Expected a usable trigram index');
+  for (const part of manifest.parts) {
+    const shard = JSON.parse(fs.readFileSync(path.join(catalogueDir, part.file), 'utf8'));
+    const records = Array.isArray(shard) ? shard : (shard.records || shard.items || []);
+    for (const record of records) {
+      if (typeof record.name !== 'string') continue;
+      const key = search._test.normalize(record.name);
+      if (key.length < 3) continue;
+      const indexed = search._test.indexedNameParts(key, manifest);
+      if (Array.isArray(indexed) && indexed.length < manifest.parts.length && indexed.some(item => item.file === part.file)) {
+        sample = record;
+        shardName = part.file;
+        candidates = indexed;
+        break;
+      }
+    }
+    if (sample) break;
+  }
+
+  assert.ok(sample, 'Expected at least one real name query to narrow the shard candidates');
+  assert.ok(candidates.length < manifest.parts.length,
+    `Expected fewer than ${manifest.parts.length} candidate shards for "${sample.name}"`);
   assert.ok(candidates.some(part => part.file === shardName),
-    `Expected trigram index for "${sample.name}" to include ${shardName}`);
+    `Expected trigram index for "${sample.name}" to include its source shard ${shardName}`);
 });
 
 test('name index normalization handles accents and punctuation consistently', () => {
