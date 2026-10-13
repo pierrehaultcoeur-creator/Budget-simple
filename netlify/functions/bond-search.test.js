@@ -268,6 +268,26 @@ test('reordered partial name tokens still find the real catalogue record', () =>
     `Expected partial reordered query "${query}" to find ISIN ${sample.isin} (${sample.name})`);
 });
 
+test('repeated partial name tokens do not duplicate shard candidates or match a single-token name', () => {
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+  const records = JSON.parse(fs.readFileSync(path.join(shardsDir, manifest.parts[0].file), 'utf8')).records;
+  const sample = records.find(record => {
+    const tokens = search._test.normalize(record.name).split(' ').filter(token => token.length >= 4);
+    return tokens.some(token => search._test.normalize(record.name).split(' ').filter(part => part === token).length === 1);
+  });
+  assert.ok(sample, 'Expected a real catalogue name with a token that appears once');
+  const token = search._test.normalize(sample.name).split(' ').find(part => part.length >= 4
+    && search._test.normalize(sample.name).split(' ').filter(value => value === part).length === 1);
+  const partial = token.slice(0, 3);
+  const indexedOnce = search._test.indexedNameParts(partial, manifest);
+  const indexedRepeated = search._test.indexedNameParts(`${partial} ${partial}`, manifest);
+  assert.deepEqual(indexedRepeated, indexedOnce,
+    'Expected duplicate query tokens not to repeat shard-index work or change candidates');
+  const results = search._test.shardedCatalogSearch(`${partial} ${partial}`);
+  assert.ok(!results.some(item => item.isin === sample.isin),
+    'Expected a repeated partial token not to match a record where that token appears only once');
+});
+
 test('repeated query tokens do not create unrelated name matches', () => {
   const score = search._test.scoreCatalogRecord;
   assert.equal(score({ name: 'Banque Exemple 2030', issuer: 'Autre' }, 'banque banque'), 0,
