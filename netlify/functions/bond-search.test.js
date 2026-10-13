@@ -145,6 +145,11 @@ test('name search ranking prioritizes exact names over prefixes and issuer match
     > score({ name: 'Banque Exemple 2030', issuer: 'Autre' }, query));
   assert.ok(score({ name: 'Autre titre', issuer: 'Banque Exemple' }, query)
     < score({ name: 'Banque Exemple 2030', issuer: 'Autre' }, query));
+  assert.ok(score({ name: 'Exemple Banque 2030', issuer: 'Autre' }, query)
+    > score({ name: 'Autre titre', issuer: 'Banque Exemple' }, query),
+    'Expected reordered name tokens to rank above an issuer-only match');
+  assert.ok(score({ name: 'Autre titre', issuer: 'Exemple Banque' }, query) > 0,
+    'Expected reordered issuer tokens to remain searchable');
   assert.equal(score({ name: 'Sans rapport', issuer: 'Autre' }, query), 0);
 });
 
