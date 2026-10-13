@@ -207,6 +207,38 @@ test('catalogue search finds a real bond when name tokens are reordered', () => 
     `Expected reordered query "${reorderedQuery}" to find ISIN ${sample.isin} (${sample.name})`);
 });
 
+test('multi-token trigram lookup keeps the real record shard while narrowing candidates', () => {
+  let sample = null;
+  let sourceShard = null;
+  for (const part of manifest.parts) {
+    const shard = JSON.parse(fs.readFileSync(path.join(catalogueDir, part.file), 'utf8'));
+    const records = Array.isArray(shard) ? shard : (shard.records || shard.items || []);
+    sample = records.find(record => {
+      if (typeof record.name !== 'string') return false;
+      const tokens = search._test.normalize(record.name).split(' ').filter(Boolean);
+      return tokens.length >= 3 && tokens.filter(token => token.length >= 3).length >= 2;
+    });
+    if (sample) {
+      sourceShard = part.file;
+      break;
+    }
+  }
+  assert.ok(sample, 'Expected a real catalogue name with at least two searchable tokens');
+  const tokens = search._test.normalize(sample.name).split(' ').filter(token => token.length >= 3);
+  const query = `${tokens[0]} ${tokens[tokens.length - 1]}`;
+  const candidates = search._test.indexedNameParts(query, manifest);
+  assert.ok(Array.isArray(candidates), 'Expected indexed candidates for a multi-token query');
+  assert.ok(candidates.some(part => part.file === sourceShard),
+    `Expected multi-token query "${query}" to retain source shard ${sourceShard}`);
+  assert.ok(candidates.length < manifest.parts.length,
+    `Expected multi-token query to narrow below all ${manifest.parts.length} shards`);
+});
+
+test('multi-token name lookup does not return unrelated records from candidate shards', () => {
+  const results = search._test.shardedCatalogSearch('zzqvwx nonexistentbondtoken');
+  assert.deepEqual(results, [], 'Expected unrelated multi-token query to return no catalogue matches');
+});
+
 test('name index normalization handles accents and punctuation consistently', () => {
   const normalize = search._test.normalize;
   assert.equal(normalize('Émission — Société Générale 2030'), 'emission societe generale 2030');
