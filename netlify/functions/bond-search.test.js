@@ -115,3 +115,13 @@ test('OpenFIGI fallback never presents unverified coupon or dates as trusted ter
   assert.equal(candidate.status, 'CANDIDATE_NOT_VERIFIED');
   assert.equal(candidate.confidence, 'candidate-only');
 });
+
+test('name search ranking prioritizes exact names over prefixes and issuer matches', () => {
+  const score = search._test.scoreCatalogRecord;
+  const query = search._test.normalize('Banque Exemple');
+  assert.ok(score({ name: 'Banque Exemple', issuer: 'Autre' }, query)
+    > score({ name: 'Banque Exemple 2030', issuer: 'Autre' }, query));
+  assert.ok(score({ name: 'Autre titre', issuer: 'Banque Exemple' }, query)
+    < score({ name: 'Banque Exemple 2030', issuer: 'Autre' }, query));
+  assert.equal(score({ name: 'Sans rapport', issuer: 'Autre' }, query), 0);
+});

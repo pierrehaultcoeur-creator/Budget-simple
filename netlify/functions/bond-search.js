@@ -159,6 +159,21 @@ function indexedIsinPrefixSearch(query, manifest) {
   }
   return results.slice(0, MAX_RESULTS);
 }
+function scoreCatalogRecord(item, key) {
+  const name = normalize(item.name);
+  const issuer = normalize(item.issuer);
+  const isin = normalize(item.isin);
+  const figi = normalize(item.figi);
+  if (name && name === key) return 1000;
+  if (name && name.startsWith(key)) return 800;
+  if (name && name.includes(key)) return 600;
+  if (issuer && issuer === key) return 500;
+  if (issuer && issuer.startsWith(key)) return 450;
+  if (issuer && issuer.includes(key)) return 400;
+  if (isin && isin.includes(key)) return 300;
+  if (figi && figi.includes(key)) return 200;
+  return 0;
+}
 function shardedCatalogSearch(q) {
   const manifest = readManifest();
   if (!manifest) return [];
@@ -169,19 +184,18 @@ function shardedCatalogSearch(q) {
   const prefixResults = indexedIsinPrefixSearch(isinQuery, manifest);
   if (prefixResults !== null) return prefixResults;
   if (!manifest.hasSearchableNames && !/^[A-Z0-9]{4,12}$/.test(isinQuery)) return [];
-  const results = [];
+  const ranked = [];
   for (const part of manifest.parts) {
     for (const raw of readShard(part.file)) {
       const item = canonicalBond(raw);
       if (!item) continue;
-      const fields = [item.name, item.issuer, item.isin, item.figi].filter(Boolean).join(' ');
-      if (normalize(fields).includes(key)) {
-        results.push(item);
-        if (results.length >= MAX_RESULTS) return results;
-      }
+      const score = scoreCatalogRecord(item, key);
+      if (score > 0) ranked.push({ item, score });
     }
   }
-  return results;
+  ranked.sort((a, b) => b.score - a.score
+    || String(a.item.name || '').localeCompare(String(b.item.name || ''), 'en'));
+  return ranked.slice(0, MAX_RESULTS).map(entry => entry.item);
 }
 function publicBond(record) {
   if (!record || !record.figi || !record.name) return null;
@@ -276,7 +290,7 @@ async function openFigiSearch(q) {
   return Array.isArray(payload.data) ? payload.data.map(normalizeOpenFigi).filter(Boolean).slice(0, MAX_RESULTS) : [];
 }
 
-exports._test = { canonicalBond, shardedCatalogSearch, exactIsinSearch, normalize, normalizeOpenFigi };
+exports._test = { canonicalBond, shardedCatalogSearch, exactIsinSearch, normalize, normalizeOpenFigi, scoreCatalogRecord };
 
 exports.handler = async (event) => {
   const q = String(event?.queryStringParameters?.q || '').trim();
