@@ -45,5 +45,27 @@ class SplitterIndexTests(unittest.TestCase):
                 module.TARGET_BYTES = old_target
 
 
+    def test_builds_searchable_name_trigram_index(self):
+        records = [
+            {"isin": "FR0000120271", "name": "Banque Exemple 2030", "issuer": "Banque Exemple"},
+            {"isin": "US0378331005", "name": "Apple Inc Bond", "issuer": "Apple Inc"},
+        ]
+        with tempfile.TemporaryDirectory() as tmp:
+            old_out = module.OUT
+            try:
+                module.OUT = pathlib.Path(tmp) / "catalogue"
+                module.write_shards(records)
+                manifest = json.loads((module.OUT / "manifest.json").read_text(encoding="utf-8"))
+                indexes = {item["prefix"]: item for item in manifest["nameIndexes"]}
+                self.assertIn("b", indexes)
+                index = json.loads((module.OUT / indexes["b"]["file"]).read_text(encoding="utf-8"))
+                self.assertTrue(any("ban" in gram for gram in index))
+                matching = set(index["ban"])
+                self.assertTrue(any("part-" in filename for filename in matching))
+            finally:
+                module.OUT = old_out
+
+
+
 if __name__ == "__main__":
     unittest.main()
