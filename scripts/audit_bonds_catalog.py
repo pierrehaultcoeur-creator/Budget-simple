@@ -11,6 +11,7 @@ from __future__ import annotations
 import json
 import re
 import sys
+from datetime import date, datetime
 from collections import Counter
 from pathlib import Path
 
@@ -103,8 +104,16 @@ def audit_records(records: list[dict]) -> dict:
             if len(sample_sentinels) < 10:
                 sample_sentinels.append({"isin": isin, "maturityDateRaw": maturity, "name": record.get("name")})
         elif maturity:
-            # Accept ISO date or ISO datetime only; do not infer alternate formats.
-            if not re.fullmatch(r"\d{4}-\d{2}-\d{2}(?:T.*)?", maturity):
+            # Validate the calendar date as well as the ISO shape. A regex alone
+            # would incorrectly accept dates such as 2026-02-31.
+            try:
+                if re.fullmatch(r"\d{4}-\d{2}-\d{2}", maturity):
+                    date.fromisoformat(maturity)
+                elif re.fullmatch(r"\d{4}-\d{2}-\d{2}T.+", maturity):
+                    datetime.fromisoformat(maturity.replace("Z", "+00:00"))
+                else:
+                    raise ValueError("not an ISO date or datetime")
+            except ValueError:
                 malformed_maturities += 1
 
         coupon = record.get("couponRateRaw") or record.get("couponRate")
