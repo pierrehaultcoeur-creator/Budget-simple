@@ -73,3 +73,18 @@ test('catalogue search can find a real record by its name', () => {
   const results = search._test.shardedCatalogSearch(query);
   assert.ok(results.some(item => item.isin === sample.isin), `Expected name search to find ISIN ${sample.isin}`);
 });
+
+test('public search handler returns a real catalogue record for a name query', async () => {
+  const shardName = manifest.parts[0].file;
+  const shard = JSON.parse(fs.readFileSync(path.join(catalogueDir, shardName), 'utf8'));
+  const records = Array.isArray(shard) ? shard : (shard.records || shard.items || []);
+  const sample = records.find(record => typeof record.name === 'string' && record.name.trim().length >= 8);
+  assert.ok(sample, 'Expected a named record in the first catalogue shard');
+
+  const response = await search.handler({ queryStringParameters: { q: sample.name.trim() } });
+  assert.equal(response.statusCode, 200);
+  const payload = JSON.parse(response.body);
+  assert.equal(payload.source, 'bond-master');
+  assert.ok(payload.results.some(item => item.isin === sample.isin),
+    `Expected public handler to return ISIN ${sample.isin} for name query`);
+});
