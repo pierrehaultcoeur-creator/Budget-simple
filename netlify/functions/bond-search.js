@@ -5,9 +5,11 @@ const CATALOG_PATH = path.join(__dirname, '..', '..', 'bond-catalog.json');
 const SHARDED_DIR = path.join(__dirname, '..', '..', 'data', 'bonds-catalog');
 const MANIFEST_PATH = path.join(SHARDED_DIR, 'manifest.json');
 const SHARD_CACHE = new Map();
-const ISIN_INDEX_CACHE = new Map();\nconst NAME_INDEX_CACHE = new Map();
+const ISIN_INDEX_CACHE = new Map();
+const NAME_INDEX_CACHE = new Map();
 const MAX_SHARD_CACHE = 3;
-const MAX_ISIN_INDEX_CACHE = 3;\nconst MAX_NAME_INDEX_CACHE = 3;
+const MAX_ISIN_INDEX_CACHE = 3;
+const MAX_NAME_INDEX_CACHE = 3;
 const OPENFIGI_URL = 'https://api.openfigi.com/v3/filter';
 const MAX_RESULTS = 30;
 const ISIN_RE = /^[A-Z]{2}[A-Z0-9]{9}[0-9]$/;
@@ -211,8 +213,10 @@ function shardedCatalogSearch(q) {
   const prefixResults = indexedIsinPrefixSearch(isinQuery, manifest);
   if (prefixResults !== null) return prefixResults;
   if (!manifest.hasSearchableNames && !/^[A-Z0-9]{4,12}$/.test(isinQuery)) return [];
+  const indexedParts = indexedNameParts(key, manifest);
+  const partsToSearch = indexedParts === null ? manifest.parts : indexedParts;
   const ranked = [];
-  for (const part of manifest.parts) {
+  for (const part of partsToSearch) {
     for (const raw of readShard(part.file)) {
       const item = canonicalBond(raw);
       if (!item) continue;
