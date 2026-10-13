@@ -100,8 +100,8 @@ function canonicalBond(record) {
   const isin = String(record.isin || record.ISIN || record.isinCode || '').replace(/\s+/g, '').toUpperCase();
   if (!isin) return null;
   const name = record.name || record.instrumentName || record.nameOfFinancialInstrument || null;
-  const maturitySourceValue = record.maturitySourceValue || record.maturityDateRaw || null;
   const sourceMaturity = record.maturity || record.maturityDate || null;
+  const maturitySourceValue = record.maturitySourceValue || record.maturityDateRaw || (['9999-12-31', '9999-12-30', '0000-00-00'].includes(String(sourceMaturity || '').trim()) ? sourceMaturity : null);
   const maturityIsSentinel = ['9999-12-31', '9999-12-30', '0000-00-00'].includes(String(maturitySourceValue || sourceMaturity || '').trim());
   const maturityStatus = record.maturityStatus || record.maturityDateStatus || (maturityIsSentinel ? 'SENTINEL_UNSPECIFIED' : null);
   const maturity = maturityStatus === 'SENTINEL_UNSPECIFIED' || maturityIsSentinel ? null : sourceMaturity;
