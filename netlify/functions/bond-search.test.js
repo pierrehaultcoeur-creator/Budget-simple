@@ -461,9 +461,10 @@ test('indexed name search preserves issuer-only matches from the real catalogue'
     const shard = JSON.parse(fs.readFileSync(path.join(catalogueDir, part.file), 'utf8'));
     const records = Array.isArray(shard) ? shard : (shard.records || shard.items || []);
     sample = records.find(record => {
-      if (typeof record.issuer !== 'string' || !record.issuer.trim()) return false;
-      const issuerTokens = search._test.normalize(record.issuer).split(' ').filter(token => token.length >= 4);
-      const name = search._test.normalize(record.name);
+      const issuer = record.issuer || record.issuerName || record.issuer_name;
+      if (typeof issuer !== 'string' || !issuer.trim()) return false;
+      const issuerTokens = search._test.normalize(issuer).split(' ').filter(token => token.length >= 4);
+      const name = search._test.normalize(record.name || record.instrumentName || record.nameOfFinancialInstrument);
       const nameTokens = name.split(' ').filter(Boolean);
       const candidate = issuerTokens.find(token => {
         const prefix = token.slice(0, 3);
@@ -477,14 +478,17 @@ test('indexed name search preserves issuer-only matches from the real catalogue'
     if (sample) break;
   }
 
-  assert.ok(sample, 'Expected a real record whose issuer can be searched independently of its name');
+  assert.ok(sample, 'Expected a real record with an issuer token independent of its instrument name');
+  const sampleIsin = String(sample.isin || sample.ISIN || sample.isinCode || '').toUpperCase();
+  const sampleIssuer = sample.issuer || sample.issuerName || sample.issuer_name;
   const candidates = search._test.indexedNameParts(issuerPrefix, manifest);
   assert.ok(Array.isArray(candidates), 'Expected issuer query to use the shared name index');
   assert.ok(candidates.some(part => {
     const shard = JSON.parse(fs.readFileSync(path.join(catalogueDir, part.file), 'utf8'));
-    return (shard.records || []).some(record => record.isin === sample.isin);
+    const records = Array.isArray(shard) ? shard : (shard.records || shard.items || []);
+    return records.some(record => String(record.isin || record.ISIN || record.isinCode || '').toUpperCase() === sampleIsin);
   }), `Expected issuer query "${issuerPrefix}" to retain the source shard`);
   const results = search._test.shardedCatalogSearch(issuerPrefix);
-  assert.ok(results.some(item => item.isin === sample.isin),
-    `Expected issuer-only query "${issuerPrefix}" to find ISIN ${sample.isin} (${sample.issuer})`);
+  assert.ok(results.some(item => item.isin === sampleIsin),
+    `Expected issuer-only query "${issuerPrefix}" to find ISIN ${sampleIsin} (${sampleIssuer})`);
 });
