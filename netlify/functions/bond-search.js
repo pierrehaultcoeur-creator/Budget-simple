@@ -249,6 +249,9 @@ function isFigiLikeQuery(value) {
   // around ISIN/name indexes so identifier matches are not filtered out.
   return /^BBG[A-Z0-9]{0,9}$/.test(String(value || '').replace(/\s+/g, '').toUpperCase());
 }
+function shouldSearchShardedCatalog(value) {
+  return !isFigiLikeQuery(value);
+}
 
 function shardedCatalogSearch(q) {
   const manifest = readManifest();
@@ -320,7 +323,7 @@ function catalogSearch(q) {
   // The ESMA shards are an ISIN/name discovery catalogue, not a FIGI index.
   // Avoid scanning all ~630k records for BBG identifiers; the handler will
   // continue to the OpenFIGI lookup when local results are empty.
-  if (isFigiLikeQuery(isinQuery)) return [];
+  if (!shouldSearchShardedCatalog(isinQuery)) return [];
   return shardedCatalogSearch(q);
 }
 
@@ -373,7 +376,7 @@ async function openFigiSearch(q) {
   return Array.isArray(payload.data) ? payload.data.map(normalizeOpenFigi).filter(Boolean).slice(0, MAX_RESULTS) : [];
 }
 
-exports._test = { canonicalBond, shardedCatalogSearch, exactIsinSearch, normalize, normalizeOpenFigi, scoreCatalogRecord, indexedNameParts, isFigiLikeQuery };
+exports._test = { canonicalBond, shardedCatalogSearch, exactIsinSearch, normalize, normalizeOpenFigi, scoreCatalogRecord, indexedNameParts, isFigiLikeQuery, shouldSearchShardedCatalog };
 
 exports.handler = async (event) => {
   const q = String(event?.queryStringParameters?.q || '').trim();
