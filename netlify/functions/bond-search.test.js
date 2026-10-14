@@ -862,8 +862,8 @@ test('ISIN prefix ranking beats a coincidental name substring', () => {
     { figi: 'BBGISIN0001', isin: 'FRAB12345678', name: 'Different issuer notes' },
     { figi: 'BBGEXACT001', isin: 'FRAB', name: 'Exact invalid sample' }
   ], 'FRAB');
-  assert.deepEqual(results.map(item => item.isin), ['FRAB12345678', 'DE0001234567'],
-    'Expected ISIN-prefix candidates to be sorted by identifier match and exclude unrelated names');
+  assert.deepEqual(results.map(item => item.isin), ['FRAB12345678', 'FRAB'],
+    'Expected ISIN-prefix candidates to be ranked by identifier match and exclude unrelated name-only hits');
 });
 
 test('four-character word queries fall through when no ISIN prefix matches', () => {
