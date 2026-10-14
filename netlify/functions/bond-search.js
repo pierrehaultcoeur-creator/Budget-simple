@@ -244,6 +244,12 @@ function scoreCatalogRecord(item, key) {
   if (figi && figi.includes(key)) return 200;
   return 0;
 }
+function isFigiLikeQuery(value) {
+  // FIGIs commonly use the 12-character BBG-prefixed form. Do not route
+  // these identifiers through the ISIN-prefix index or the name trigram index.
+  return /^BBG[A-Z0-9]{9}$/.test(String(value || '').replace(/\s+/g, '').toUpperCase());
+}
+
 function shardedCatalogSearch(q) {
   const manifest = readManifest();
   if (!manifest) return [];
@@ -251,10 +257,11 @@ function shardedCatalogSearch(q) {
   const isinQuery = String(q || '').replace(/\s+/g, '').toUpperCase();
   const exact = exactIsinSearch(isinQuery);
   if (exact !== null) return exact;
-  const prefixResults = indexedIsinPrefixSearch(isinQuery, manifest);
+  const figiQuery = isFigiLikeQuery(isinQuery);
+  const prefixResults = figiQuery ? null : indexedIsinPrefixSearch(isinQuery, manifest);
   if (prefixResults !== null) return prefixResults;
   if (!manifest.hasSearchableNames && !/^[A-Z0-9]{4,12}$/.test(isinQuery)) return [];
-  const indexedParts = indexedNameParts(key, manifest);
+  const indexedParts = figiQuery ? null : indexedNameParts(key, manifest);
   const partsToSearch = indexedParts === null ? manifest.parts : indexedParts;
   const ranked = [];
   for (const part of partsToSearch) {
@@ -362,7 +369,7 @@ async function openFigiSearch(q) {
   return Array.isArray(payload.data) ? payload.data.map(normalizeOpenFigi).filter(Boolean).slice(0, MAX_RESULTS) : [];
 }
 
-exports._test = { canonicalBond, shardedCatalogSearch, exactIsinSearch, normalize, normalizeOpenFigi, scoreCatalogRecord, indexedNameParts };
+exports._test = { canonicalBond, shardedCatalogSearch, exactIsinSearch, normalize, normalizeOpenFigi, scoreCatalogRecord, indexedNameParts, isFigiLikeQuery };
 
 exports.handler = async (event) => {
   const q = String(event?.queryStringParameters?.q || '').trim();
