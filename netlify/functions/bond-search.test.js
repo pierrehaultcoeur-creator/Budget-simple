@@ -847,6 +847,31 @@ test('master catalogue search ranks exact names above prefixes and issuer-only m
   ], 'Expected master catalogue results to be relevance-ranked and unrelated records excluded');
 });
 
+test('master catalogue ranking puts exact short names between exact legal names and broad matches', () => {
+  const results = search._test.rankCatalogRecords([
+    {
+      figi: 'BBGSUBSTRING1',
+      name: 'Long legal instrument description containing Example Note 2030',
+      shortName: 'Different short name'
+    },
+    {
+      figi: 'BBGSHORT001',
+      name: 'Long legal instrument description containing Example Note 2030',
+      shortName: 'Example Note 2030'
+    },
+    {
+      figi: 'BBGLEGAL001',
+      name: 'Example Note 2030',
+      shortName: 'Example Note'
+    }
+  ], 'example note 2030');
+  assert.deepEqual(results.map(item => item.figi), [
+    'BBGLEGAL001',
+    'BBGSHORT001',
+    'BBGSUBSTRING1'
+  ], 'Expected exact legal name, exact short name, then broad substring relevance order');
+});
+
 test('master catalogue search does not match across separate fields by concatenation', () => {
   const results = search._test.rankCatalogRecords([
     { figi: 'BBGJOINED001', name: 'Banque', issuer: 'Exemple' }
