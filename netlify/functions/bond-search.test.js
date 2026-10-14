@@ -891,6 +891,16 @@ test('ISIN prefix ranking beats a coincidental name substring', () => {
     'Expected exact identifier matches to rank above partial ISIN-prefix matches and exclude unrelated name-only hits');
 });
 
+test('ISIN ranking normalizes whitespace in query and catalogue identifiers', () => {
+  const results = search._test.rankCatalogRecordsByIsin([
+    { figi: 'BBGSPACE001', isin: 'FR 00 123 45678', name: 'Spaced catalogue ISIN' },
+    { figi: 'BBGSPACE002', isin: 'FR00987654321', name: 'Other instrument' }
+  ], ' FR 00 123 45678 ');
+
+  assert.deepEqual(results.map(item => item.figi), ['BBGSPACE001'],
+    'Expected spaces in both the query and source ISIN to be ignored during identifier matching');
+});
+
 test('four-character word queries fall through when no ISIN prefix matches', () => {
   const results = search._test.shardedCatalogSearch('BOND');
   assert.ok(results.length > 0, 'Expected ordinary word "BOND" to reach name search when no ISIN prefix matches');
