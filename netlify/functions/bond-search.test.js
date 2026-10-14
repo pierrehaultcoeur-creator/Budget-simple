@@ -216,6 +216,48 @@ test('canonical bond withholds suspicious coupon and preserves source value', ()
   assert.equal(bond.couponSourceValue, '3375');
 });
 
+test('canonical bond withholds suspicious coupon values without precomputed status', () => {
+  for (const value of ['3375', '101', '-101']) {
+    const bond = search._test.canonicalBond({
+      isin: 'FR0000047612',
+      name: 'Suspicious coupon example',
+      couponRate: value
+    });
+    assert.equal(bond.coupon, null, `Expected coupon "${value}" to be withheld`);
+    assert.equal(bond.couponStatus, 'SUSPICIOUS_SOURCE_VALUE');
+    assert.equal(bond.couponSourceValue, value);
+  }
+});
+
+test('canonical bond withholds non-numeric coupon values without precomputed status', () => {
+  const bond = search._test.canonicalBond({
+    isin: 'FR0000047613',
+    name: 'Invalid coupon example',
+    couponRate: 'not-a-rate'
+  });
+  assert.equal(bond.coupon, null);
+  assert.equal(bond.couponStatus, 'INVALID_SOURCE_VALUE');
+  assert.equal(bond.couponSourceValue, 'not-a-rate');
+});
+
+test('canonical bond keeps valid coupon percentages and decimal commas', () => {
+  const dot = search._test.canonicalBond({
+    isin: 'FR0000047614',
+    name: 'Valid coupon example',
+    couponRate: '3.375'
+  });
+  assert.equal(dot.coupon, '3.375');
+  assert.equal(dot.couponStatus, null);
+
+  const comma = search._test.canonicalBond({
+    isin: 'FR0000047615',
+    name: 'Valid comma coupon example',
+    couponRate: '3,375'
+  });
+  assert.equal(comma.coupon, '3,375');
+  assert.equal(comma.couponStatus, null);
+});
+
 test('invalid ISIN-like input does not claim an exact match', () => {
   assert.deepEqual(search._test.exactIsinSearch('NOT-AN-ISIN'), null);
 });
