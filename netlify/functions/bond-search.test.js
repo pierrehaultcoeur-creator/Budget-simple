@@ -776,3 +776,29 @@ test('issuer-only query scoring works when issuer metadata is available', () => 
   assert.equal(search._test.scoreCatalogRecord(record, 'unrelated'), 0,
     'Expected unrelated issuer queries not to match');
 });
+
+test('OpenFIGI fallback keeps genuine fixed-income candidates but withholds unverified terms', () => {
+  const corporate = search._test.normalizeOpenFigi({
+    figi: 'BBG000DEBT01',
+    name: 'Example corporate notes',
+    marketSector: 'Corp',
+    securityType: 'CORP',
+    coupon: 5.25,
+    maturity: '2030-06-15'
+  });
+  const government = search._test.normalizeOpenFigi({
+    figi: 'BBG000GOVT01',
+    name: 'Example government bond',
+    marketSector: 'Govt',
+    securityType: 'Government'
+  });
+
+  assert.ok(corporate, 'Expected corporate debt to remain eligible for fallback search');
+  assert.ok(government, 'Expected government debt to remain eligible for fallback search');
+  assert.equal(corporate.status, 'CANDIDATE_NOT_VERIFIED');
+  assert.equal(corporate.confidence, 'candidate-only');
+  assert.equal(corporate.coupon, null, 'Expected unverified coupon terms to be withheld');
+  assert.equal(corporate.maturity, null, 'Expected unverified maturity terms to be withheld');
+  assert.equal(corporate.couponStatus, 'NOT_VERIFIED_EXTERNAL_SOURCE');
+  assert.equal(corporate.maturityStatus, 'NOT_VERIFIED_EXTERNAL_SOURCE');
+});
