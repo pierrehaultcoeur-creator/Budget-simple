@@ -361,3 +361,43 @@ test('name search falls back to full shard scan when an index file cannot be rea
     nameIndexes: [{ prefix: 'b', file: '__missing_name_index_test__.json' }]
   }), null, 'Expected unreadable name-index files to trigger a full-scan fallback');
 });
+
+
+test('OpenFIGI fallback filters out unrelated equity candidates', async () => {
+  const originalFetch = global.fetch;
+  global.fetch = async () => ({
+    ok: true,
+    json: async () => ({
+      data: [{
+        figi: 'BBG000000002',
+        name: 'Example common stock',
+        marketSector: 'Equity',
+        securityType: 'Common Stock'
+      }]
+    })
+  });
+  try {
+    const response = await search.handler({ queryStringParameters: { q: 'unrelated instrument query' } });
+    const payload = JSON.parse(response.body);
+    assert.equal(response.statusCode, 200);
+    assert.equal(payload.source, 'openfigi');
+    assert.deepEqual(payload.results, [], 'Expected equity candidates not to leak into the bond search');
+  } finally {
+    global.fetch = originalFetch;
+  }
+});
+
+test('OpenFIGI outage returns a safe unavailable response instead of throwing', async () => {
+  const originalFetch = global.fetch;
+  global.fetch = async () => { throw new Error('simulated network outage'); };
+  try {
+    const response = await search.handler({ queryStringParameters: { q: 'BBG000B9XRY4' } });
+    const payload = JSON.parse(response.body);
+    assert.equal(response.statusCode, 200);
+    assert.equal(payload.source, 'unavailable');
+    assert.deepEqual(payload.results, []);
+    assert.equal(payload.warning, 'BOND_SEARCH_UNAVAILABLE');
+  } finally {
+    global.fetch = originalFetch;
+  }
+});
