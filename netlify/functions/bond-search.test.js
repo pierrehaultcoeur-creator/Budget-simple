@@ -826,3 +826,12 @@ test('master catalogue search does not match across separate fields by concatena
   assert.deepEqual(results, [],
     'Expected tokens split across name and issuer fields not to create a false phrase match');
 });
+
+test('four-character word queries fall through when no ISIN prefix matches', () => {
+  const results = search._test.shardedCatalogSearch('BOND');
+  assert.ok(results.length > 0, 'Expected ordinary word "BOND" to reach name search when no ISIN prefix matches');
+  assert.ok(results.some(item => search._test.normalize(item.name).includes('bond')
+    || search._test.normalize(item.shortName).includes('bond')
+    || search._test.normalize(item.issuer).includes('bond')),
+  'Expected at least one result to match the ordinary word query');
+});
