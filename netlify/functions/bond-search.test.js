@@ -2,6 +2,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
+const vm = require('node:vm');
 const search = require('./bond-search');
 
 const catalogueDir = path.join(__dirname, '..', '..', 'data', 'bonds-catalog');
@@ -238,6 +239,40 @@ test('canonical bond withholds non-numeric coupon values without precomputed sta
   assert.equal(bond.coupon, null);
   assert.equal(bond.couponStatus, 'INVALID_SOURCE_VALUE');
   assert.equal(bond.couponSourceValue, 'not-a-rate');
+});
+
+test('local investment-page canonicalization withholds invalid coupon and maturity data', () => {
+  const html = fs.readFileSync(path.join(__dirname, '..', '..', 'investissement.html'), 'utf8');
+  const start = html.indexOf('function cfiLabel(group){');
+  const end = html.indexOf('\nasync function searchLocal', start);
+  assert.ok(start >= 0 && end > start, 'Expected to locate investment-page canonicalization functions');
+  const canonical = vm.runInNewContext(`${html.slice(start, end)}; canonical`);
+
+  const invalid = canonical({
+    isin: 'FR0000047607',
+    name: 'Local validation example',
+    couponRate: '3375',
+    couponRateStatus: 'VERIFIED',
+    maturityDate: '2030-02-31',
+    maturityDateStatus: 'VERIFIED'
+  });
+  assert.equal(invalid.coupon, null);
+  assert.equal(invalid.couponStatus, 'SUSPICIOUS_SOURCE_VALUE');
+  assert.equal(invalid.couponSourceValue, '3375');
+  assert.equal(invalid.maturity, null);
+  assert.equal(invalid.maturityStatus, 'INVALID_SOURCE_VALUE');
+  assert.equal(invalid.maturitySourceValue, '2030-02-31');
+
+  const valid = canonical({
+    isin: 'FR0000047615',
+    name: 'Local valid example',
+    couponRate: '3,375',
+    maturityDate: '2032-02-29'
+  });
+  assert.equal(valid.coupon, '3,375');
+  assert.equal(valid.couponStatus, null);
+  assert.equal(valid.maturity, '2032-02-29');
+  assert.equal(valid.maturityStatus, null);
 });
 
 test('canonical bond normalizes blank coupon values to null', () => {
