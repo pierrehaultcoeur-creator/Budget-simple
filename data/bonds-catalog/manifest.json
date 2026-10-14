@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "generatedAt": "2026-10-14T05:23:04+00:00",
+  "generatedAt": "2026-10-14T08:08:58+00:00",
   "sourcePublicationDate": "20261010",
   "source": "ESMA FIRDS",
   "sourceFileType": "FULINS_D",
@@ -722,226 +722,220 @@
   ],
   "nameIndexes": [
     {
-      "prefix": " ",
-      "file": "name-index- .json",
-      "trigrams": 1058,
-      "bytes": 277032
-    },
-    {
       "prefix": "0",
       "file": "name-index-0.json",
-      "trigrams": 568,
-      "bytes": 84412
+      "trigrams": 499,
+      "bytes": 60162
     },
     {
       "prefix": "1",
       "file": "name-index-1.json",
-      "trigrams": 514,
-      "bytes": 94350
+      "trigrams": 442,
+      "bytes": 71164
     },
     {
       "prefix": "2",
       "file": "name-index-2.json",
-      "trigrams": 657,
-      "bytes": 97704
+      "trigrams": 585,
+      "bytes": 75623
     },
     {
       "prefix": "3",
       "file": "name-index-3.json",
-      "trigrams": 474,
-      "bytes": 77846
+      "trigrams": 403,
+      "bytes": 57303
     },
     {
       "prefix": "4",
       "file": "name-index-4.json",
-      "trigrams": 382,
-      "bytes": 67726
+      "trigrams": 310,
+      "bytes": 48314
     },
     {
       "prefix": "5",
       "file": "name-index-5.json",
-      "trigrams": 409,
-      "bytes": 68163
+      "trigrams": 340,
+      "bytes": 48180
     },
     {
       "prefix": "6",
       "file": "name-index-6.json",
-      "trigrams": 347,
-      "bytes": 70149
+      "trigrams": 275,
+      "bytes": 45161
     },
     {
       "prefix": "7",
       "file": "name-index-7.json",
-      "trigrams": 357,
-      "bytes": 69158
+      "trigrams": 287,
+      "bytes": 44169
     },
     {
       "prefix": "8",
       "file": "name-index-8.json",
-      "trigrams": 350,
-      "bytes": 67929
+      "trigrams": 279,
+      "bytes": 45176
     },
     {
       "prefix": "9",
       "file": "name-index-9.json",
-      "trigrams": 317,
-      "bytes": 64928
+      "trigrams": 247,
+      "bytes": 43628
     },
     {
       "prefix": "a",
       "file": "name-index-a.json",
-      "trigrams": 794,
-      "bytes": 157161
+      "trigrams": 723,
+      "bytes": 128628
     },
     {
       "prefix": "b",
       "file": "name-index-b.json",
-      "trigrams": 691,
-      "bytes": 100424
+      "trigrams": 620,
+      "bytes": 78198
     },
     {
       "prefix": "c",
       "file": "name-index-c.json",
-      "trigrams": 786,
-      "bytes": 117878
+      "trigrams": 714,
+      "bytes": 91598
     },
     {
       "prefix": "d",
       "file": "name-index-d.json",
-      "trigrams": 703,
-      "bytes": 96678
+      "trigrams": 631,
+      "bytes": 70874
     },
     {
       "prefix": "e",
       "file": "name-index-e.json",
-      "trigrams": 788,
-      "bytes": 153237
+      "trigrams": 716,
+      "bytes": 122384
     },
     {
       "prefix": "f",
       "file": "name-index-f.json",
-      "trigrams": 610,
-      "bytes": 72967
+      "trigrams": 540,
+      "bytes": 50103
     },
     {
       "prefix": "g",
       "file": "name-index-g.json",
-      "trigrams": 632,
-      "bytes": 80351
+      "trigrams": 560,
+      "bytes": 56706
     },
     {
       "prefix": "h",
       "file": "name-index-h.json",
-      "trigrams": 574,
-      "bytes": 75637
+      "trigrams": 505,
+      "bytes": 54566
     },
     {
       "prefix": "i",
       "file": "name-index-i.json",
-      "trigrams": 707,
-      "bytes": 127412
+      "trigrams": 637,
+      "bytes": 101828
     },
     {
       "prefix": "j",
       "file": "name-index-j.json",
-      "trigrams": 275,
-      "bytes": 19627
+      "trigrams": 219,
+      "bytes": 14062
     },
     {
       "prefix": "k",
       "file": "name-index-k.json",
-      "trigrams": 551,
-      "bytes": 67582
+      "trigrams": 480,
+      "bytes": 46580
     },
     {
       "prefix": "l",
       "file": "name-index-l.json",
-      "trigrams": 721,
-      "bytes": 116406
+      "trigrams": 649,
+      "bytes": 89140
     },
     {
       "prefix": "m",
       "file": "name-index-m.json",
-      "trigrams": 617,
-      "bytes": 91774
+      "trigrams": 545,
+      "bytes": 67381
     },
     {
       "prefix": "n",
       "file": "name-index-n.json",
-      "trigrams": 761,
-      "bytes": 138061
+      "trigrams": 689,
+      "bytes": 108517
     },
     {
       "prefix": "o",
       "file": "name-index-o.json",
-      "trigrams": 700,
-      "bytes": 125962
+      "trigrams": 630,
+      "bytes": 100599
     },
     {
       "prefix": "p",
       "file": "name-index-p.json",
-      "trigrams": 688,
-      "bytes": 96269
+      "trigrams": 617,
+      "bytes": 71136
     },
     {
       "prefix": "q",
       "file": "name-index-q.json",
-      "trigrams": 231,
-      "bytes": 15552
+      "trigrams": 163,
+      "bytes": 9177
     },
     {
       "prefix": "r",
       "file": "name-index-r.json",
-      "trigrams": 770,
-      "bytes": 140870
+      "trigrams": 698,
+      "bytes": 111785
     },
     {
       "prefix": "s",
       "file": "name-index-s.json",
-      "trigrams": 820,
-      "bytes": 145486
+      "trigrams": 749,
+      "bytes": 116137
     },
     {
       "prefix": "t",
       "file": "name-index-t.json",
-      "trigrams": 705,
-      "bytes": 113592
+      "trigrams": 634,
+      "bytes": 85110
     },
     {
       "prefix": "u",
       "file": "name-index-u.json",
-      "trigrams": 574,
-      "bytes": 83474
+      "trigrams": 503,
+      "bytes": 65430
     },
     {
       "prefix": "v",
       "file": "name-index-v.json",
-      "trigrams": 464,
-      "bytes": 53558
+      "trigrams": 397,
+      "bytes": 36838
     },
     {
       "prefix": "w",
       "file": "name-index-w.json",
-      "trigrams": 392,
-      "bytes": 42187
+      "trigrams": 323,
+      "bytes": 26913
     },
     {
       "prefix": "x",
       "file": "name-index-x.json",
-      "trigrams": 396,
-      "bytes": 48628
+      "trigrams": 328,
+      "bytes": 28534
     },
     {
       "prefix": "y",
       "file": "name-index-y.json",
-      "trigrams": 426,
-      "bytes": 45179
+      "trigrams": 358,
+      "bytes": 27924
     },
     {
       "prefix": "z",
       "file": "name-index-z.json",
-      "trigrams": 353,
-      "bytes": 37744
+      "trigrams": 292,
+      "bytes": 23418
     }
   ],
   "notes": "ISIN discovery catalogue only; an ISIN is not a verified quote or a fully enriched bond record."
