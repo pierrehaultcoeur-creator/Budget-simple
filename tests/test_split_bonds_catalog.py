@@ -67,6 +67,24 @@ class SplitterIndexTests(unittest.TestCase):
                 module.OUT = old_out
 
 
+    def test_short_name_is_included_in_searchable_trigram_index(self):
+        records = [
+            {"isin": "FR0000120271", "name": "Full legal instrument name", "shortName": "Example Note 2030"},
+        ]
+        with tempfile.TemporaryDirectory() as tmp:
+            old_out = module.OUT
+            try:
+                module.OUT = pathlib.Path(tmp) / "catalogue"
+                module.write_shards(records)
+                manifest = json.loads((module.OUT / "manifest.json").read_text(encoding="utf-8"))
+                indexes = {item["prefix"]: item for item in manifest["nameIndexes"]}
+                index = json.loads((module.OUT / indexes["e"]["file"]).read_text(encoding="utf-8"))
+                self.assertIn("exa", index, "Short-name trigrams must be indexed")
+                self.assertTrue(any("part-" in filename for filename in index["exa"]))
+            finally:
+                module.OUT = old_out
+
+
     def test_name_trigram_index_exactly_matches_searchable_shard_contents(self):
         records = [
             {"isin": "FR0000120271", "name": "Banque Étoile 2030", "issuer": "Groupe Étoile"},
@@ -88,7 +106,7 @@ class SplitterIndexTests(unittest.TestCase):
                     payload = json.loads((module.OUT / part["file"]).read_text(encoding="utf-8"))
                     for record in payload["records"]:
                         searchable = " ".join(str(record.get(field) or "") for field in (
-                            "name", "issuer", "instrumentName", "nameOfFinancialInstrument"
+                            "name", "shortName", "short_name", "issuer", "instrumentName", "nameOfFinancialInstrument"
                         ))
                         for gram in module.trigrams(searchable):
                             self.assertTrue(gram.strip(), "Trigrams should not span word boundaries")

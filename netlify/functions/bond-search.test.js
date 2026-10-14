@@ -92,6 +92,27 @@ test('canonical bond labels conventional bonds separately from structured produc
   assert.equal(structured.instrumentLabel, 'Produit structuré sans protection du capital');
 });
 
+test('canonical bond preserves ESMA short name, issuer LEI and market MIC fields', () => {
+  const bond = search._test.canonicalBond({
+    isin: 'FR0000047607',
+    name: 'Full legal instrument name',
+    shortName: 'Example Note 2030',
+    issuerLei: '549300EXAMPLE00000000',
+    marketMic: 'XETR'
+  });
+  assert.equal(bond.name, 'Full legal instrument name');
+  assert.equal(bond.shortName, 'Example Note 2030');
+  assert.equal(bond.issuerLei, '549300EXAMPLE00000000');
+  assert.equal(bond.mic, 'XETR');
+  assert.equal(bond.exchange, 'XETR');
+});
+
+test('short names are eligible for bond search ranking', () => {
+  const score = search._test.scoreCatalogRecord;
+  assert.ok(score({ name: 'Full legal instrument name', shortName: 'Example Note 2030' }, 'example note') > 0,
+    'Expected a short-name prefix query to match the bond');
+});
+
 test('canonical bond withholds suspicious coupon and preserves source value', () => {
   const bond = search._test.canonicalBond({
     isin: 'GR0118017657',

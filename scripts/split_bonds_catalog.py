@@ -91,7 +91,7 @@ def write_shards(records, source_metadata=None):
         target.write_text(json.dumps({'version': 1, 'records': shard}, ensure_ascii=False, separators=(',', ':')) + '\n', encoding='utf-8')
         raw = target.read_bytes()
         total += len(shard)
-        has_names = has_names or any(bool(x.get('name') or x.get('issuer')) for x in shard)
+        has_names = has_names or any(bool(x.get('name') or x.get('shortName') or x.get('short_name') or x.get('issuer')) for x in shard)
         manifest_parts.append({'file': filename, 'records': len(shard), 'bytes': len(raw), 'sha256': hashlib.sha256(raw).hexdigest()})
         if len(raw) >= 100 * 1024 * 1024:
             raise RuntimeError(f'{filename} exceeds GitHub 100 MB limit')
@@ -100,7 +100,7 @@ def write_shards(records, source_metadata=None):
             if ISIN_RE.fullmatch(isin):
                 index_buckets.setdefault(isin[:2], {})[isin] = filename
             searchable = ' '.join(str(record.get(field) or '') for field in (
-                'name', 'issuer', 'instrumentName', 'nameOfFinancialInstrument'
+                'name', 'shortName', 'short_name', 'issuer', 'instrumentName', 'nameOfFinancialInstrument'
             ))
             for gram in trigrams(searchable):
                 name_index_buckets.setdefault(gram[0], {}).setdefault(gram, set()).add(filename)

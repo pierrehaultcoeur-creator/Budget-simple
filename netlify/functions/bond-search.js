@@ -111,7 +111,10 @@ function canonicalBond(record) {
     instrumentLabel: cfiGroupLabel(record.instrumentGroup || record.cfiGroup || (record.cfi ? String(record.cfi).slice(0, 2) : null)),
     instrumentType: record.instrumentType || null, cfi: record.cfi || null,
     id: record.id || record.figi || isin, figi: record.figi || null, isin,
-    name: name || `Instrument de dette — ${isin}`, issuer: record.issuer || record.issuerName || null,
+    name: name || `Instrument de dette — ${isin}`,
+    shortName: record.shortName || record.short_name || null,
+    issuerLei: record.issuerLei || record.issuerLEI || null,
+    issuer: record.issuer || record.issuerName || null,
     issuerCountry: record.issuerCountry || record.countryOfIssuer || null,
     currency: record.currency || record.tradingCurrency || null,
     coupon: record.coupon ?? record.couponRate ?? null,
@@ -122,8 +125,9 @@ function canonicalBond(record) {
     maturityStatus,
     maturitySourceValue,
     nominalValue: record.nominalValue ?? null, bondType: record.bondType || record.securityType || record.instrumentType || null,
-    status: record.status || 'IDENTIFIER_ONLY', market: record.market || null, mic: record.mic || null,
-    symbol: isin, exchange: record.mic || record.market || 'ISIN',
+    status: record.status || 'IDENTIFIER_ONLY', market: record.market || null,
+    mic: record.mic || record.marketMic || record.micCode || null,
+    symbol: isin, exchange: record.mic || record.marketMic || record.micCode || record.market || 'ISIN',
     source: name ? 'ESMA debt instrument catalogue' : 'ESMA debt ISIN catalogue',
     sourceUpdatedAt: record.sourceUpdatedAt || null,
     confidence: name ? 'catalog-record' : 'isin-only'
@@ -245,6 +249,7 @@ function distinctTokenPrefixMatch(queryTokens, targetTokens) {
 
 function scoreCatalogRecord(item, key) {
   const name = normalize(item.name);
+  const shortName = normalize(item.shortName);
   const issuer = normalize(item.issuer);
   const isin = normalize(item.isin);
   const figi = normalize(item.figi);
@@ -258,6 +263,9 @@ function scoreCatalogRecord(item, key) {
   const issuerTokens = issuer.split(' ').filter(Boolean);
   if (queryTokens.length > 1 && queryTokens.every(token => nameTokens.includes(token))) return 550;
   if (queryTokens.length > 1 && queryTokens.every(token => token.length >= 3) && distinctTokenPrefixMatch(queryTokens, nameTokens)) return 525;
+  if (shortName && shortName === key) return 575;
+  if (shortName && shortName.startsWith(key)) return 475;
+  if (shortName && shortName.includes(key)) return 375;
   if (issuer && issuer === key) return 500;
   if (issuer && issuer.startsWith(key)) return 450;
   if (issuer && issuer.includes(key)) return 400;
@@ -310,6 +318,8 @@ function publicBond(record) {
     figi: record.figi,
     isin: record.isin || null,
     name: record.name,
+    shortName: record.shortName || null,
+    issuerLei: record.issuerLei || null,
     issuer: record.issuer || null,
     issuerCountry: record.issuerCountry || null,
     currency: record.currency || null,
@@ -326,7 +336,7 @@ function publicBond(record) {
     bondType: record.bondType || null,
     status: record.status || 'UNKNOWN',
     market: record.market || null,
-    mic: record.mic || null,
+    mic: record.mic || record.marketMic || record.micCode || null,
     source: record.provenance?.source || 'Budget simplement Bond Master',
     sourceUpdatedAt: record.provenance?.sourceUpdatedAt || null,
     confidence: record.provenance?.confidence || 'catalog'
@@ -340,7 +350,7 @@ function catalogSearch(q) {
   const exact = exactIsinSearch(isinQuery);
   if (exact && exact.length) return exact;
   const small = readCatalog().map(publicBond).filter(Boolean)
-    .filter(x => normalize([x.name, x.issuer, x.isin, x.figi].filter(Boolean).join(' ')).includes(key))
+    .filter(x => normalize([x.name, x.shortName, x.issuer, x.isin, x.figi].filter(Boolean).join(' ')).includes(key))
     .slice(0, MAX_RESULTS);
   if (small.length) return small;
   // The ESMA shards are an ISIN/name discovery catalogue, not a FIGI index.
