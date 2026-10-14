@@ -23,8 +23,13 @@ def normalize_search(value):
     return re.sub(r'[^a-z0-9]+', ' ', text.lower()).strip()
 
 def trigrams(value):
-    normalized = normalize_search(value)
-    return {normalized[i:i + 3] for i in range(len(normalized) - 2) if normalized[i:i + 3].strip()}
+    # Search queries are tokenized before lookup, so index trigrams within each
+    # token only. Cross-word trigrams (for example, a gram starting with a
+    # space) can never be queried and only create unnecessary index entries.
+    grams = set()
+    for token in normalize_search(value).split():
+        grams.update(token[i:i + 3] for i in range(len(token) - 2))
+    return grams
 
 
 
