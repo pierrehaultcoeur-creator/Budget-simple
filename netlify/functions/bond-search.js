@@ -428,7 +428,8 @@ function normalizeOpenFigi(item) {
   const sector = String(item.marketSector || '').toLowerCase();
   const type2 = String(item.securityType2 || '').toLowerCase();
   const type = String(item.securityType || '').toLowerCase();
-  const looksFixedIncome = ['corp', 'govt', 'muni', 'mtge', 'mmkt', 'pfd'].some(k => sector.includes(k) || type2.includes(k) || type.includes(k));
+  // Preferred stock is equity-like, not a bond/debt instrument; do not admit it as a fixed-income candidate.
+  const looksFixedIncome = ['corp', 'govt', 'muni', 'mtge', 'mmkt'].some(k => sector.includes(k) || type2.includes(k) || type.includes(k));
   if (!looksFixedIncome) return null;
   return {
     type: 'bond',
