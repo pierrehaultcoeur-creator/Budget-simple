@@ -144,7 +144,7 @@ function canonicalBond(record) {
       ? 'SUSPICIOUS_SOURCE_VALUE'
       : (record.couponStatus || record.couponRateStatus || null);
   const unusableCouponStatuses = new Set(['SUSPICIOUS_SOURCE_VALUE', 'INVALID_SOURCE_VALUE', 'NOT_VERIFIED_EXTERNAL_SOURCE']);
-  const coupon = unusableCouponStatuses.has(couponStatus) ? null : sourceCoupon;
+  const coupon = !sourceCouponText || unusableCouponStatuses.has(couponStatus) ? null : sourceCoupon;
   const couponSourceValue = record.couponSourceValue || record.couponRateRaw
     || (couponIsInvalid || couponIsSuspicious ? sourceCoupon : null);
   return {
