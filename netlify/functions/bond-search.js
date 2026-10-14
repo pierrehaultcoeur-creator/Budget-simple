@@ -130,9 +130,23 @@ function canonicalBond(record) {
       : (record.maturityStatus || record.maturityDateStatus || null);
   const unusableMaturityStatuses = new Set(['SENTINEL_UNSPECIFIED', 'INVALID_SOURCE_VALUE', 'NOT_VERIFIED_EXTERNAL_SOURCE']);
   const maturity = unusableMaturityStatuses.has(maturityStatus) || maturityIsSentinel || maturityIsInvalidIsoDate ? null : sourceMaturity;
-  const couponStatus = record.couponStatus || record.couponRateStatus || null;
+  const sourceCoupon = record.coupon ?? record.couponRate ?? null;
+  const sourceCouponText = sourceCoupon == null ? '' : String(sourceCoupon).trim();
+  const parsedCoupon = sourceCouponText ? Number(sourceCouponText.replace(',', '.')) : null;
+  const couponIsInvalid = sourceCouponText !== '' && !Number.isFinite(parsedCoupon);
+  const couponIsSuspicious = sourceCouponText !== '' && Number.isFinite(parsedCoupon)
+    && (parsedCoupon < -100 || parsedCoupon > 100);
+  // Defend the public response even when a caller supplies no quality status.
+  // ESMA coupon values are percentages; never silently rescale suspicious values.
+  const couponStatus = couponIsInvalid
+    ? 'INVALID_SOURCE_VALUE'
+    : couponIsSuspicious
+      ? 'SUSPICIOUS_SOURCE_VALUE'
+      : (record.couponStatus || record.couponRateStatus || null);
   const unusableCouponStatuses = new Set(['SUSPICIOUS_SOURCE_VALUE', 'INVALID_SOURCE_VALUE', 'NOT_VERIFIED_EXTERNAL_SOURCE']);
-  const coupon = unusableCouponStatuses.has(couponStatus) ? null : (record.coupon ?? record.couponRate ?? null);
+  const coupon = unusableCouponStatuses.has(couponStatus) ? null : sourceCoupon;
+  const couponSourceValue = record.couponSourceValue || record.couponRateRaw
+    || (couponIsInvalid || couponIsSuspicious ? sourceCoupon : null);
   return {
     type: 'bond', assetClass: 'debt-instrument',
     instrumentGroup: record.instrumentGroup || record.cfiGroup || (record.cfi ? String(record.cfi).slice(0, 2) : null),
@@ -147,7 +161,7 @@ function canonicalBond(record) {
     currency: record.currency || record.tradingCurrency || null,
     coupon,
     couponStatus,
-    couponSourceValue: record.couponSourceValue || record.couponRateRaw || null,
+    couponSourceValue,
     couponType: record.couponType || null, couponFrequency: record.couponFrequency || null,
     issueDate: record.issueDate || null, maturity,
     maturityStatus,
