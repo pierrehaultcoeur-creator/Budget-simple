@@ -66,6 +66,46 @@ class SplitterIndexTests(unittest.TestCase):
                 module.OUT = old_out
 
 
+    def test_name_trigram_index_exactly_matches_searchable_shard_contents(self):
+        records = [
+            {"isin": "FR0000120271", "name": "Banque Étoile 2030", "issuer": "Groupe Étoile"},
+            {"isin": "US0378331005", "name": "Apple Inc Bond", "issuer": "Apple Incorporated"},
+            {"isin": "DE0001102606", "name": "Bundesanleihe 2029", "issuer": "Federal Republic"},
+        ]
+        with tempfile.TemporaryDirectory() as tmp:
+            old_out = module.OUT
+            old_target = module.TARGET_BYTES
+            try:
+                module.OUT = pathlib.Path(tmp) / "catalogue"
+                module.TARGET_BYTES = 100
+                module.write_shards(records)
+                manifest = json.loads((module.OUT / "manifest.json").read_text(encoding="utf-8"))
+
+                expected = {}
+                shard_names = {part["file"] for part in manifest["parts"]}
+                for part in manifest["parts"]:
+                    payload = json.loads((module.OUT / part["file"]).read_text(encoding="utf-8"))
+                    for record in payload["records"]:
+                        searchable = " ".join(str(record.get(field) or "") for field in (
+                            "name", "issuer", "instrumentName", "nameOfFinancialInstrument"
+                        ))
+                        for gram in module.trigrams(searchable):
+                            expected.setdefault(gram, set()).add(part["file"])
+
+                actual = {}
+                for entry in manifest["nameIndexes"]:
+                    index = json.loads((module.OUT / entry["file"]).read_text(encoding="utf-8"))
+                    for gram, files in index.items():
+                        self.assertEqual(gram[0], entry["prefix"])
+                        self.assertTrue(set(files) <= shard_names)
+                        actual[gram] = set(files)
+
+                self.assertEqual(actual, expected,
+                    "Name index must contain every expected trigram and only shards that contain it")
+            finally:
+                module.OUT = old_out
+                module.TARGET_BYTES = old_target
+
 
 if __name__ == "__main__":
     unittest.main()
