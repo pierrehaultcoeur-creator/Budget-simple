@@ -153,6 +153,26 @@ test('short names are eligible for bond search ranking', () => {
     'Expected a short-name prefix query to match the bond');
 });
 
+test('exact short-name matches outrank broad name fragments but not exact legal names', () => {
+  const score = search._test.scoreCatalogRecord;
+  const exactShortName = score({
+    name: 'Long legal instrument description containing Example Note 2030',
+    shortName: 'Example Note 2030'
+  }, 'example note 2030');
+  const nameSubstring = score({
+    name: 'Long legal instrument description containing Example Note 2030',
+    shortName: 'Other short name'
+  }, 'example note 2030');
+  const exactLegalName = score({
+    name: 'Example Note 2030',
+    shortName: 'Example Note'
+  }, 'example note 2030');
+  assert.ok(exactShortName > nameSubstring,
+    'Expected an exact short-name match to outrank a broad full-name substring');
+  assert.ok(exactLegalName > exactShortName,
+    'Expected an exact full legal name to remain the strongest match');
+});
+
 test('canonical bond defensively withholds coupon values flagged as suspicious', () => {
   const bond = search._test.canonicalBond({
     isin: 'GR0118017657',
