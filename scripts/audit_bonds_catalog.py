@@ -9,6 +9,7 @@ never silently converted into guessed financial terms.
 from __future__ import annotations
 
 import json
+import math
 import re
 import sys
 from datetime import date, datetime
@@ -120,6 +121,8 @@ def audit_records(records: list[dict]) -> dict:
         if coupon not in (None, ""):
             try:
                 number = float(str(coupon).replace(",", "."))
+                if not math.isfinite(number):
+                    raise ValueError("coupon must be finite")
                 if not (-100 <= number <= 100):
                     suspicious_coupon += 1
                     if len(suspicious_coupon_samples) < 10:

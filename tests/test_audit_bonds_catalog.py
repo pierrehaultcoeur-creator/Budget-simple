@@ -59,6 +59,18 @@ class BondCatalogueAuditTests(unittest.TestCase):
         ])
         self.assertEqual(report["malformedMaturityCount"], 2)
 
+
+    def test_non_finite_coupons_are_invalid_not_numeric_outliers(self):
+        report = module.audit_records([
+            {"isin": "FR0000047607", "couponRate": "NaN"},
+            {"isin": "US0378331005", "couponRate": "Infinity"},
+            {"isin": "GB0002634946", "couponRate": "-Infinity"},
+            {"isin": "US5949181045", "couponRate": "3375"},
+        ])
+        self.assertEqual(report["nonNumericCouponCount"], 3)
+        self.assertEqual(report["suspiciousCouponCount"], 1)
+        self.assertEqual(report["suspiciousCouponSamples"][0]["couponRateRaw"], "3375")
+
     def test_detects_duplicate_isins_and_bad_coupon(self):
         report = module.audit_records([
             {"isin": "FR0000047607", "couponRate": "unknown"},
