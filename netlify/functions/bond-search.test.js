@@ -113,6 +113,34 @@ test('short names are eligible for bond search ranking', () => {
     'Expected a short-name prefix query to match the bond');
 });
 
+test('canonical bond defensively withholds coupon values flagged as suspicious', () => {
+  const bond = search._test.canonicalBond({
+    isin: 'GR0118017657',
+    name: 'Example bond',
+    couponRate: '3375',
+    couponRateRaw: '3375',
+    couponRateStatus: 'SUSPICIOUS_SOURCE_VALUE'
+  });
+  assert.equal(bond.coupon, null);
+  assert.equal(bond.couponStatus, 'SUSPICIOUS_SOURCE_VALUE');
+  assert.equal(bond.couponSourceValue, '3375');
+});
+
+test('canonical bond withholds invalid and unverified maturity values', () => {
+  for (const status of ['INVALID_SOURCE_VALUE', 'NOT_VERIFIED_EXTERNAL_SOURCE']) {
+    const bond = search._test.canonicalBond({
+      isin: 'FR0000047607',
+      name: 'Example bond',
+      maturityDate: '2030-02-31',
+      maturityDateRaw: '2030-02-31',
+      maturityDateStatus: status
+    });
+    assert.equal(bond.maturity, null, `Expected maturity to be withheld for ${status}`);
+    assert.equal(bond.maturityStatus, status);
+    assert.equal(bond.maturitySourceValue, '2030-02-31');
+  }
+});
+
 test('canonical bond withholds suspicious coupon and preserves source value', () => {
   const bond = search._test.canonicalBond({
     isin: 'GR0118017657',
