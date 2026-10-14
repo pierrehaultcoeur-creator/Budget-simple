@@ -339,6 +339,13 @@ function shouldSearchShardedCatalog(value) {
   return !isFigiLikeQuery(value);
 }
 
+function shouldSearchShardedNames(value) {
+  // Name queries shorter than a trigram cannot use the name index and would
+  // otherwise scan every catalogue shard. The master catalogue was already
+  // searched by this point; keep short-name misses cheap and predictable.
+  return normalize(value).length >= 3;
+}
+
 function shardedCatalogSearch(q) {
   const manifest = readManifest();
   if (!manifest) return [];
@@ -431,6 +438,7 @@ function catalogSearch(q) {
   // Avoid scanning all ~630k records for BBG identifiers; the handler will
   // continue to the OpenFIGI lookup when local results are empty.
   if (!shouldSearchShardedCatalog(isinQuery)) return [];
+  if (!shouldSearchShardedNames(q)) return [];
   return shardedCatalogSearch(q);
 }
 
@@ -484,7 +492,7 @@ async function openFigiSearch(q) {
   return Array.isArray(payload.data) ? payload.data.map(normalizeOpenFigi).filter(Boolean).slice(0, MAX_RESULTS) : [];
 }
 
-exports._test = { canonicalBond, publicBond, catalogSearch, rankCatalogRecords, shardedCatalogSearch, exactIsinSearch, normalize, normalizeOpenFigi, scoreCatalogRecord, indexedNameParts, isFigiLikeQuery, shouldSearchShardedCatalog };
+exports._test = { canonicalBond, publicBond, catalogSearch, rankCatalogRecords, shardedCatalogSearch, exactIsinSearch, normalize, normalizeOpenFigi, scoreCatalogRecord, indexedNameParts, isFigiLikeQuery, shouldSearchShardedCatalog, shouldSearchShardedNames };
 
 exports.handler = async (event) => {
   const q = String(event?.queryStringParameters?.q || '').trim();
