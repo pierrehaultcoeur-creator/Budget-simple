@@ -802,3 +802,27 @@ test('OpenFIGI fallback keeps genuine fixed-income candidates but withholds unve
   assert.equal(corporate.couponStatus, 'NOT_VERIFIED_EXTERNAL_SOURCE');
   assert.equal(corporate.maturityStatus, 'NOT_VERIFIED_EXTERNAL_SOURCE');
 });
+
+test('master catalogue search ranks exact names above prefixes and issuer-only matches', () => {
+  const results = search._test.rankCatalogRecords([
+    { figi: 'BBGISSUER001', name: 'Other instrument', issuer: 'Banque Exemple' },
+    { figi: 'BBGPREFIX0001', name: 'Banque Exemple 2030', issuer: 'Different issuer' },
+    { figi: 'BBGEXACT0001', name: 'Banque Exemple', issuer: 'Different issuer' },
+    { figi: 'BBGUNRELATED1', name: 'Unrelated instrument', issuer: 'Other issuer' }
+  ], search._test.normalize('Banque Exemple'));
+
+  assert.deepEqual(results.map(item => item.figi), [
+    'BBGEXACT0001',
+    'BBGPREFIX0001',
+    'BBGISSUER001'
+  ], 'Expected master catalogue results to be relevance-ranked and unrelated records excluded');
+});
+
+test('master catalogue search does not match across separate fields by concatenation', () => {
+  const results = search._test.rankCatalogRecords([
+    { figi: 'BBGJOINED001', name: 'Banque', issuer: 'Exemple' }
+  ], search._test.normalize('Banque Exemple'));
+
+  assert.deepEqual(results, [],
+    'Expected tokens split across name and issuer fields not to create a false phrase match');
+});
