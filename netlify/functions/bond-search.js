@@ -348,7 +348,10 @@ function shardedCatalogSearch(q) {
   if (exact !== null) return exact;
   const figiQuery = isFigiLikeQuery(isinQuery);
   const prefixResults = figiQuery ? null : indexedIsinPrefixSearch(isinQuery, manifest);
-  if (prefixResults !== null) return prefixResults;
+  // A four-character word such as "BOND" can syntactically resemble a partial
+  // ISIN. Only short-circuit when the prefix actually returns identifiers;
+  // otherwise let ordinary name search try instead of hiding valid name matches.
+  if (prefixResults !== null && prefixResults.length) return prefixResults;
   if (!manifest.hasSearchableNames && !/^[A-Z0-9]{4,12}$/.test(isinQuery)) return [];
   const indexedParts = figiQuery ? null : indexedNameParts(key, manifest);
   const partsToSearch = indexedParts === null ? manifest.parts : indexedParts;
