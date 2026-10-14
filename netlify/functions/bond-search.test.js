@@ -901,6 +901,18 @@ test('ISIN ranking normalizes whitespace in query and catalogue identifiers', ()
     'Expected spaces in both the query and source ISIN to be ignored during identifier matching');
 });
 
+test('public search handler resolves an ISIN with embedded whitespace', async () => {
+  const isin = firstIndexedIsin();
+  const spacedIsin = isin.split('').join(' ');
+  const response = await search.handler({ queryStringParameters: { q: spacedIsin } });
+  const payload = JSON.parse(response.body);
+
+  assert.equal(response.statusCode, 200);
+  assert.equal(payload.source, 'bond-master');
+  assert.ok(payload.results.some(item => item.isin === isin),
+    `Expected spaced ISIN query to resolve to the exact catalogue record ${isin}`);
+});
+
 test('four-character word queries fall through when no ISIN prefix matches', () => {
   const results = search._test.shardedCatalogSearch('BOND');
   assert.ok(results.length > 0, 'Expected ordinary word "BOND" to reach name search when no ISIN prefix matches');
