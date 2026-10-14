@@ -250,12 +250,14 @@ def normalized_maturity(debt: ET.Element | None) -> tuple[str | None, str | None
         return None, raw, "SENTINEL_UNSPECIFIED"
 
     try:
-        if re.fullmatch(r"\d{4}-\d{2}-\d{2}", raw):
-            date.fromisoformat(raw)
-        elif re.fullmatch(r"\d{4}-\d{2}-\d{2}T.+", raw):
-            datetime.fromisoformat(raw.replace("Z", "+00:00"))
+        if "T" in raw:
+            parsed = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+            if parsed.date().isoformat() != raw[:10]:
+                raise ValueError("invalid ISO date component")
         else:
-            raise ValueError("not an ISO date or datetime")
+            parsed_date = date.fromisoformat(raw)
+            if parsed_date.isoformat() != raw:
+                raise ValueError("date must use YYYY-MM-DD format")
     except ValueError:
         return None, raw, "INVALID_SOURCE_VALUE"
 
