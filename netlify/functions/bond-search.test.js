@@ -300,3 +300,10 @@ test('name search falls back to all shards for queries shorter than a trigram', 
   const candidates = search._test.indexedNameParts('ab', manifest);
   assert.equal(candidates, null);
 });
+
+test('name search falls back to full shard scan when the name index is unavailable', () => {
+  assert.equal(search._test.indexedNameParts('banque exemple', {
+    parts: manifest.parts,
+    nameIndexes: []
+  }), null, 'Expected missing index entries to trigger a full-scan fallback');
+});
