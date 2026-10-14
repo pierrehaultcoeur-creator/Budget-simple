@@ -466,6 +466,16 @@ test('public handler sends a FIGI query to OpenFIGI without scanning ESMA shards
   }
 });
 
+test('OpenFIGI fallback excludes preferred stock from debt-instrument candidates', () => {
+  const preferredStock = search._test.normalizeOpenFigi({
+    figi: 'BBG000PREF01',
+    name: 'Example preferred stock',
+    marketSector: 'Pfd',
+    securityType: 'Preferred Stock'
+  });
+  assert.equal(preferredStock, null);
+});
+
 test('OpenFIGI fallback never presents unverified coupon or dates as trusted terms', () => {
   const candidate = search._test.normalizeOpenFigi({
     figi: 'BBG000000001',
