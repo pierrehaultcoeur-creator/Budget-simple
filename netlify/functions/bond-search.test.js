@@ -141,6 +141,25 @@ test('canonical bond withholds invalid and unverified maturity values', () => {
   }
 });
 
+test('canonical bond rejects invalid ISO maturity dates without a precomputed status', () => {
+  const invalid = search._test.canonicalBond({
+    isin: 'FR0000047607',
+    name: 'Example bond',
+    maturityDate: '2030-02-31'
+  });
+  assert.equal(invalid.maturity, null);
+  assert.equal(invalid.maturityStatus, 'INVALID_SOURCE_VALUE');
+  assert.equal(invalid.maturitySourceValue, '2030-02-31');
+
+  const validLeapDay = search._test.canonicalBond({
+    isin: 'FR0000047608',
+    name: 'Example bond',
+    maturityDate: '2032-02-29'
+  });
+  assert.equal(validLeapDay.maturity, '2032-02-29');
+  assert.equal(validLeapDay.maturityStatus, null);
+});
+
 test('canonical bond withholds suspicious coupon and preserves source value', () => {
   const bond = search._test.canonicalBond({
     isin: 'GR0118017657',
