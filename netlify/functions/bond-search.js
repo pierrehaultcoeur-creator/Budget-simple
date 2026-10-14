@@ -95,7 +95,7 @@ function cfiGroupLabel(group) {
 }
 
 function isValidIsoDate(value) {
-  const match = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(value || '').trim());
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(value || '').trim());
   if (!match) return null;
   const year = Number(match[1]);
   const month = Number(match[2]);
