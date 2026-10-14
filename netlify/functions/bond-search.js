@@ -76,6 +76,17 @@ function readIsinIndex(prefix, manifest) {
     return null;
   }
 }
+function cfiInstrumentCategory(group) {
+  const code = String(group || '').slice(0, 2).toUpperCase();
+  if (code === 'DB') return 'conventional-bond';
+  if (code === 'DE' || code === 'DS') return 'structured-product';
+  if (code === 'DY') return 'other-debt-instrument';
+  if (['DA', 'DC', 'DD', 'DG', 'DM', 'DN', 'DT', 'DW'].includes(code)) {
+    return 'related-debt-instrument';
+  }
+  return 'unclassified-debt-instrument';
+}
+
 function cfiGroupLabel(group) {
   const labels = {
     DA: 'Titre adossé à des actifs (ABS)',
@@ -147,9 +158,11 @@ function canonicalBond(record) {
   const coupon = !sourceCouponText || unusableCouponStatuses.has(couponStatus) ? null : sourceCoupon;
   const couponSourceValue = record.couponSourceValue || record.couponRateRaw
     || (couponIsInvalid || couponIsSuspicious ? sourceCoupon : null);
+  const instrumentGroup = record.instrumentGroup || record.cfiGroup || (record.cfi ? String(record.cfi).slice(0, 2) : null);
   return {
     type: 'bond', assetClass: 'debt-instrument',
-    instrumentGroup: record.instrumentGroup || record.cfiGroup || (record.cfi ? String(record.cfi).slice(0, 2) : null),
+    instrumentGroup,
+    instrumentCategory: cfiInstrumentCategory(instrumentGroup),
     instrumentLabel: cfiGroupLabel(record.instrumentGroup || record.cfiGroup || (record.cfi ? String(record.cfi).slice(0, 2) : null)),
     instrumentType: record.instrumentType || null, cfi: record.cfi || null,
     id: record.id || record.figi || isin, figi: record.figi || null, isin,
