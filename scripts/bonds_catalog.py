@@ -250,9 +250,9 @@ def normalized_maturity(debt: ET.Element | None) -> tuple[str | None, str | None
         return None, raw, "SENTINEL_UNSPECIFIED"
 
     try:
-        if re.fullmatch(r"\\d{4}-\\d{2}-\\d{2}", raw):
+        if re.fullmatch(r"\d{4}-\d{2}-\d{2}", raw):
             date.fromisoformat(raw)
-        elif re.fullmatch(r"\\d{4}-\\d{2}-\\d{2}T.+", raw):
+        elif re.fullmatch(r"\d{4}-\d{2}-\d{2}T.+", raw):
             datetime.fromisoformat(raw.replace("Z", "+00:00"))
         else:
             raise ValueError("not an ISO date or datetime")
@@ -260,7 +260,6 @@ def normalized_maturity(debt: ET.Element | None) -> tuple[str | None, str | None
         return None, raw, "INVALID_SOURCE_VALUE"
 
     return raw, raw, "SOURCE_DATE"
-
 
 def completeness(record: dict) -> int:
     # Count only meaningful catalogue fields. Raw sentinel values and quality
