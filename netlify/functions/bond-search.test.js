@@ -360,6 +360,12 @@ test('name search falls back to all shards for queries shorter than a trigram', 
   assert.equal(candidates, null);
 });
 
+test('name search falls back when every query token is shorter than a trigram', () => {
+  const candidates = search._test.indexedNameParts('a bc de', manifest);
+  assert.equal(candidates, null,
+    'Expected a full-scan fallback when no query token can use the trigram index');
+});
+
 test('name search falls back to full shard scan when the name index is unavailable', () => {
   assert.equal(search._test.indexedNameParts('banque exemple', {
     parts: manifest.parts,
