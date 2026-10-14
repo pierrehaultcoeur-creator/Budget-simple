@@ -94,6 +94,18 @@ function cfiGroupLabel(group) {
   return labels[String(group || '').slice(0, 2).toUpperCase()] || 'Instrument de dette — classification CFI à vérifier';
 }
 
+function isValidIsoDate(value) {
+  const match = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(value || '').trim());
+  if (!match) return null;
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  if (year < 1 || month < 1 || month > 12 || day < 1) return false;
+  const leap = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+  const days = [31, leap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  return day <= days[month - 1];
+}
+
 function canonicalBond(record) {
   if (typeof record === 'string') record = { isin: record };
   if (!record || typeof record !== 'object') return null;
@@ -101,11 +113,16 @@ function canonicalBond(record) {
   if (!isin) return null;
   const name = record.name || record.instrumentName || record.nameOfFinancialInstrument || null;
   const sourceMaturity = record.maturity || record.maturityDate || null;
-  const maturitySourceValue = record.maturitySourceValue || record.maturityDateRaw || (['9999-12-31', '9999-12-30', '0000-00-00'].includes(String(sourceMaturity || '').trim()) ? sourceMaturity : null);
-  const maturityIsSentinel = ['9999-12-31', '9999-12-30', '0000-00-00'].includes(String(maturitySourceValue || sourceMaturity || '').trim());
-  const maturityStatus = record.maturityStatus || record.maturityDateStatus || (maturityIsSentinel ? 'SENTINEL_UNSPECIFIED' : null);
+  const sourceMaturityText = String(sourceMaturity || '').trim();
+  const maturityDateValidity = isValidIsoDate(sourceMaturityText);
+  const maturityIsInvalidIsoDate = maturityDateValidity === false;
+  const maturityIsSentinel = ['9999-12-31', '9999-12-30', '0000-00-00'].includes(sourceMaturityText);
+  const maturitySourceValue = record.maturitySourceValue || record.maturityDateRaw
+    || (maturityIsSentinel || maturityIsInvalidIsoDate ? sourceMaturity : null);
+  const maturityStatus = record.maturityStatus || record.maturityDateStatus
+    || (maturityIsSentinel ? 'SENTINEL_UNSPECIFIED' : maturityIsInvalidIsoDate ? 'INVALID_SOURCE_VALUE' : null);
   const unusableMaturityStatuses = new Set(['SENTINEL_UNSPECIFIED', 'INVALID_SOURCE_VALUE', 'NOT_VERIFIED_EXTERNAL_SOURCE']);
-  const maturity = unusableMaturityStatuses.has(maturityStatus) || maturityIsSentinel ? null : sourceMaturity;
+  const maturity = unusableMaturityStatuses.has(maturityStatus) || maturityIsSentinel || maturityIsInvalidIsoDate ? null : sourceMaturity;
   const couponStatus = record.couponStatus || record.couponRateStatus || null;
   const unusableCouponStatuses = new Set(['SUSPICIOUS_SOURCE_VALUE', 'INVALID_SOURCE_VALUE', 'NOT_VERIFIED_EXTERNAL_SOURCE']);
   const coupon = unusableCouponStatuses.has(couponStatus) ? null : (record.coupon ?? record.couponRate ?? null);
