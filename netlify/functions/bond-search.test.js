@@ -204,6 +204,33 @@ test('name search ranking prioritizes exact names over prefixes and issuer match
   assert.equal(score({ name: 'Sans rapport', issuer: 'Autre' }, query), 0);
 });
 
+test('issuer-only search survives trigram shard narrowing', () => {
+  let sample = null;
+  for (const part of manifest.parts) {
+    const shard = JSON.parse(fs.readFileSync(path.join(catalogueDir, part.file), 'utf8'));
+    const records = Array.isArray(shard) ? shard : (shard.records || shard.items || []);
+    sample = records.find(record => {
+      if (typeof record.name !== 'string' || typeof record.issuer !== 'string') return false;
+      const name = search._test.normalize(record.name);
+      const issuer = search._test.normalize(record.issuer);
+      return issuer.length >= 8 && issuer !== name && !name.includes(issuer);
+    });
+    if (sample) break;
+  }
+  assert.ok(sample, 'Expected a real catalogue record with an issuer distinct from its name');
+  const query = search._test.normalize(sample.issuer);
+  const candidates = search._test.indexedNameParts(query, manifest);
+  assert.ok(Array.isArray(candidates), 'Expected issuer text to be covered by the trigram index');
+  assert.ok(candidates.some(part => {
+    const shard = JSON.parse(fs.readFileSync(path.join(catalogueDir, part.file), 'utf8'));
+    const records = Array.isArray(shard) ? shard : (shard.records || shard.items || []);
+    return records.some(record => record.isin === sample.isin);
+  }), `Expected issuer query "${query}" to retain the record shard`);
+  const results = search._test.shardedCatalogSearch(query);
+  assert.ok(results.some(item => item.isin === sample.isin),
+    `Expected issuer-only query "${query}" to find ISIN ${sample.isin}`);
+});
+
 test('partial multi-token matching requires distinct target tokens', () => {
   const score = search._test.scoreCatalogRecord;
   assert.equal(score({ name: 'Banque', issuer: '' }, 'ban banque'), 0,
