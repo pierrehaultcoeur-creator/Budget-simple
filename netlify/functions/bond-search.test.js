@@ -293,8 +293,11 @@ test('local investment-page canonicalization withholds invalid coupon and maturi
     couponRate: '3375',
     couponRateStatus: 'VERIFIED',
     maturityDate: '2030-02-31',
-    maturityDateStatus: 'VERIFIED'
+    maturityDateStatus: 'VERIFIED',
+    cfi: 'DBXXXX'
   });
+  assert.equal(invalid.instrumentCategory, 'conventional-bond');
+  assert.equal(invalid.instrumentGroup, 'DB');
   assert.equal(invalid.coupon, null);
   assert.equal(invalid.couponStatus, 'SUSPICIOUS_SOURCE_VALUE');
   assert.equal(invalid.couponSourceValue, '3375');
@@ -306,8 +309,11 @@ test('local investment-page canonicalization withholds invalid coupon and maturi
     isin: 'FR0000047615',
     name: 'Local valid example',
     couponRate: '3,375',
-    maturityDate: '2032-02-29'
+    maturityDate: '2032-02-29',
+    cfi: 'DEXXXX'
   });
+  assert.equal(valid.instrumentCategory, 'structured-product');
+  assert.equal(valid.instrumentGroup, 'DE');
   assert.equal(valid.coupon, '3,375');
   assert.equal(valid.couponStatus, null);
   assert.equal(valid.maturity, '2032-02-29');
