@@ -110,6 +110,28 @@ test('canonical bond labels conventional bonds separately from structured produc
   assert.equal(unknownGroup.instrumentCategory, 'unclassified-debt-instrument');
 });
 
+test('public bond master records expose normalized CFI instrument categories', () => {
+  const conventional = search._test.publicBond({
+    figi: 'BBG000TEST01',
+    isin: 'FR0000047607',
+    name: 'Example conventional bond',
+    cfi: 'DBXXXX'
+  });
+  assert.equal(conventional.assetClass, 'debt-instrument');
+  assert.equal(conventional.instrumentGroup, 'DB');
+  assert.equal(conventional.instrumentCategory, 'conventional-bond');
+  assert.equal(conventional.instrumentLabel, 'Obligation classique (CFI DB)');
+
+  const structured = search._test.publicBond({
+    figi: 'BBG000TEST02',
+    isin: 'FR0000047608',
+    name: 'Example structured product',
+    cfi: 'DEXXXX'
+  });
+  assert.equal(structured.instrumentCategory, 'structured-product');
+  assert.equal(structured.instrumentLabel, 'Produit structuré sans protection du capital');
+});
+
 test('canonical bond preserves ESMA short name, issuer LEI and market MIC fields', () => {
   const bond = search._test.canonicalBond({
     isin: 'FR0000047607',
