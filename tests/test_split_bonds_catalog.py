@@ -57,6 +57,7 @@ class SplitterIndexTests(unittest.TestCase):
                 module.write_shards(records)
                 manifest = json.loads((module.OUT / "manifest.json").read_text(encoding="utf-8"))
                 indexes = {item["prefix"]: item for item in manifest["nameIndexes"]}
+                self.assertNotIn(" ", indexes, "Index should not create an unused leading-space trigram shard")
                 self.assertIn("b", indexes)
                 index = json.loads((module.OUT / indexes["b"]["file"]).read_text(encoding="utf-8"))
                 self.assertTrue(any("ban" in gram for gram in index))
@@ -90,6 +91,7 @@ class SplitterIndexTests(unittest.TestCase):
                             "name", "issuer", "instrumentName", "nameOfFinancialInstrument"
                         ))
                         for gram in module.trigrams(searchable):
+                            self.assertTrue(gram.strip(), "Trigrams should not span word boundaries")
                             expected.setdefault(gram, set()).add(part["file"])
 
                 actual = {}
