@@ -269,8 +269,10 @@ test('reordered partial name tokens still find the real catalogue record', () =>
 });
 
 test('repeated partial name tokens do not duplicate shard candidates or match a single-token name', () => {
-  const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
-  const records = JSON.parse(fs.readFileSync(path.join(shardsDir, manifest.parts[0].file), 'utf8')).records;
+  const records = manifest.parts.flatMap(part => {
+    const shard = JSON.parse(fs.readFileSync(path.join(catalogueDir, part.file), 'utf8'));
+    return Array.isArray(shard) ? shard : (shard.records || shard.items || []);
+  });
   const sample = records.find(record => {
     const tokens = search._test.normalize(record.name).split(' ').filter(token => token.length >= 4);
     return tokens.some(token => search._test.normalize(record.name).split(' ').filter(part => part === token).length === 1);
