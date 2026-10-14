@@ -307,3 +307,10 @@ test('name search falls back to full shard scan when the name index is unavailab
     nameIndexes: []
   }), null, 'Expected missing index entries to trigger a full-scan fallback');
 });
+
+test('name search falls back to full shard scan when an index file cannot be read', () => {
+  assert.equal(search._test.indexedNameParts('banque exemple', {
+    parts: manifest.parts,
+    nameIndexes: [{ prefix: 'b', file: '__missing_name_index_test__.json' }]
+  }), null, 'Expected unreadable name-index files to trigger a full-scan fallback');
+});
