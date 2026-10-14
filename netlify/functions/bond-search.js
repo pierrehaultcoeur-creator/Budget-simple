@@ -429,10 +429,10 @@ function rankCatalogRecords(records, key) {
 }
 
 function rankCatalogRecordsByIsin(records, query) {
-  const key = String(query || '').replace(/\\s+/g, '').toUpperCase();
+  const key = String(query || '').replace(/\s+/g, '').toUpperCase();
   return records.map(publicBond).filter(Boolean)
     .map(item => {
-      const isin = String(item.isin || '').replace(/\\s+/g, '').toUpperCase();
+      const isin = String(item.isin || '').replace(/\s+/g, '').toUpperCase();
       if (!isin || !isin.startsWith(key)) return null;
       return { item, score: isin === key ? 1000 : 800 };
     })
