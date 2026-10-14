@@ -104,7 +104,11 @@ function canonicalBond(record) {
   const maturitySourceValue = record.maturitySourceValue || record.maturityDateRaw || (['9999-12-31', '9999-12-30', '0000-00-00'].includes(String(sourceMaturity || '').trim()) ? sourceMaturity : null);
   const maturityIsSentinel = ['9999-12-31', '9999-12-30', '0000-00-00'].includes(String(maturitySourceValue || sourceMaturity || '').trim());
   const maturityStatus = record.maturityStatus || record.maturityDateStatus || (maturityIsSentinel ? 'SENTINEL_UNSPECIFIED' : null);
-  const maturity = maturityStatus === 'SENTINEL_UNSPECIFIED' || maturityIsSentinel ? null : sourceMaturity;
+  const unusableMaturityStatuses = new Set(['SENTINEL_UNSPECIFIED', 'INVALID_SOURCE_VALUE', 'NOT_VERIFIED_EXTERNAL_SOURCE']);
+  const maturity = unusableMaturityStatuses.has(maturityStatus) || maturityIsSentinel ? null : sourceMaturity;
+  const couponStatus = record.couponStatus || record.couponRateStatus || null;
+  const unusableCouponStatuses = new Set(['SUSPICIOUS_SOURCE_VALUE', 'INVALID_SOURCE_VALUE', 'NOT_VERIFIED_EXTERNAL_SOURCE']);
+  const coupon = unusableCouponStatuses.has(couponStatus) ? null : (record.coupon ?? record.couponRate ?? null);
   return {
     type: 'bond', assetClass: 'debt-instrument',
     instrumentGroup: record.instrumentGroup || record.cfiGroup || (record.cfi ? String(record.cfi).slice(0, 2) : null),
@@ -117,8 +121,8 @@ function canonicalBond(record) {
     issuer: record.issuer || record.issuerName || null,
     issuerCountry: record.issuerCountry || record.countryOfIssuer || null,
     currency: record.currency || record.tradingCurrency || null,
-    coupon: record.coupon ?? record.couponRate ?? null,
-    couponStatus: record.couponStatus || record.couponRateStatus || null,
+    coupon,
+    couponStatus,
     couponSourceValue: record.couponSourceValue || record.couponRateRaw || null,
     couponType: record.couponType || null, couponFrequency: record.couponFrequency || null,
     issueDate: record.issueDate || null, maturity,
