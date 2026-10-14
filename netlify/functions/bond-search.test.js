@@ -240,6 +240,18 @@ test('canonical bond withholds non-numeric coupon values without precomputed sta
   assert.equal(bond.couponSourceValue, 'not-a-rate');
 });
 
+test('canonical bond normalizes blank coupon values to null', () => {
+  for (const value of ['', '   ']) {
+    const bond = search._test.canonicalBond({
+      isin: 'FR0000047607',
+      name: 'Blank coupon example',
+      couponRate: value
+    });
+    assert.equal(bond.coupon, null);
+    assert.equal(bond.couponStatus, null);
+  }
+});
+
 test('canonical bond keeps valid coupon percentages and decimal commas', () => {
   const dot = search._test.canonicalBond({
     isin: 'FR0000047614',
