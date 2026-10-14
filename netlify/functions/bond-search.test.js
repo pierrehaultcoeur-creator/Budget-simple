@@ -320,6 +320,44 @@ test('local investment-page canonicalization withholds invalid coupon and maturi
   assert.equal(valid.maturityStatus, null);
 });
 
+test('server and investment page classify every supported CFI debt group consistently', () => {
+  const html = fs.readFileSync(path.join(__dirname, '..', '..', 'investissement.html'), 'utf8');
+  const start = html.indexOf('function cfiLabel(group){');
+  const end = html.indexOf('\nasync function searchLocal', start);
+  assert.ok(start >= 0 && end > start, 'Expected to locate investment-page canonicalization functions');
+  const localCanonical = vm.runInNewContext(`${html.slice(start, end)}; canonical`);
+
+  const cases = [
+    ['DA', 'related-debt-instrument'],
+    ['DB', 'conventional-bond'],
+    ['DC', 'related-debt-instrument'],
+    ['DD', 'related-debt-instrument'],
+    ['DE', 'structured-product'],
+    ['DG', 'related-debt-instrument'],
+    ['DM', 'related-debt-instrument'],
+    ['DN', 'related-debt-instrument'],
+    ['DS', 'structured-product'],
+    ['DT', 'related-debt-instrument'],
+    ['DW', 'related-debt-instrument'],
+    ['DY', 'other-debt-instrument'],
+    ['D?', 'unclassified-debt-instrument']
+  ];
+
+  for (const [group, expectedCategory] of cases) {
+    const record = {
+      isin: 'FR0000047607',
+      name: 'CFI classification consistency check',
+      cfi: `${group}XXXX`
+    };
+    const server = search._test.canonicalBond(record);
+    const local = localCanonical(record);
+    assert.equal(server.instrumentCategory, expectedCategory, `Server category for ${group}`);
+    assert.equal(local.instrumentCategory, expectedCategory, `Investment page category for ${group}`);
+    assert.equal(local.instrumentCategory, server.instrumentCategory, `Category parity for ${group}`);
+    assert.equal(local.instrumentLabel, server.instrumentLabel, `Human-readable label parity for ${group}`);
+  }
+});
+
 test('canonical bond normalizes blank coupon values to null', () => {
   for (const value of ['', '   ']) {
     const bond = search._test.canonicalBond({
