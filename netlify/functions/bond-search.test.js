@@ -160,6 +160,19 @@ test('canonical bond rejects invalid ISO maturity dates without a precomputed st
   assert.equal(validLeapDay.maturityStatus, null);
 });
 
+test('canonical bond rejects non-ISO maturity strings without a precomputed status', () => {
+  for (const value of ['31/12/2030', '2030-13-01', 'not-a-date']) {
+    const bond = search._test.canonicalBond({
+      isin: 'FR0000047609',
+      name: 'Example bond',
+      maturityDate: value
+    });
+    assert.equal(bond.maturity, null, `Expected non-ISO maturity "${value}" to be withheld`);
+    assert.equal(bond.maturityStatus, 'INVALID_SOURCE_VALUE');
+    assert.equal(bond.maturitySourceValue, value);
+  }
+});
+
 test('canonical bond withholds suspicious coupon and preserves source value', () => {
   const bond = search._test.canonicalBond({
     isin: 'GR0118017657',
