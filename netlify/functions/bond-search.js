@@ -220,6 +220,29 @@ function indexedNameParts(key, manifest) {
   return manifest.parts.filter(part => candidateFiles.has(part.file));
 }
 
+function distinctTokenPrefixMatch(queryTokens, targetTokens) {
+  // Every query token must match a different target token. Assign the
+  // most constrained query tokens first so prefix overlaps remain reliable.
+  const candidates = queryTokens.map(token => targetTokens
+    .map((part, index) => part.startsWith(token) ? index : -1)
+    .filter(index => index >= 0));
+  if (candidates.some(indices => indices.length === 0)) return false;
+  const order = candidates.map((indices, index) => ({ indices, index }))
+    .sort((a, b) => a.indices.length - b.indices.length);
+  const used = new Set();
+  function assign(position) {
+    if (position === order.length) return true;
+    for (const targetIndex of order[position].indices) {
+      if (used.has(targetIndex)) continue;
+      used.add(targetIndex);
+      if (assign(position + 1)) return true;
+      used.delete(targetIndex);
+    }
+    return false;
+  }
+  return assign(0);
+}
+
 function scoreCatalogRecord(item, key) {
   const name = normalize(item.name);
   const issuer = normalize(item.issuer);
@@ -234,12 +257,12 @@ function scoreCatalogRecord(item, key) {
   const nameTokens = name.split(' ').filter(Boolean);
   const issuerTokens = issuer.split(' ').filter(Boolean);
   if (queryTokens.length > 1 && queryTokens.every(token => nameTokens.includes(token))) return 550;
-  if (queryTokens.length > 1 && queryTokens.every(token => token.length >= 3 && nameTokens.some(part => part.startsWith(token)))) return 525;
+  if (queryTokens.length > 1 && queryTokens.every(token => token.length >= 3) && distinctTokenPrefixMatch(queryTokens, nameTokens)) return 525;
   if (issuer && issuer === key) return 500;
   if (issuer && issuer.startsWith(key)) return 450;
   if (issuer && issuer.includes(key)) return 400;
   if (queryTokens.length > 1 && queryTokens.every(token => issuerTokens.includes(token))) return 350;
-  if (queryTokens.length > 1 && queryTokens.every(token => token.length >= 3 && issuerTokens.some(part => part.startsWith(token)))) return 325;
+  if (queryTokens.length > 1 && queryTokens.every(token => token.length >= 3) && distinctTokenPrefixMatch(queryTokens, issuerTokens)) return 325;
   if (isin && isin.includes(key)) return 300;
   if (figi && figi.includes(key)) return 200;
   return 0;

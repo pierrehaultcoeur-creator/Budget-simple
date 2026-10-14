@@ -204,6 +204,18 @@ test('name search ranking prioritizes exact names over prefixes and issuer match
   assert.equal(score({ name: 'Sans rapport', issuer: 'Autre' }, query), 0);
 });
 
+test('partial multi-token matching requires distinct target tokens', () => {
+  const score = search._test.scoreCatalogRecord;
+  assert.equal(score({ name: 'Banque', issuer: '' }, 'ban banque'), 0,
+    'Expected one name token not to satisfy two distinct query tokens');
+  assert.ok(score({ name: 'Banque Nationale', issuer: '' }, 'ban nat') > 0,
+    'Expected distinct partial tokens to match separate name tokens');
+  assert.equal(score({ name: 'Banque', issuer: 'Banque' }, 'ban banque'), 0,
+    'Expected issuer matching to require distinct issuer tokens too');
+  assert.ok(score({ name: 'Autre titre', issuer: 'Banque Nationale' }, 'ban nat') > 0,
+    'Expected distinct partial tokens to match separate issuer tokens');
+});
+
 test('name trigram index actually narrows candidate shards for a real catalogue name', () => {
   let sample = null;
   let shardName = null;
