@@ -16,12 +16,13 @@ function firstIndexedIsin() {
   throw new Error('No valid ISIN found in generated indexes');
 }
 
-test('FIGI-shaped identifiers bypass ISIN-prefix and name-index routing', () => {
+test('full and partial FIGI identifiers bypass ISIN-prefix and name-index routing', () => {
   const isFigiLikeQuery = search._test.isFigiLikeQuery;
   assert.equal(isFigiLikeQuery('BBG000B9XRY4'), true);
   assert.equal(isFigiLikeQuery(' bbg000b9xry4 '), true, 'Expected whitespace and case normalization');
+  assert.equal(isFigiLikeQuery('BBG000'), true, 'Expected a partial FIGI prefix to bypass ISIN routing');
   assert.equal(isFigiLikeQuery('FR0000047607'), false, 'Expected a full ISIN not to be classified as a FIGI');
-  assert.equal(isFigiLikeQuery('BBG000B9XRY'), false, 'Expected an incomplete FIGI not to be classified as a full FIGI');
+  assert.equal(isFigiLikeQuery('BOND ISSUER'), false, 'Expected ordinary name queries not to be classified as FIGIs');
 });
 
 test('exact ISIN lookup returns the indexed bond', () => {
