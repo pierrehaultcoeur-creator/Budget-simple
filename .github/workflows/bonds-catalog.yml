@@ -109,6 +109,7 @@ jobs:
               assert len(index) == item["trigrams"], f"Name-index trigram count mismatch: {item['file']}"
               for gram, files in index.items():
                   assert len(gram) == 3, f"Invalid trigram {gram!r} in {item['file']}"
+                  assert gram.isascii() and gram.isalnum() and gram == gram.lower(), f"Name trigram crosses token boundaries or is not normalized: {gram!r}"
                   assert isinstance(files, list) and files, f"Empty shard list for trigram {gram!r}"
                   assert set(files) <= shard_names, f"Name index references unknown shards for {gram!r}"
                   indexed_trigrams += 1
