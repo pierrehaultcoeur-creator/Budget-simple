@@ -245,9 +245,9 @@ function scoreCatalogRecord(item, key) {
   return 0;
 }
 function isFigiLikeQuery(value) {
-  // FIGIs commonly use the 12-character BBG-prefixed form. Do not route
-  // these identifiers through the ISIN-prefix index or the name trigram index.
-  return /^BBG[A-Z0-9]{9}$/.test(String(value || '').replace(/\s+/g, '').toUpperCase());
+  // FIGIs commonly use the BBG prefix. Route full and partial FIGI queries
+  // around ISIN/name indexes so identifier matches are not filtered out.
+  return /^BBG[A-Z0-9]{0,9}$/.test(String(value || '').replace(/\s+/g, '').toUpperCase());
 }
 
 function shardedCatalogSearch(q) {
