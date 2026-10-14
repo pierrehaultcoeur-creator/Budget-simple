@@ -451,3 +451,40 @@ test('OpenFIGI outage returns a safe unavailable response instead of throwing', 
     global.fetch = originalFetch;
   }
 });
+
+
+test('indexed name search preserves issuer-only matches from the real catalogue', () => {
+  let sample = null;
+  let issuerPrefix = null;
+
+  for (const part of manifest.parts) {
+    const shard = JSON.parse(fs.readFileSync(path.join(catalogueDir, part.file), 'utf8'));
+    const records = Array.isArray(shard) ? shard : (shard.records || shard.items || []);
+    sample = records.find(record => {
+      if (typeof record.issuer !== 'string' || !record.issuer.trim()) return false;
+      const issuerTokens = search._test.normalize(record.issuer).split(' ').filter(token => token.length >= 4);
+      const name = search._test.normalize(record.name);
+      const nameTokens = name.split(' ').filter(Boolean);
+      const candidate = issuerTokens.find(token => {
+        const prefix = token.slice(0, 3);
+        return prefix.length === 3 && !name.includes(prefix)
+          && !nameTokens.some(nameToken => nameToken.startsWith(prefix));
+      });
+      if (!candidate) return false;
+      issuerPrefix = candidate.slice(0, 3);
+      return true;
+    });
+    if (sample) break;
+  }
+
+  assert.ok(sample, 'Expected a real record whose issuer can be searched independently of its name');
+  const candidates = search._test.indexedNameParts(issuerPrefix, manifest);
+  assert.ok(Array.isArray(candidates), 'Expected issuer query to use the shared name index');
+  assert.ok(candidates.some(part => {
+    const shard = JSON.parse(fs.readFileSync(path.join(catalogueDir, part.file), 'utf8'));
+    return (shard.records || []).some(record => record.isin === sample.isin);
+  }), `Expected issuer query "${issuerPrefix}" to retain the source shard`);
+  const results = search._test.shardedCatalogSearch(issuerPrefix);
+  assert.ok(results.some(item => item.isin === sample.isin),
+    `Expected issuer-only query "${issuerPrefix}" to find ISIN ${sample.isin} (${sample.issuer})`);
+});
