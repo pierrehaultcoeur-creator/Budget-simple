@@ -37,6 +37,28 @@ class ParserTests(unittest.TestCase):
             ("2030-12-31", "2030-12-31", "SOURCE_DATE"),
         )
 
+    def test_invalid_maturity_is_preserved_for_audit_but_not_exposed_as_a_date(self):
+        invalid_dates = ("2030-02-31", "2030-13-01", "not-a-date")
+        for raw in invalid_dates:
+            with self.subTest(raw=raw):
+                node = module.ET.fromstring(
+                    f"<DebtInstrmAttrbts><MtrtyDt>{raw}</MtrtyDt></DebtInstrmAttrbts>"
+                )
+                self.assertEqual(
+                    module.normalized_maturity(node),
+                    (None, raw, "INVALID_SOURCE_VALUE"),
+                )
+
+    def test_iso_datetime_maturity_is_validated_and_preserved(self):
+        raw = "2030-12-31T00:00:00Z"
+        node = module.ET.fromstring(
+            f"<DebtInstrmAttrbts><MtrtyDt>{raw}</MtrtyDt></DebtInstrmAttrbts>"
+        )
+        self.assertEqual(
+            module.normalized_maturity(node),
+            (raw, raw, "SOURCE_DATE"),
+        )
+
     def test_sentinel_metadata_does_not_inflate_record_completeness(self):
         real = {
             "isin": "FR0000047607",

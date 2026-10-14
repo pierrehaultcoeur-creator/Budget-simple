@@ -242,12 +242,23 @@ def normalized_coupon(raw: str | None) -> tuple[str | None, str | None]:
 
 
 def normalized_maturity(debt: ET.Element | None) -> tuple[str | None, str | None, str | None]:
-    """Keep source maturity data but never expose known sentinel dates as real dates."""
+    """Keep source maturity data, but expose only valid dates as usable maturities."""
     raw = first_descendant_text(debt, "MtrtyDt") if debt is not None else None
     if not raw:
         return None, None, None
     if raw in MATURITY_SENTINELS:
         return None, raw, "SENTINEL_UNSPECIFIED"
+
+    try:
+        if re.fullmatch(r"\\d{4}-\\d{2}-\\d{2}", raw):
+            date.fromisoformat(raw)
+        elif re.fullmatch(r"\\d{4}-\\d{2}-\\d{2}T.+", raw):
+            datetime.fromisoformat(raw.replace("Z", "+00:00"))
+        else:
+            raise ValueError("not an ISO date or datetime")
+    except ValueError:
+        return None, raw, "INVALID_SOURCE_VALUE"
+
     return raw, raw, "SOURCE_DATE"
 
 
