@@ -121,8 +121,13 @@ function canonicalBond(record) {
   const maturityIsSentinel = ['9999-12-31', '9999-12-30', '0000-00-00'].includes(sourceMaturityText);
   const maturitySourceValue = record.maturitySourceValue || record.maturityDateRaw
     || (maturityIsSentinel || maturityIsInvalidIsoDate ? sourceMaturity : null);
-  const maturityStatus = record.maturityStatus || record.maturityDateStatus
-    || (maturityIsSentinel ? 'SENTINEL_UNSPECIFIED' : maturityIsInvalidIsoDate ? 'INVALID_SOURCE_VALUE' : null);
+  // Invalid or sentinel source values must override upstream status labels:
+  // a contradictory "verified" status must never make an unusable date look trusted.
+  const maturityStatus = maturityIsSentinel
+    ? 'SENTINEL_UNSPECIFIED'
+    : maturityIsInvalidIsoDate
+      ? 'INVALID_SOURCE_VALUE'
+      : (record.maturityStatus || record.maturityDateStatus || null);
   const unusableMaturityStatuses = new Set(['SENTINEL_UNSPECIFIED', 'INVALID_SOURCE_VALUE', 'NOT_VERIFIED_EXTERNAL_SOURCE']);
   const maturity = unusableMaturityStatuses.has(maturityStatus) || maturityIsSentinel || maturityIsInvalidIsoDate ? null : sourceMaturity;
   const couponStatus = record.couponStatus || record.couponRateStatus || null;
