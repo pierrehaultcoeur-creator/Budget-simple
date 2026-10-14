@@ -428,12 +428,33 @@ function rankCatalogRecords(records, key) {
     .map(entry => entry.item);
 }
 
+function rankCatalogRecordsByIsin(records, query) {
+  const key = String(query || '').replace(/\\s+/g, '').toUpperCase();
+  return records.map(publicBond).filter(Boolean)
+    .map(item => {
+      const isin = String(item.isin || '').replace(/\\s+/g, '').toUpperCase();
+      if (!isin || !isin.startsWith(key)) return null;
+      return { item, score: isin === key ? 1000 : 800 };
+    })
+    .filter(Boolean)
+    .sort((a, b) => b.score - a.score
+      || String(a.item.isin || '').localeCompare(String(b.item.isin || ''), 'en'))
+    .slice(0, MAX_RESULTS)
+    .map(entry => entry.item);
+}
+
 function catalogSearch(q) {
   const key = normalize(q);
   if (!key) return [];
   const isinQuery = String(q || '').replace(/\s+/g, '').toUpperCase();
   const exact = exactIsinSearch(isinQuery);
   if (exact && exact.length) return exact;
+  // Identifier-like queries should rank by ISIN prefix before name relevance,
+  // so a coincidental name substring cannot hide an identifier match.
+  if (/^[A-Z]{2}[A-Z0-9]{2,10}$/.test(isinQuery)) {
+    const isinMatches = rankCatalogRecordsByIsin(readCatalog(), isinQuery);
+    if (isinMatches.length) return isinMatches;
+  }
   const small = rankCatalogRecords(readCatalog(), key);
   if (small.length) return small;
   // The ESMA shards are an ISIN/name discovery catalogue, not a FIGI index.
@@ -494,7 +515,7 @@ async function openFigiSearch(q) {
   return Array.isArray(payload.data) ? payload.data.map(normalizeOpenFigi).filter(Boolean).slice(0, MAX_RESULTS) : [];
 }
 
-exports._test = { canonicalBond, publicBond, catalogSearch, rankCatalogRecords, shardedCatalogSearch, exactIsinSearch, normalize, normalizeOpenFigi, scoreCatalogRecord, indexedNameParts, isFigiLikeQuery, shouldSearchShardedCatalog, shouldSearchShardedNames };
+exports._test = { canonicalBond, publicBond, catalogSearch, rankCatalogRecords, rankCatalogRecordsByIsin, shardedCatalogSearch, exactIsinSearch, normalize, normalizeOpenFigi, scoreCatalogRecord, indexedNameParts, isFigiLikeQuery, shouldSearchShardedCatalog, shouldSearchShardedNames };
 
 exports.handler = async (event) => {
   const q = String(event?.queryStringParameters?.q || '').trim();
