@@ -406,15 +406,23 @@ function publicBond(record) {
   };
 }
 
+function rankCatalogRecords(records, key) {
+  return records.map(publicBond).filter(Boolean)
+    .map(item => ({ item, score: scoreCatalogRecord(item, key) }))
+    .filter(entry => entry.score > 0)
+    .sort((a, b) => b.score - a.score
+      || String(a.item.name || '').localeCompare(String(b.item.name || ''), 'en'))
+    .slice(0, MAX_RESULTS)
+    .map(entry => entry.item);
+}
+
 function catalogSearch(q) {
   const key = normalize(q);
   if (!key) return [];
   const isinQuery = String(q || '').replace(/\s+/g, '').toUpperCase();
   const exact = exactIsinSearch(isinQuery);
   if (exact && exact.length) return exact;
-  const small = readCatalog().map(publicBond).filter(Boolean)
-    .filter(x => normalize([x.name, x.shortName, x.issuer, x.isin, x.figi].filter(Boolean).join(' ')).includes(key))
-    .slice(0, MAX_RESULTS);
+  const small = rankCatalogRecords(readCatalog(), key);
   if (small.length) return small;
   // The ESMA shards are an ISIN/name discovery catalogue, not a FIGI index.
   // Avoid scanning all ~630k records for BBG identifiers; the handler will
@@ -473,7 +481,7 @@ async function openFigiSearch(q) {
   return Array.isArray(payload.data) ? payload.data.map(normalizeOpenFigi).filter(Boolean).slice(0, MAX_RESULTS) : [];
 }
 
-exports._test = { canonicalBond, publicBond, shardedCatalogSearch, exactIsinSearch, normalize, normalizeOpenFigi, scoreCatalogRecord, indexedNameParts, isFigiLikeQuery, shouldSearchShardedCatalog };
+exports._test = { canonicalBond, publicBond, catalogSearch, rankCatalogRecords, shardedCatalogSearch, exactIsinSearch, normalize, normalizeOpenFigi, scoreCatalogRecord, indexedNameParts, isFigiLikeQuery, shouldSearchShardedCatalog };
 
 exports.handler = async (event) => {
   const q = String(event?.queryStringParameters?.q || '').trim();
