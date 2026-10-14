@@ -200,9 +200,12 @@ function indexedNameParts(key, manifest) {
     for (let i = 0; i <= token.length - 3; i += 1) {
       const gram = token.slice(i, i + 3);
       const entry = manifest.nameIndexes.find(item => item.prefix === gram[0]);
-      if (!entry) return [];
+      // If the index structure or file is unavailable, fall back to scanning
+      // all shards rather than silently hiding valid name matches.
+      if (!entry) return null;
       const index = readNameIndex(entry.file);
-      if (!index || !Array.isArray(index[gram])) return [];
+      if (!index || typeof index !== 'object' || Array.isArray(index)) return null;
+      if (!Array.isArray(index[gram])) return [];
       const gramFiles = new Set(index[gram]);
       tokenFiles = tokenFiles === null
         ? gramFiles
