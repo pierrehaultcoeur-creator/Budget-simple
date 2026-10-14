@@ -366,6 +366,38 @@ test('name search falls back when every query token is shorter than a trigram', 
     'Expected a full-scan fallback when no query token can use the trigram index');
 });
 
+test('mixed short and long name tokens keep the source shard while narrowing candidates', () => {
+  let sample = null;
+  let sourceShard = null;
+  for (const part of manifest.parts) {
+    const shard = JSON.parse(fs.readFileSync(path.join(catalogueDir, part.file), 'utf8'));
+    const records = Array.isArray(shard) ? shard : (shard.records || shard.items || []);
+    sample = records.find(record => {
+      if (typeof record.name !== 'string') return false;
+      const tokens = search._test.normalize(record.name).split(' ').filter(Boolean);
+      return tokens.some(token => token.length === 2) && tokens.some(token => token.length >= 3);
+    });
+    if (sample) {
+      sourceShard = part.file;
+      break;
+    }
+  }
+  assert.ok(sample, 'Expected a real catalogue name containing both a two-character token and a searchable token');
+  const tokens = search._test.normalize(sample.name).split(' ').filter(Boolean);
+  const shortToken = tokens.find(token => token.length === 2);
+  const longToken = tokens.find(token => token.length >= 3);
+  const query = `${shortToken} ${longToken}`;
+  const candidates = search._test.indexedNameParts(query, manifest);
+  assert.ok(Array.isArray(candidates), 'Expected the long token to enable indexed lookup');
+  assert.ok(candidates.some(part => part.file === sourceShard),
+    `Expected mixed-token query "${query}" to retain source shard ${sourceShard}`);
+  assert.ok(candidates.length < manifest.parts.length,
+    'Expected mixed-token query to narrow candidates despite the short token');
+  const results = search._test.shardedCatalogSearch(query);
+  assert.ok(results.some(item => item.isin === sample.isin),
+    `Expected mixed-token query "${query}" to find ISIN ${sample.isin} (${sample.name})`);
+});
+
 test('name search falls back to full shard scan when the name index is unavailable', () => {
   assert.equal(search._test.indexedNameParts('banque exemple', {
     parts: manifest.parts,
