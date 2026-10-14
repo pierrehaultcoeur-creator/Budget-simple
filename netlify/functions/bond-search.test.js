@@ -370,8 +370,26 @@ test('public search handler returns a real catalogue record for a name query', a
   assert.equal(response.statusCode, 200);
   const payload = JSON.parse(response.body);
   assert.equal(payload.source, 'bond-master');
-  assert.ok(payload.results.some(item => item.isin === sample.isin),
-    `Expected public handler to return ISIN ${sample.isin} for name query`);
+  const result = payload.results.find(item => item.isin === sample.isin);
+  assert.ok(result, `Expected public handler to return ISIN ${sample.isin} for name query`);
+
+  const group = sample.instrumentGroup || sample.cfiGroup
+    || (sample.cfi ? String(sample.cfi).slice(0, 2) : null);
+  const code = String(group || '').slice(0, 2).toUpperCase();
+  const expectedCategory = code === 'DB'
+    ? 'conventional-bond'
+    : ['DE', 'DS'].includes(code)
+      ? 'structured-product'
+      : code === 'DY'
+        ? 'other-debt-instrument'
+        : ['DA', 'DC', 'DD', 'DG', 'DM', 'DN', 'DT', 'DW'].includes(code)
+          ? 'related-debt-instrument'
+          : 'unclassified-debt-instrument';
+
+  assert.equal(result.assetClass, 'debt-instrument');
+  assert.equal(result.instrumentGroup, group);
+  assert.equal(result.instrumentCategory, expectedCategory,
+    'Expected public handler to expose the CFI-derived instrument category');
 });
 
 test('public handler sends a FIGI query to OpenFIGI without scanning ESMA shards', async () => {
