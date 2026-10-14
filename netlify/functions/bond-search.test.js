@@ -173,6 +173,28 @@ test('canonical bond rejects non-ISO maturity strings without a precomputed stat
   }
 });
 
+test('invalid and sentinel maturity values override contradictory trusted statuses', () => {
+  const invalid = search._test.canonicalBond({
+    isin: 'FR0000047610',
+    name: 'Invalid maturity example',
+    maturity: '2030-02-31',
+    maturityStatus: 'VERIFIED'
+  });
+  assert.equal(invalid.maturity, null);
+  assert.equal(invalid.maturityStatus, 'INVALID_SOURCE_VALUE');
+  assert.equal(invalid.maturitySourceValue, '2030-02-31');
+
+  const sentinel = search._test.canonicalBond({
+    isin: 'FR0000047611',
+    name: 'Sentinel maturity example',
+    maturity: '9999-12-31',
+    maturityStatus: 'VERIFIED'
+  });
+  assert.equal(sentinel.maturity, null);
+  assert.equal(sentinel.maturityStatus, 'SENTINEL_UNSPECIFIED');
+  assert.equal(sentinel.maturitySourceValue, '9999-12-31');
+});
+
 test('canonical bond withholds suspicious coupon and preserves source value', () => {
   const bond = search._test.canonicalBond({
     isin: 'GR0118017657',
