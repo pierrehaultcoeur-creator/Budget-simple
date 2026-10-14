@@ -127,18 +127,26 @@ test('canonical bond defensively withholds coupon values flagged as suspicious',
 });
 
 test('canonical bond withholds invalid and unverified maturity values', () => {
-  for (const status of ['INVALID_SOURCE_VALUE', 'NOT_VERIFIED_EXTERNAL_SOURCE']) {
-    const bond = search._test.canonicalBond({
-      isin: 'FR0000047607',
-      name: 'Example bond',
-      maturityDate: '2030-02-31',
-      maturityDateRaw: '2030-02-31',
-      maturityDateStatus: status
-    });
-    assert.equal(bond.maturity, null, `Expected maturity to be withheld for ${status}`);
-    assert.equal(bond.maturityStatus, status);
-    assert.equal(bond.maturitySourceValue, '2030-02-31');
-  }
+  const invalid = search._test.canonicalBond({
+    isin: 'FR0000047607',
+    name: 'Example bond',
+    maturityDate: '2030-02-31',
+    maturityDateRaw: '2030-02-31',
+    maturityDateStatus: 'NOT_VERIFIED_EXTERNAL_SOURCE'
+  });
+  assert.equal(invalid.maturity, null);
+  assert.equal(invalid.maturityStatus, 'INVALID_SOURCE_VALUE');
+  assert.equal(invalid.maturitySourceValue, '2030-02-31');
+
+  const unverified = search._test.canonicalBond({
+    isin: 'FR0000047608',
+    name: 'Unverified example bond',
+    maturityDate: '2030-02-28',
+    maturityDateStatus: 'NOT_VERIFIED_EXTERNAL_SOURCE'
+  });
+  assert.equal(unverified.maturity, null);
+  assert.equal(unverified.maturityStatus, 'NOT_VERIFIED_EXTERNAL_SOURCE');
+  assert.equal(unverified.maturitySourceValue, null);
 });
 
 test('canonical bond rejects invalid ISO maturity dates without a precomputed status', () => {
