@@ -309,7 +309,11 @@ function scoreCatalogRecord(item, key) {
   const isin = normalize(item.isin);
   const figi = normalize(item.figi);
   if (name && name === key) return 1000;
+  // An exact short name is a strong instrument match: rank it above broad
+  // prefix/substring matches, but keep an exact full legal name at the top.
+  if (shortName && shortName === key) return 900;
   if (name && name.startsWith(key)) return 800;
+  if (shortName && shortName.startsWith(key)) return 750;
   if (name && name.includes(key)) return 600;
   // Allow users to find the same instrument when they type its name tokens
   // in a different order, while keeping contiguous name matches higher ranked.
@@ -318,8 +322,6 @@ function scoreCatalogRecord(item, key) {
   const issuerTokens = issuer.split(' ').filter(Boolean);
   if (queryTokens.length > 1 && queryTokens.every(token => nameTokens.includes(token))) return 550;
   if (queryTokens.length > 1 && queryTokens.every(token => token.length >= 3) && distinctTokenPrefixMatch(queryTokens, nameTokens)) return 525;
-  if (shortName && shortName === key) return 575;
-  if (shortName && shortName.startsWith(key)) return 475;
   if (shortName && shortName.includes(key)) return 375;
   if (issuer && issuer === key) return 500;
   if (issuer && issuer.startsWith(key)) return 450;
