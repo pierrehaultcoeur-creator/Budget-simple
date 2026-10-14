@@ -135,6 +135,36 @@ test('public search handler returns a real catalogue record for a name query', a
     `Expected public handler to return ISIN ${sample.isin} for name query`);
 });
 
+test('public handler sends a FIGI query to OpenFIGI without scanning ESMA shards', async () => {
+  const originalFetch = global.fetch;
+  let request;
+  global.fetch = async (url, options) => {
+    request = { url, body: JSON.parse(options.body) };
+    return {
+      ok: true,
+      json: async () => ({
+        data: [{
+          figi: 'BBG000B9XRY4',
+          name: 'Example corporate bond',
+          marketSector: 'Corp'
+        }]
+      })
+    };
+  };
+  try {
+    const response = await search.handler({ queryStringParameters: { q: 'BBG000B9XRY4' } });
+    const payload = JSON.parse(response.body);
+    assert.equal(response.statusCode, 200);
+    assert.equal(request.url, 'https://api.openfigi.com/v3/filter');
+    assert.equal(request.body.query, 'BBG000B9XRY4');
+    assert.equal(payload.source, 'openfigi');
+    assert.equal(payload.results[0].figi, 'BBG000B9XRY4');
+    assert.equal(payload.results[0].confidence, 'candidate-only');
+  } finally {
+    global.fetch = originalFetch;
+  }
+});
+
 test('OpenFIGI fallback never presents unverified coupon or dates as trusted terms', () => {
   const candidate = search._test.normalizeOpenFigi({
     figi: 'BBG000000001',
