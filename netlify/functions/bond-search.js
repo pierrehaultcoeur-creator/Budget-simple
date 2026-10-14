@@ -367,8 +367,16 @@ function shardedCatalogSearch(q) {
 }
 function publicBond(record) {
   if (!record || !record.figi || !record.name) return null;
+  const instrumentGroup = record.instrumentGroup || record.cfiGroup
+    || (record.cfi ? String(record.cfi).slice(0, 2) : null);
   return {
     type: 'bond',
+    assetClass: 'debt-instrument',
+    instrumentGroup,
+    instrumentCategory: cfiInstrumentCategory(instrumentGroup),
+    instrumentLabel: cfiGroupLabel(instrumentGroup),
+    instrumentType: record.instrumentType || null,
+    cfi: record.cfi || null,
     id: record.id || record.figi,
     figi: record.figi,
     isin: record.isin || null,
@@ -464,7 +472,7 @@ async function openFigiSearch(q) {
   return Array.isArray(payload.data) ? payload.data.map(normalizeOpenFigi).filter(Boolean).slice(0, MAX_RESULTS) : [];
 }
 
-exports._test = { canonicalBond, shardedCatalogSearch, exactIsinSearch, normalize, normalizeOpenFigi, scoreCatalogRecord, indexedNameParts, isFigiLikeQuery, shouldSearchShardedCatalog };
+exports._test = { canonicalBond, publicBond, shardedCatalogSearch, exactIsinSearch, normalize, normalizeOpenFigi, scoreCatalogRecord, indexedNameParts, isFigiLikeQuery, shouldSearchShardedCatalog };
 
 exports.handler = async (event) => {
   const q = String(event?.queryStringParameters?.q || '').trim();
