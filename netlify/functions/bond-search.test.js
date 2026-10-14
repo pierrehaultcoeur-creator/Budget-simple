@@ -671,6 +671,15 @@ test('name search falls back to all shards for queries shorter than a trigram', 
   assert.equal(candidates, null);
 });
 
+test('short name queries skip expensive sharded scans after master lookup', () => {
+  assert.equal(search._test.shouldSearchShardedNames('ab'), false);
+  assert.equal(search._test.shouldSearchShardedNames('  AB  '), false,
+    'Expected normalization and trimming to be applied before the minimum-length check');
+  assert.equal(search._test.shouldSearchShardedNames('bond'), true);
+  assert.equal(search._test.shouldSearchShardedNames('FRAB'), true,
+    'Expected potentially useful partial ISIN prefixes to remain eligible for sharded lookup');
+});
+
 test('name search falls back when every query token is shorter than a trigram', () => {
   const candidates = search._test.indexedNameParts('a bc de', manifest);
   assert.equal(candidates, null,
