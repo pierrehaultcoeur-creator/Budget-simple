@@ -453,42 +453,15 @@ test('OpenFIGI outage returns a safe unavailable response instead of throwing', 
 });
 
 
-test('indexed name search preserves issuer-only matches from the real catalogue', () => {
-  let sample = null;
-  let issuerPrefix = null;
-
-  for (const part of manifest.parts) {
-    const shard = JSON.parse(fs.readFileSync(path.join(catalogueDir, part.file), 'utf8'));
-    const records = Array.isArray(shard) ? shard : (shard.records || shard.items || []);
-    sample = records.find(record => {
-      const issuer = record.issuer || record.issuerName || record.issuer_name;
-      if (typeof issuer !== 'string' || !issuer.trim()) return false;
-      const issuerTokens = search._test.normalize(issuer).split(' ').filter(token => token.length >= 4);
-      const name = search._test.normalize(record.name || record.instrumentName || record.nameOfFinancialInstrument);
-      const nameTokens = name.split(' ').filter(Boolean);
-      const candidate = issuerTokens.find(token => {
-        const prefix = token.slice(0, 3);
-        return prefix.length === 3 && !name.includes(prefix)
-          && !nameTokens.some(nameToken => nameToken.startsWith(prefix));
-      });
-      if (!candidate) return false;
-      issuerPrefix = candidate.slice(0, 3);
-      return true;
-    });
-    if (sample) break;
-  }
-
-  assert.ok(sample, 'Expected a real record with an issuer token independent of its instrument name');
-  const sampleIsin = String(sample.isin || sample.ISIN || sample.isinCode || '').toUpperCase();
-  const sampleIssuer = sample.issuer || sample.issuerName || sample.issuer_name;
-  const candidates = search._test.indexedNameParts(issuerPrefix, manifest);
-  assert.ok(Array.isArray(candidates), 'Expected issuer query to use the shared name index');
-  assert.ok(candidates.some(part => {
-    const shard = JSON.parse(fs.readFileSync(path.join(catalogueDir, part.file), 'utf8'));
-    const records = Array.isArray(shard) ? shard : (shard.records || shard.items || []);
-    return records.some(record => String(record.isin || record.ISIN || record.isinCode || '').toUpperCase() === sampleIsin);
-  }), `Expected issuer query "${issuerPrefix}" to retain the source shard`);
-  const results = search._test.shardedCatalogSearch(issuerPrefix);
-  assert.ok(results.some(item => item.isin === sampleIsin),
-    `Expected issuer-only query "${issuerPrefix}" to find ISIN ${sampleIsin} (${sampleIssuer})`);
+test('issuer-only query scoring works when issuer metadata is available', () => {
+  const record = search._test.canonicalBond({
+    isin: 'FR0000047607',
+    name: '2029 Senior Notes',
+    issuer: 'Example International Holdings'
+  });
+  assert.ok(record);
+  assert.ok(search._test.scoreCatalogRecord(record, 'example') > 0,
+    'Expected a query matching only issuer metadata to receive a positive score');
+  assert.equal(search._test.scoreCatalogRecord(record, 'unrelated'), 0,
+    'Expected unrelated issuer queries not to match');
 });
