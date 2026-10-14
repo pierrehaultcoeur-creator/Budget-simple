@@ -317,6 +317,10 @@ function catalogSearch(q) {
     .filter(x => normalize([x.name, x.issuer, x.isin, x.figi].filter(Boolean).join(' ')).includes(key))
     .slice(0, MAX_RESULTS);
   if (small.length) return small;
+  // The ESMA shards are an ISIN/name discovery catalogue, not a FIGI index.
+  // Avoid scanning all ~630k records for BBG identifiers; the handler will
+  // continue to the OpenFIGI lookup when local results are empty.
+  if (isFigiLikeQuery(isinQuery)) return [];
   return shardedCatalogSearch(q);
 }
 
