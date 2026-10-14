@@ -25,6 +25,14 @@ test('full and partial FIGI identifiers bypass ISIN-prefix and name-index routin
   assert.equal(isFigiLikeQuery('BOND ISSUER'), false, 'Expected ordinary name queries not to be classified as FIGIs');
 });
 
+test('FIGI queries skip the ESMA shard scan and continue to OpenFIGI fallback', () => {
+  const shouldSearchShardedCatalog = search._test.shouldSearchShardedCatalog;
+  assert.equal(shouldSearchShardedCatalog('BBG000B9XRY4'), false);
+  assert.equal(shouldSearchShardedCatalog('BBG000'), false);
+  assert.equal(shouldSearchShardedCatalog('FR0000047607'), true);
+  assert.equal(shouldSearchShardedCatalog('Banque Exemple'), true);
+});
+
 test('exact ISIN lookup returns the indexed bond', () => {
   const isin = firstIndexedIsin();
   const results = search._test.shardedCatalogSearch(isin);
