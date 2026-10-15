@@ -1729,3 +1729,38 @@ test('investment page retries loading an ISIN index after a transient outage', a
   assert.match(page.elements.results.innerHTML, /Recovered indexed bond/);
   assert.equal(page.elements.search.disabled, false);
 });
+
+test('investment page handles HTTP and invalid-JSON server responses without locking search', async () => {
+  const scenarios = [
+    {
+      name: 'HTTP error',
+      response: async () => ({ ok: false, status: 503, json: async () => ({}) })
+    },
+    {
+      name: 'invalid JSON',
+      response: async () => ({ ok: true, json: async () => { throw new SyntaxError('Unexpected token'); } })
+    }
+  ];
+
+  for (const scenario of scenarios) {
+    const requests = [];
+    const page = loadInvestmentSearchPage(async url => {
+      requests.push(url);
+      if (!url.includes('/.netlify/functions/bond-search?')) {
+        throw new Error('Name search should use the server endpoint only: ' + url);
+      }
+      return scenario.response();
+    });
+
+    page.elements.q.value = 'Example Issuer';
+    await page.doSearch();
+
+    assert.equal(requests.length, 1, `${scenario.name}: expected one server request`);
+    assert.match(page.elements.status.textContent, /Recherche indisponible/,
+      `${scenario.name}: expected a safe unavailable status`);
+    assert.match(page.elements.results.innerHTML, /Impossible de joindre le service de recherche/,
+      `${scenario.name}: expected a clear fallback message`);
+    assert.equal(page.elements.search.disabled, false,
+      `${scenario.name}: search must be re-enabled`);
+  }
+});
