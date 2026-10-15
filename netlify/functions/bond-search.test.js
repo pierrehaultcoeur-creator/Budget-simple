@@ -1226,3 +1226,28 @@ test('exact ISIN lookup normalizes whitespace in the indexed shard record', () =
   assert.deepEqual(results.map(item => item.isin), [isin]);
   assert.equal(results[0].name, 'Whitespace exact ISIN example');
 });
+
+
+test('exact ISIN lookup falls back when the index points outside declared catalogue shards', () => {
+  const isin = 'FR0000047607';
+  const fakeManifest = { parts: [{ file: 'part-0001.json' }] };
+  let fallbackCalled = false;
+  const expected = search._test.canonicalBond({ isin, name: 'Recovered from safe fallback' });
+  const results = search._test.resolveExactIsinFromIndex(
+    isin,
+    fakeManifest,
+    { [isin]: '../manifest.json' },
+    () => { throw new Error('Untrusted index reference must never be read'); },
+    (query, receivedManifest, exact) => {
+      fallbackCalled = true;
+      assert.equal(query, isin);
+      assert.equal(receivedManifest, fakeManifest);
+      assert.equal(exact, true);
+      return [expected];
+    }
+  );
+
+  assert.equal(fallbackCalled, true);
+  assert.deepEqual(results.map(item => item.isin), [isin]);
+  assert.equal(results[0].name, 'Recovered from safe fallback');
+});
