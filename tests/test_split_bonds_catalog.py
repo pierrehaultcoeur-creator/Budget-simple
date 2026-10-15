@@ -49,6 +49,40 @@ class SplitterIndexTests(unittest.TestCase):
                 module.TARGET_BYTES = old_target
 
 
+    def test_preserves_generated_at_when_catalogue_and_indexes_are_unchanged(self):
+        records = [
+            {"isin": "FR0000120271", "name": "Banque Exemple 2030", "cfi": "DBFTFR"},
+            {"isin": "US0378331005", "name": "Apple Inc Bond", "cfi": "DBFTFR"},
+        ]
+        with tempfile.TemporaryDirectory() as tmp:
+            old_out = module.OUT
+            try:
+                module.OUT = pathlib.Path(tmp) / "catalogue"
+                module.write_shards(records, {
+                    "source": "ESMA FIRDS", "sourceFileType": "FULINS_D",
+                    "publicationDate": "2026-10-11", "generatedAt": "2026-10-12T10:00:00+00:00"
+                })
+                manifest_path = module.OUT / "manifest.json"
+                first = json.loads(manifest_path.read_text(encoding="utf-8"))
+                module.write_shards(records, {
+                    "source": "ESMA FIRDS", "sourceFileType": "FULINS_D",
+                    "publicationDate": "2026-10-11", "generatedAt": "2026-10-15T17:00:00+00:00"
+                })
+                second = json.loads(manifest_path.read_text(encoding="utf-8"))
+                self.assertEqual(second["generatedAt"], first["generatedAt"])
+                self.assertEqual(second, first)
+
+                changed_records = records + [{"isin": "DE0001102606", "name": "Bundesanleihe 2029"}]
+                module.write_shards(changed_records, {
+                    "source": "ESMA FIRDS", "sourceFileType": "FULINS_D",
+                    "publicationDate": "2026-10-15", "generatedAt": "2026-10-15T18:00:00+00:00"
+                })
+                third = json.loads(manifest_path.read_text(encoding="utf-8"))
+                self.assertEqual(third["generatedAt"], "2026-10-15T18:00:00+00:00")
+                self.assertNotEqual(third["recordCount"], second["recordCount"])
+            finally:
+                module.OUT = old_out
+
     def test_builds_searchable_name_trigram_index(self):
         records = [
             {"isin": "FR0000120271", "name": "Banque Exemple 2030", "issuer": "Banque Exemple"},

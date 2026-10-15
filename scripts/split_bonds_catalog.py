@@ -59,6 +59,17 @@ def compact_record(record):
 
 
 def write_shards(records, source_metadata=None):
+    # Preserve the previous manifest timestamp when the catalogue and all generated
+    # indexes are byte-for-byte equivalent. A timestamp-only diff should not create
+    # a new commit on every scheduled rebuild.
+    previous_manifest = None
+    previous_manifest_path = OUT / 'manifest.json'
+    if previous_manifest_path.exists():
+        try:
+            previous_manifest = json.loads(previous_manifest_path.read_text(encoding='utf-8'))
+        except (OSError, json.JSONDecodeError):
+            previous_manifest = None
+
     OUT.mkdir(parents=True, exist_ok=True)
     for pattern in ('part-*.json', 'isin-index-*.json', 'name-index-*.json', 'manifest.json'):
         for old in OUT.glob(pattern):
@@ -142,6 +153,14 @@ def write_shards(records, source_metadata=None):
         'nameIndexes': name_index_files,
         'notes': 'ISIN discovery catalogue only; an ISIN is not a verified quote or a fully enriched bond record.'
     }
+    if isinstance(previous_manifest, dict):
+        previous_comparable = dict(previous_manifest)
+        current_comparable = dict(manifest)
+        previous_generated_at = previous_comparable.pop('generatedAt', None)
+        current_comparable.pop('generatedAt', None)
+        if previous_comparable == current_comparable and previous_generated_at:
+            manifest['generatedAt'] = previous_generated_at
+
     (OUT / 'manifest.json').write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
     print(f'Sharded {total:,} records into {len(manifest_parts)} catalogue files.')
     print(f'Built {sum(len(x) for x in index_buckets.values()):,} ISIN index entries across {len(index_files)} index files.')
