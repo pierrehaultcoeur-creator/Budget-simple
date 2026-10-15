@@ -1475,3 +1475,36 @@ test('investment page renders exact and partial ISIN matches from the local inde
     assert.equal(page.elements.search.disabled, false);
   }
 });
+
+
+test('investment page falls back to server search when the local catalogue cannot load', async () => {
+  const requests = [];
+  const page = loadInvestmentSearchPage(async url => {
+    requests.push(url);
+    if (url.endsWith('manifest.json')) throw new Error('Simulated local catalogue outage');
+    if (url.includes('/.netlify/functions/bond-search?')) {
+      return {
+        ok: true,
+        json: async () => ({
+          source: 'Test server',
+          results: [{
+            isin: 'FR0000047607',
+            name: 'Server fallback bond',
+            source: 'Test server',
+            confidence: 'catalog-record'
+          }]
+        })
+      };
+    }
+    throw new Error('Unexpected URL: ' + url);
+  });
+
+  page.elements.q.value = 'FR0000047607';
+  await page.doSearch();
+
+  assert.ok(requests.some(url => url.includes('/.netlify/functions/bond-search?')),
+    'Expected server search to run when the local manifest cannot be loaded');
+  assert.match(page.elements.results.innerHTML, /Server fallback bond/);
+  assert.match(page.elements.status.textContent, /1 résultat\(s\) via Test server/);
+  assert.equal(page.elements.search.disabled, false);
+});
