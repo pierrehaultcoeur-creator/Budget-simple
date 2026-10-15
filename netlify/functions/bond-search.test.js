@@ -771,6 +771,14 @@ test('malformed trigram entries trigger a safe full-scan fallback', () => {
 test('name search falls back safely for malformed manifest index entries', () => {
   const indexedNameParts = search._test.indexedNameParts;
   assert.equal(indexedNameParts('banque exemple', {
+    parts: [{ file: 'name-index-b.json' }],
+    nameIndexes: manifest.nameIndexes
+  }), null, 'Expected name-index files not to masquerade as catalogue shards');
+  assert.equal(indexedNameParts('banque exemple', {
+    parts: [{ file: 'part-0001.json' }, { file: 'part-0001.json' }],
+    nameIndexes: manifest.nameIndexes
+  }), null, 'Expected duplicate shard filenames to trigger a full-scan fallback');
+  assert.equal(indexedNameParts('banque exemple', {
     parts: manifest.parts,
     nameIndexes: [null]
   }), null, 'Expected null name-index entries to trigger a full-scan fallback');
