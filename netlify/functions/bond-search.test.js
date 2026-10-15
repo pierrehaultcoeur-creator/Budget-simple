@@ -795,6 +795,20 @@ test('name search falls back safely for malformed manifest index entries', () =>
   assert.equal(indexedNameParts('banque exemple', {
     parts: manifest.parts,
     nameIndexes: [
+      { prefix: 'b', file: 'manifest.json' },
+      { prefix: 'e', file: manifest.nameIndexes.find(item => item.prefix === 'e')?.file || 'name-index-e.json' }
+    ]
+  }), null, 'Expected the manifest itself not to be accepted as a name-index file');
+  assert.equal(indexedNameParts('banque exemple', {
+    parts: manifest.parts,
+    nameIndexes: [
+      { prefix: 'b', file: manifest.isinIndexes[0].file },
+      { prefix: 'e', file: manifest.nameIndexes.find(item => item.prefix === 'e')?.file || 'name-index-e.json' }
+    ]
+  }), null, 'Expected ISIN index files not to be accepted as name-index files');
+  assert.equal(indexedNameParts('banque exemple', {
+    parts: manifest.parts,
+    nameIndexes: [
       { prefix: 'b', file: 'shared-name-index.json' },
       { prefix: 'e', file: 'shared-name-index.json' }
     ]
