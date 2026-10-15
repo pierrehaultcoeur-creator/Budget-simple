@@ -1001,6 +1001,20 @@ test('four-character word queries fall through when no ISIN prefix matches', () 
 });
 
 
+test('ISIN index contents must contain only valid ISINs mapped to declared shards for their prefix', () => {
+  const validate = search._test.isValidIsinIndex;
+  const fakeManifest = { parts: [{ file: 'part-0001.json' }, { file: 'part-0002.json' }] };
+  assert.equal(validate({ FR0000047607: 'part-0001.json' }, 'FR', fakeManifest), true);
+  assert.equal(validate({ FR0000047607: 'missing-shard.json' }, 'FR', fakeManifest), false);
+  assert.equal(validate({ DE0000047607: 'part-0001.json' }, 'FR', fakeManifest), false,
+    'A country index must not contain identifiers for another prefix');
+  assert.equal(validate({ 'not-an-isin': 'part-0001.json' }, 'FR', fakeManifest), false);
+  assert.equal(validate({ FR0000047607: 'part-0001.json', broken: 'part-0002.json' }, 'FR', fakeManifest), false,
+    'One malformed entry must invalidate the whole index and trigger shard scanning');
+  assert.equal(validate([], 'FR', fakeManifest), false);
+  assert.equal(validate({ FR0000047607: 'part-0001.json' }, 'FR', { parts: [] }), false);
+});
+
 test('ISIN index manifest rejects duplicate files and shard/index overlap', () => {
   const readIsinIndex = search._test.readIsinIndex;
   const validIndexFile = manifest.isinIndexes[0].file;
