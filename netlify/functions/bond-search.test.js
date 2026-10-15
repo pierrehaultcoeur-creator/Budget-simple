@@ -802,6 +802,13 @@ test('name search falls back safely for malformed manifest index entries', () =>
   assert.equal(indexedNameParts('banque exemple', {
     parts: manifest.parts,
     nameIndexes: [
+      { prefix: 'b', file: 'some-other-index.json' },
+      { prefix: 'e', file: manifest.nameIndexes.find(item => item.prefix === 'e')?.file || 'name-index-e.json' }
+    ]
+  }), null, 'Expected name-index filenames to match their declared prefix');
+  assert.equal(indexedNameParts('banque exemple', {
+    parts: manifest.parts,
+    nameIndexes: [
       { prefix: 'b', file: manifest.isinIndexes[0].file },
       { prefix: 'e', file: manifest.nameIndexes.find(item => item.prefix === 'e')?.file || 'name-index-e.json' }
     ]
