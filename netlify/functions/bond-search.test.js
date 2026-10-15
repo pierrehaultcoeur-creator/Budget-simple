@@ -1110,6 +1110,27 @@ test('ISIN prefix lookup scans shards when indexed records are missing from thei
 });
 
 
+test('ISIN prefix lookup ignores malformed keys in the index and recovers from shards', () => {
+  const query = 'FR';
+  const fakeManifest = { parts: [{ file: 'part-0001.json' }] };
+  let fallbackCalled = false;
+  const expected = search._test.canonicalBond({ isin: 'FR0000047607', name: 'Recovered valid ISIN' });
+  const results = search._test.resolveIsinPrefixFromIndex(
+    query,
+    fakeManifest,
+    { 'FRAB12345678': 'part-0001.json' },
+    () => { throw new Error('Malformed index key must not be trusted'); },
+    (receivedQuery, receivedManifest) => {
+      fallbackCalled = true;
+      assert.equal(receivedQuery, query);
+      assert.equal(receivedManifest, fakeManifest);
+      return [expected];
+    }
+  );
+  assert.equal(fallbackCalled, true);
+  assert.deepEqual(results.map(item => item.isin), ['FR0000047607']);
+});
+
 test('ISIN shard scan excludes malformed identifiers from catalogue records', () => {
   const fakeManifest = { parts: [{ file: 'part-0001.json' }] };
   const records = [
