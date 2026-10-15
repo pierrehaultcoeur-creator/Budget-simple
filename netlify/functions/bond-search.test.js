@@ -1205,3 +1205,24 @@ test('ISIN prefix lookup normalizes whitespace in shard records before comparing
   assert.deepEqual(results.map(item => item.isin), ['FR1234567890']);
   assert.equal(results[0].name, 'Whitespace ISIN example');
 });
+
+
+test('exact ISIN lookup normalizes whitespace in the indexed shard record', () => {
+  const isin = 'FR0000047607';
+  const fakeManifest = { parts: [{ file: 'part-0001.json' }] };
+  let fallbackCalled = false;
+  const results = search._test.resolveExactIsinFromIndex(
+    isin,
+    fakeManifest,
+    { [isin]: 'part-0001.json' },
+    () => [{ isin: ' FR00\t00047607\n', name: 'Whitespace exact ISIN example' }],
+    () => {
+      fallbackCalled = true;
+      throw new Error('A valid indexed record should not require a full shard scan');
+    }
+  );
+
+  assert.equal(fallbackCalled, false);
+  assert.deepEqual(results.map(item => item.isin), [isin]);
+  assert.equal(results[0].name, 'Whitespace exact ISIN example');
+});
