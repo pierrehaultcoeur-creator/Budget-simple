@@ -46,13 +46,24 @@ function isSafeCatalogFilename(filename) {
     && path.basename(filename) === filename
     && filename.endsWith('.json');
 }
+function isValidManifestParts(parts) {
+  if (!Array.isArray(parts) || parts.length === 0) return false;
+  const filenames = [];
+  for (const part of parts) {
+    if (!part || typeof part !== 'object'
+      || typeof part.file !== 'string'
+      || !/^part-\\d{4,}\\.json$/.test(part.file)
+      || !isSafeCatalogFilename(part.file)) return false;
+    filenames.push(part.file);
+  }
+  return new Set(filenames).size === filenames.length;
+}
 function readManifest() {
   try {
     const manifest = JSON.parse(fs.readFileSync(MANIFEST_PATH, 'utf8'));
-    // A malformed part list cannot be scanned safely. Reject it before any
-    // shard path is read; malformed optional indexes are handled by fallback.
-    if (!manifest || !Array.isArray(manifest.parts)
-      || manifest.parts.some(part => !part || !isSafeCatalogFilename(part.file))) return null;
+    // Only unique catalogue shard filenames are accepted. A safe-looking
+    // index or manifest filename is not a catalogue shard and must never be scanned.
+    if (!manifest || !isValidManifestParts(manifest.parts)) return null;
     return manifest;
   } catch { return null; }
 }
@@ -610,7 +621,7 @@ async function openFigiSearch(q) {
   return Array.isArray(payload.data) ? payload.data.map(normalizeOpenFigi).filter(Boolean).slice(0, MAX_RESULTS) : [];
 }
 
-exports._test = { canonicalBond, publicBond, catalogSearch, rankCatalogRecords, rankCatalogRecordsByIsin, shardedCatalogSearch, exactIsinSearch, resolveExactIsinFromIndex, resolveIsinPrefixFromIndex, scanShardsByIsin, normalize, normalizeOpenFigi, scoreCatalogRecord, indexedNameParts, nameIndexFiles, isSafeCatalogFilename, isAllowedShardReference, allowedShardFiles, readIsinIndex, isFigiLikeQuery, shouldSearchShardedCatalog, shouldSearchShardedNames };
+exports._test = { canonicalBond, publicBond, catalogSearch, rankCatalogRecords, rankCatalogRecordsByIsin, shardedCatalogSearch, exactIsinSearch, resolveExactIsinFromIndex, resolveIsinPrefixFromIndex, scanShardsByIsin, normalize, normalizeOpenFigi, scoreCatalogRecord, indexedNameParts, nameIndexFiles, isSafeCatalogFilename, isValidManifestParts, isAllowedShardReference, allowedShardFiles, readIsinIndex, isFigiLikeQuery, shouldSearchShardedCatalog, shouldSearchShardedNames };
 
 exports.handler = async (event) => {
   const q = String(event?.queryStringParameters?.q || '').trim();
