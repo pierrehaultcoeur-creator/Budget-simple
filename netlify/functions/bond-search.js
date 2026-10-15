@@ -77,7 +77,10 @@ function isAllowedShardReference(filename, manifest) {
   return isSafeCatalogFilename(filename) && allowedShardFiles(manifest).has(filename);
 }
 function readIsinIndex(prefix, manifest) {
-  const entry = (manifest.isinIndexes || []).find(item => item.prefix === prefix);
+  // Optional index metadata may be malformed even when the manifest's shard
+  // list is valid. Treat it as unavailable so callers can use shard scanning.
+  const entries = Array.isArray(manifest?.isinIndexes) ? manifest.isinIndexes : [];
+  const entry = entries.find(item => item && item.prefix === prefix);
   if (!entry || !isSafeCatalogFilename(entry.file)) return null;
   if (ISIN_INDEX_CACHE.has(entry.file)) return ISIN_INDEX_CACHE.get(entry.file);
   try {
@@ -578,7 +581,7 @@ async function openFigiSearch(q) {
   return Array.isArray(payload.data) ? payload.data.map(normalizeOpenFigi).filter(Boolean).slice(0, MAX_RESULTS) : [];
 }
 
-exports._test = { canonicalBond, publicBond, catalogSearch, rankCatalogRecords, rankCatalogRecordsByIsin, shardedCatalogSearch, exactIsinSearch, resolveExactIsinFromIndex, scanShardsByIsin, normalize, normalizeOpenFigi, scoreCatalogRecord, indexedNameParts, nameIndexFiles, isSafeCatalogFilename, isAllowedShardReference, allowedShardFiles, isFigiLikeQuery, shouldSearchShardedCatalog, shouldSearchShardedNames };
+exports._test = { canonicalBond, publicBond, catalogSearch, rankCatalogRecords, rankCatalogRecordsByIsin, shardedCatalogSearch, exactIsinSearch, resolveExactIsinFromIndex, scanShardsByIsin, normalize, normalizeOpenFigi, scoreCatalogRecord, indexedNameParts, nameIndexFiles, isSafeCatalogFilename, isAllowedShardReference, allowedShardFiles, readIsinIndex, isFigiLikeQuery, shouldSearchShardedCatalog, shouldSearchShardedNames };
 
 exports.handler = async (event) => {
   const q = String(event?.queryStringParameters?.q || '').trim();

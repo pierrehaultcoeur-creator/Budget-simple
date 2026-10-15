@@ -1057,3 +1057,11 @@ test('exact ISIN lookup scans shards when the index has no entry for the identif
   assert.equal(results[0].isin, isin);
   assert.equal(results[0].name, 'Recovered from incomplete index');
 });
+
+test('malformed ISIN index metadata is treated as unavailable and does not throw', () => {
+  const readIndex = search._test.readIsinIndex;
+  assert.equal(readIndex('FR', { isinIndexes: null }), null);
+  assert.equal(readIndex('FR', { isinIndexes: 'not-an-array' }), null);
+  assert.equal(readIndex('FR', { isinIndexes: { prefix: 'FR', file: 'isin-index-FR.json' } }), null);
+  assert.equal(readIndex('FR', { isinIndexes: [null, 42, { prefix: 'DE', file: 'isin-index-DE.json' }] }), null);
+});
