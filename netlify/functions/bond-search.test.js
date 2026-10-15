@@ -1111,7 +1111,7 @@ test('ISIN prefix lookup scans shards when indexed records are missing from thei
 
 
 test('ISIN prefix lookup ignores malformed keys in the index and recovers from shards', () => {
-  const query = 'FR';
+  const query = 'FR00';
   const fakeManifest = { parts: [{ file: 'part-0001.json' }] };
   let fallbackCalled = false;
   const expected = search._test.canonicalBond({ isin: 'FR0000047607', name: 'Recovered valid ISIN' });
@@ -1132,7 +1132,7 @@ test('ISIN prefix lookup ignores malformed keys in the index and recovers from s
 });
 
 test('ISIN prefix lookup ignores malformed keys when valid indexed entries exist', () => {
-  const query = 'FR';
+  const query = 'FR00';
   const fakeManifest = { parts: [{ file: 'part-0001.json' }] };
   const record = { isin: 'FR0000047607', name: 'Valid indexed ISIN' };
   let fallbackCalled = false;
