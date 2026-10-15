@@ -1001,6 +1001,22 @@ test('four-character word queries fall through when no ISIN prefix matches', () 
 });
 
 
+test('cached ISIN indexes are revalidated against the current manifest', () => {
+  const readIndex = search._test.readIsinIndex;
+  const realIndex = readIndex('FR', manifest);
+  assert.ok(realIndex && typeof realIndex === 'object');
+  const mappedFile = Object.values(realIndex)[0];
+  assert.ok(mappedFile);
+  const differentPart = manifest.parts.find(part => part.file !== mappedFile);
+  assert.ok(differentPart);
+  const changedManifest = {
+    parts: [differentPart],
+    isinIndexes: manifest.isinIndexes
+  };
+  assert.equal(readIndex('FR', changedManifest), null,
+    'A cached index must not bypass validation against the current shard list');
+});
+
 test('ISIN index contents must contain only valid ISINs mapped to declared shards for their prefix', () => {
   const validate = search._test.isValidIsinIndex;
   const fakeManifest = { parts: [{ file: 'part-0001.json' }, { file: 'part-0002.json' }] };
