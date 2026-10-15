@@ -70,6 +70,12 @@ function readShard(filename) {
     return [];
   }
 }
+function allowedShardFiles(manifest) {
+  return new Set(manifest.parts.map(part => part.file));
+}
+function isAllowedShardReference(filename, manifest) {
+  return isSafeCatalogFilename(filename) && allowedShardFiles(manifest).has(filename);
+}
 function readIsinIndex(prefix, manifest) {
   const entry = (manifest.isinIndexes || []).find(item => item.prefix === prefix);
   if (!entry || !isSafeCatalogFilename(entry.file)) return null;
@@ -205,8 +211,11 @@ function exactIsinSearch(isin) {
   if (!manifest) return null;
   const index = readIsinIndex(isin.slice(0, 2), manifest);
   if (!index) return null;
+  if (!Object.prototype.hasOwnProperty.call(index, isin)) return [];
   const shardName = index[isin];
-  if (!shardName) return [];
+  // A present but invalid reference means the index cannot be trusted. Let
+  // callers fall back to scanning the declared catalogue shards.
+  if (!isAllowedShardReference(shardName, manifest)) return null;
   const record = readShard(shardName).find(raw => {
     const value = String(raw?.isin || raw?.ISIN || raw?.isinCode || '').replace(/\s+/g, '').toUpperCase();
     return value === isin;
@@ -218,11 +227,16 @@ function indexedIsinPrefixSearch(query, manifest) {
   if (!/^[A-Z]{2}[A-Z0-9]{2,10}$/.test(query)) return null;
   const index = readIsinIndex(query.slice(0, 2), manifest);
   if (!index) return null;
-  const matches = Object.entries(index)
+  const matchingEntries = Object.entries(index)
     .filter(([isin]) => isin.startsWith(query))
-    .sort(([a], [b]) => a.localeCompare(b))
-    .slice(0, MAX_RESULTS);
-  if (!matches.length) return [];
+    .sort(([a], [b]) => a.localeCompare(b));
+  if (!matchingEntries.length) return [];
+  const allowedFiles = allowedShardFiles(manifest);
+  // Validate every matching reference before applying the result limit, so a
+  // corrupt entry cannot silently hide catalogue records behind the index.
+  if (matchingEntries.some(([, filename]) =>
+    !isSafeCatalogFilename(filename) || !allowedFiles.has(filename))) return null;
+  const matches = matchingEntries.slice(0, MAX_RESULTS);
   const byShard = new Map();
   for (const [isin, filename] of matches) {
     if (!byShard.has(filename)) byShard.set(filename, new Set());
@@ -539,7 +553,7 @@ async function openFigiSearch(q) {
   return Array.isArray(payload.data) ? payload.data.map(normalizeOpenFigi).filter(Boolean).slice(0, MAX_RESULTS) : [];
 }
 
-exports._test = { canonicalBond, publicBond, catalogSearch, rankCatalogRecords, rankCatalogRecordsByIsin, shardedCatalogSearch, exactIsinSearch, normalize, normalizeOpenFigi, scoreCatalogRecord, indexedNameParts, nameIndexFiles, isSafeCatalogFilename, isFigiLikeQuery, shouldSearchShardedCatalog, shouldSearchShardedNames };
+exports._test = { canonicalBond, publicBond, catalogSearch, rankCatalogRecords, rankCatalogRecordsByIsin, shardedCatalogSearch, exactIsinSearch, normalize, normalizeOpenFigi, scoreCatalogRecord, indexedNameParts, nameIndexFiles, isSafeCatalogFilename, isAllowedShardReference, allowedShardFiles, isFigiLikeQuery, shouldSearchShardedCatalog, shouldSearchShardedNames };
 
 exports.handler = async (event) => {
   const q = String(event?.queryStringParameters?.q || '').trim();
