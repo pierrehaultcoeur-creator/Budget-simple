@@ -87,6 +87,19 @@ function allowedShardFiles(manifest) {
 function isAllowedShardReference(filename, manifest) {
   return isSafeCatalogFilename(filename) && allowedShardFiles(manifest).has(filename);
 }
+function isValidIsinIndex(index, prefix, manifest) {
+  if (!index || typeof index !== 'object' || Array.isArray(index)
+    || !Array.isArray(manifest?.parts) || !/^[A-Z]{2}$/.test(prefix)) return false;
+  const allowedFiles = new Set(manifest.parts
+    .map(part => part?.file)
+    .filter(file => typeof file === 'string' && isSafeCatalogFilename(file)));
+  if (!allowedFiles.size) return false;
+  // Validate the whole index, not just the requested ISIN. A partially corrupt
+  // index must never be trusted for a fast path that can hide other records.
+  return Object.entries(index).every(([isin, filename]) =>
+    ISIN_RE.test(isin) && isin.startsWith(prefix) && allowedFiles.has(filename));
+}
+
 function readIsinIndex(prefix, manifest) {
   // Optional index metadata may be malformed even when the manifest's shard
   // list is valid. Treat it as unavailable so callers can use shard scanning.
@@ -105,7 +118,7 @@ function readIsinIndex(prefix, manifest) {
   if (ISIN_INDEX_CACHE.has(entry.file)) return ISIN_INDEX_CACHE.get(entry.file);
   try {
     const index = JSON.parse(fs.readFileSync(path.join(SHARDED_DIR, entry.file), 'utf8'));
-    if (!index || typeof index !== 'object' || Array.isArray(index)) return null;
+    if (!isValidIsinIndex(index, prefix, manifest)) return null;
     ISIN_INDEX_CACHE.set(entry.file, index);
     while (ISIN_INDEX_CACHE.size > MAX_ISIN_INDEX_CACHE) {
       ISIN_INDEX_CACHE.delete(ISIN_INDEX_CACHE.keys().next().value);
@@ -630,7 +643,7 @@ async function openFigiSearch(q) {
   return Array.isArray(payload.data) ? payload.data.map(normalizeOpenFigi).filter(Boolean).slice(0, MAX_RESULTS) : [];
 }
 
-exports._test = { canonicalBond, publicBond, catalogSearch, rankCatalogRecords, rankCatalogRecordsByIsin, shardedCatalogSearch, exactIsinSearch, resolveExactIsinFromIndex, resolveIsinPrefixFromIndex, scanShardsByIsin, normalize, normalizeOpenFigi, scoreCatalogRecord, indexedNameParts, nameIndexFiles, isSafeCatalogFilename, isValidManifestParts, isAllowedShardReference, allowedShardFiles, readIsinIndex, isFigiLikeQuery, shouldSearchShardedCatalog, shouldSearchShardedNames };
+exports._test = { canonicalBond, publicBond, catalogSearch, rankCatalogRecords, rankCatalogRecordsByIsin, shardedCatalogSearch, exactIsinSearch, resolveExactIsinFromIndex, resolveIsinPrefixFromIndex, scanShardsByIsin, normalize, normalizeOpenFigi, scoreCatalogRecord, indexedNameParts, nameIndexFiles, isSafeCatalogFilename, isValidManifestParts, isAllowedShardReference, allowedShardFiles, readIsinIndex, isValidIsinIndex, isFigiLikeQuery, shouldSearchShardedCatalog, shouldSearchShardedNames };
 
 exports.handler = async (event) => {
   const q = String(event?.queryStringParameters?.q || '').trim();
