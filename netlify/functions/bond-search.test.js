@@ -1562,3 +1562,48 @@ test('investment page routes ordinary bond-name queries to server search', async
   assert.match(page.elements.status.textContent, /1 résultat\(s\) via bond-master/);
   assert.equal(page.elements.search.disabled, false);
 });
+
+
+test('investment page retries loading the local manifest after a transient outage', async () => {
+  let manifestAttempts = 0;
+  const page = loadInvestmentSearchPage(async url => {
+    if (url.endsWith('manifest.json')) {
+      manifestAttempts += 1;
+      if (manifestAttempts === 1) throw new Error('Temporary manifest outage');
+      return {
+        ok: true,
+        json: async () => ({
+          parts: [{ file: 'part-0001.json' }],
+          isinIndexes: [{ prefix: 'FR', file: 'isin-index-FR.json' }]
+        })
+      };
+    }
+    if (url.endsWith('isin-index-FR.json')) {
+      return { ok: true, json: async () => ({ 'FR0000047607': 'part-0001.json' }) };
+    }
+    if (url.endsWith('part-0001.json')) {
+      return {
+        ok: true,
+        json: async () => [{ isin: 'FR0000047607', name: 'Recovered local bond' }]
+      };
+    }
+    if (url.includes('/.netlify/functions/bond-search?')) {
+      return {
+        ok: true,
+        json: async () => ({ source: 'bond-master', results: [] })
+      };
+    }
+    throw new Error('Unexpected URL: ' + url);
+  });
+
+  page.elements.q.value = 'FR0000047607';
+  await page.doSearch();
+  assert.match(page.elements.status.textContent, /1 résultat\(s\) via bond-master/);
+  assert.equal(page.elements.search.disabled, false);
+
+  await page.doSearch();
+  assert.equal(manifestAttempts, 2, 'A failed manifest request must not stay cached forever');
+  assert.match(page.elements.status.textContent, /résultat\(s\) dans le catalogue ESMA/);
+  assert.match(page.elements.results.innerHTML, /Recovered local bond/);
+  assert.equal(page.elements.search.disabled, false);
+});
