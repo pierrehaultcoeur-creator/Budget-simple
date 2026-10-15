@@ -1831,3 +1831,37 @@ test('investment page handles HTTP and invalid-JSON server responses without loc
       `${scenario.name}: search must be re-enabled`);
   }
 });
+
+test('name index retains matching records across representative catalogue shards', () => {
+  // Exercise the generated index against records beyond the first shard, so
+  // a missing trigram-to-shard entry cannot pass only because early shards work.
+  const sampleIndexes = [...new Set([
+    0,
+    Math.floor((manifest.parts.length - 1) / 2),
+    manifest.parts.length - 1
+  ])];
+  let checked = 0;
+
+  for (const partIndex of sampleIndexes) {
+    const part = manifest.parts[partIndex];
+    const shard = JSON.parse(fs.readFileSync(path.join(catalogueDir, part.file), 'utf8'));
+    const records = Array.isArray(shard) ? shard : (shard.records || shard.items || []);
+    const sample = records.find(record => {
+      if (typeof record.name !== 'string' || !record.isin) return false;
+      const tokens = search._test.normalize(record.name).split(' ').filter(token => token.length >= 4);
+      return new Set(tokens).size >= 2;
+    });
+    assert.ok(sample, `Expected a searchable name in shard ${part.file}`);
+
+    const tokens = [...new Set(search._test.normalize(sample.name)
+      .split(' ').filter(token => token.length >= 4))];
+    const query = `${tokens[0].slice(0, 3)} ${tokens[1].slice(0, 3)}`;
+    const candidates = search._test.indexedNameParts(query, manifest);
+    assert.ok(Array.isArray(candidates), `Expected indexed candidates for "${query}"`);
+    assert.ok(candidates.some(candidate => candidate.file === part.file),
+      `Expected query "${query}" to retain source shard ${part.file} for ISIN ${sample.isin}`);
+    checked += 1;
+  }
+
+  assert.equal(checked, sampleIndexes.length);
+});
