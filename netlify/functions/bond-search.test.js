@@ -738,6 +738,18 @@ test('mixed short and long name tokens keep the source shard while narrowing can
     `Expected mixed-token query "${query}" to find ISIN ${sample.isin} (${sample.name})`);
 });
 
+test('malformed trigram entries trigger a safe full-scan fallback', () => {
+  const filesFor = search._test.nameIndexFiles;
+  assert.deepEqual(filesFor({}, 'ban'), [],
+    'Expected a genuinely missing trigram to be treated as a valid no-match');
+  assert.deepEqual(filesFor({ ban: ['part-0001.json'] }, 'ban'), ['part-0001.json'],
+    'Expected a valid trigram entry to return its shard list');
+  assert.equal(filesFor({ ban: 'part-0001.json' }, 'ban'), null,
+    'Expected a malformed trigram value to trigger fallback rather than hide valid matches');
+  assert.equal(filesFor({ ban: null }, 'ban'), null,
+    'Expected null index entries to be treated as malformed');
+});
+
 test('name search falls back to full shard scan when the name index is unavailable', () => {
   assert.equal(search._test.indexedNameParts('banque exemple', {
     parts: manifest.parts,
