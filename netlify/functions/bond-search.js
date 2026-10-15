@@ -244,13 +244,17 @@ function readNameIndex(file) {
     return value;
   } catch { return null; }
 }
-function nameIndexFiles(index, gram) {
+function nameIndexFiles(index, gram, allowedFiles) {
   if (!Object.prototype.hasOwnProperty.call(index, gram)) return [];
-  return Array.isArray(index[gram]) ? index[gram] : null;
+  const files = index[gram];
+  if (!Array.isArray(files)) return null;
+  if (files.some(file => typeof file !== 'string' || (allowedFiles && !allowedFiles.has(file)))) return null;
+  return files;
 }
 
 function indexedNameParts(key, manifest) {
-  if (key.length < 3 || !Array.isArray(manifest.nameIndexes)) return null;
+  if (key.length < 3 || !Array.isArray(manifest.parts) || !Array.isArray(manifest.nameIndexes)) return null;
+  const allowedFiles = new Set(manifest.parts.map(part => part.file).filter(file => typeof file === 'string'));
 
   // Match each searchable token independently so reordered terms remain searchable.
   // Intersecting the shard sets for each token's trigrams reduces work without
@@ -269,7 +273,7 @@ function indexedNameParts(key, manifest) {
       if (!entry) return null;
       const index = readNameIndex(entry.file);
       if (!index || typeof index !== 'object' || Array.isArray(index)) return null;
-      const files = nameIndexFiles(index, gram);
+      const files = nameIndexFiles(index, gram, allowedFiles);
       // A missing trigram is a valid no-match; a malformed entry means the
       // index cannot be trusted, so fall back to the complete shard scan.
       if (files === null) return null;
