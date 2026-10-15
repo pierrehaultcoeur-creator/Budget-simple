@@ -1350,3 +1350,62 @@ test('catalogue manifest accepts only unique declared shard filenames', () => {
   assert.equal(validate([{ file: 'part-1.json' }]), false,
     'Shard filenames must follow the generated catalogue naming convention');
 });
+
+
+function loadInvestmentSearchPage(fetchImpl) {
+  const html = fs.readFileSync(path.join(__dirname, '..', '..', 'investissement.html'), 'utf8');
+  const scripts = [...html.matchAll(/<script\\b[^>]*>([\\s\\S]*?)<\\/script>/gi)].map(match => match[1]).filter(script => script.trim());
+  const elements = Object.fromEntries(['status', 'results', 'q', 'search'].map(id => [id, {
+    value: '', disabled: false, innerHTML: '', textContent: '',
+    addEventListener() {}
+  }]));
+  const context = {
+    document: { getElementById: id => elements[id] },
+    fetch: fetchImpl,
+    console: { warn() {}, error() {} },
+    Map, Set, Promise
+  };
+  vm.runInNewContext(scripts[scripts.length - 1] + '\\nglobalThis.__investmentSearchTest = { getIndex, searchLocal };', context);
+  return context.__investmentSearchTest;
+}
+
+test('investment page rejects ISIN index references outside declared catalogue shards', async () => {
+  const page = loadInvestmentSearchPage(async () => ({
+    ok: true,
+    json: async () => ({ 'FR0000047607': '../manifest.json' })
+  }));
+  const manifest = {
+    parts: [{ file: 'part-0001.json' }],
+    isinIndexes: [{ prefix: 'FR', file: 'isin-index-FR.json' }]
+  };
+  assert.equal(await page.getIndex('FR', manifest), null);
+});
+
+test('investment page revalidates cached ISIN indexes against the current manifest', async () => {
+  const page = loadInvestmentSearchPage(async () => ({
+    ok: true,
+    json: async () => ({ 'FR0000047607': 'part-0001.json' })
+  }));
+  const firstManifest = {
+    parts: [{ file: 'part-0001.json' }],
+    isinIndexes: [{ prefix: 'FR', file: 'isin-index-FR.json' }]
+  };
+  const changedManifest = {
+    parts: [{ file: 'part-0002.json' }],
+    isinIndexes: [{ prefix: 'FR', file: 'isin-index-FR.json' }]
+  };
+  assert.ok(await page.getIndex('FR', firstManifest));
+  assert.equal(await page.getIndex('FR', changedManifest), null);
+});
+
+test('investment page falls back to server search when an ISIN prefix has no indexed matches', async () => {
+  const manifest = {
+    parts: [{ file: 'part-0001.json' }],
+    isinIndexes: [{ prefix: 'FR', file: 'isin-index-FR.json' }]
+  };
+  const page = loadInvestmentSearchPage(async url => ({
+    ok: true,
+    json: async () => url.endsWith('manifest.json') ? manifest : { 'FR0000047607': 'part-0001.json' }
+  }));
+  assert.equal(await page.searchLocal('FR99'), null);
+});
