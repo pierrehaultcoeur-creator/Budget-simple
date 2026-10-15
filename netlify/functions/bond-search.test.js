@@ -1183,3 +1183,19 @@ test('ISIN shard scan excludes malformed identifiers from catalogue records', ()
   const results = search._test.scanShardsByIsin('FR', fakeManifest, false, () => records);
   assert.deepEqual(results.map(item => item.isin), ['FR1234567890']);
 });
+
+
+test('ISIN prefix lookup normalizes whitespace in shard records before comparing indexed identifiers', () => {
+  const query = 'FR12';
+  const fakeManifest = { parts: [{ file: 'part-0001.json' }] };
+  const results = search._test.resolveIsinPrefixFromIndex(
+    query,
+    fakeManifest,
+    { 'FR1234567890': 'part-0001.json' },
+    () => [{ isin: 'FR12 34567890', name: 'Whitespace ISIN example' }],
+    () => { throw new Error('A normalized indexed hit should not need a fallback scan'); }
+  );
+
+  assert.deepEqual(results.map(item => item.isin), ['FR1234567890']);
+  assert.equal(results[0].name, 'Whitespace ISIN example');
+});
