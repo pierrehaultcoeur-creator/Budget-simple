@@ -772,7 +772,7 @@ test('name index content validation rejects malformed keys and shard lists', () 
   const isValidNameIndex = search._test.isValidNameIndex;
   const allowed = new Set(['part-0001.json', 'part-0002.json']);
   assert.equal(isValidNameIndex({ ban: ['part-0001.json'] }, 'b', allowed), true);
-  assert.equal(isValidNameIndex({ ban: ['part-0001.json'], bad: ['part-0002.json'] }, 'b', allowed), false,
+  assert.equal(isValidNameIndex({ ban: ['part-0001.json'], can: ['part-0002.json'] }, 'b', allowed), false,
     'Expected every trigram to match the index prefix');
   assert.equal(isValidNameIndex({ 'ba-': ['part-0001.json'] }, 'b', allowed), false,
     'Expected non-alphanumeric trigrams to invalidate the index');
