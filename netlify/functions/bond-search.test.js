@@ -1361,6 +1361,7 @@ function loadInvestmentSearchPage(fetchImpl) {
   }]));
   const context = {
     document: { getElementById: id => elements[id] },
+    elements,
     fetch: fetchImpl,
     console: { warn() {}, error() {} },
     Map, Set, Promise
