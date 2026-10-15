@@ -786,6 +786,20 @@ test('name search falls back safely for malformed manifest index entries', () =>
     ]
   }), null, 'Expected duplicate prefixes to trigger a full-scan fallback');
   assert.equal(indexedNameParts('banque exemple', {
+    parts: manifest.parts,
+    nameIndexes: [
+      { prefix: 'b', file: manifest.parts[0].file },
+      { prefix: 'e', file: manifest.nameIndexes.find(item => item.prefix === 'e')?.file || 'name-index-e.json' }
+    ]
+  }), null, 'Expected catalogue shards not to be accepted as name-index files');
+  assert.equal(indexedNameParts('banque exemple', {
+    parts: manifest.parts,
+    nameIndexes: [
+      { prefix: 'b', file: 'shared-name-index.json' },
+      { prefix: 'e', file: 'shared-name-index.json' }
+    ]
+  }), null, 'Expected duplicate name-index filenames to trigger a full-scan fallback');
+  assert.equal(indexedNameParts('banque exemple', {
     parts: [null],
     nameIndexes: []
   }), null, 'Expected malformed shard entries to trigger a full-scan fallback');
@@ -986,6 +1000,22 @@ test('four-character word queries fall through when no ISIN prefix matches', () 
   'Expected at least one result to match the ordinary word query');
 });
 
+
+test('ISIN index manifest rejects duplicate files and shard/index overlap', () => {
+  const readIsinIndex = search._test.readIsinIndex;
+  const validIndexFile = manifest.isinIndexes[0].file;
+  assert.equal(readIsinIndex('FR', {
+    parts: manifest.parts,
+    isinIndexes: [
+      { prefix: 'FR', file: validIndexFile },
+      { prefix: 'DE', file: validIndexFile }
+    ]
+  }), null, 'Expected duplicate ISIN-index filenames to trigger fallback');
+  assert.equal(readIsinIndex('FR', {
+    parts: manifest.parts,
+    isinIndexes: [{ prefix: 'FR', file: manifest.parts[0].file }]
+  }), null, 'Expected a catalogue shard not to be accepted as an ISIN-index file');
+});
 
 test('ISIN index references must point to declared catalogue shards', () => {
   const isAllowed = search._test.isAllowedShardReference;
