@@ -324,7 +324,12 @@ function indexedNameParts(key, manifest) {
   // has already validated every nested value.
   if (manifest.parts.some(part => !part || typeof part !== 'object' || !isSafeCatalogFilename(part.file))
     || manifest.nameIndexes.some(item => !item || typeof item !== 'object'
-      || typeof item.prefix !== 'string' || !isSafeCatalogFilename(item.file))) return null;
+      || typeof item.prefix !== 'string' || !/^[a-z0-9]$/.test(item.prefix)
+      || !isSafeCatalogFilename(item.file))) return null;
+  // There should be exactly one index file per first-character prefix.
+  // Duplicates can make .find() select an incomplete index and hide matches.
+  const nameIndexPrefixes = manifest.nameIndexes.map(item => item.prefix);
+  if (new Set(nameIndexPrefixes).size !== nameIndexPrefixes.length) return null;
   const allowedFiles = new Set(manifest.parts.map(part => part.file));
 
   // Match each searchable token independently so reordered terms remain searchable.
