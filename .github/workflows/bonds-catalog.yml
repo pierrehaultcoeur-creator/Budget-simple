@@ -100,6 +100,22 @@ jobs:
           name_indexes = manifest.get("nameIndexes", [])
           assert manifest.get("hasSearchableNames") == bool(name_indexes), "Name-index manifest flag does not match generated indexes"
           assert all(item["bytes"] < 100 * 1024 * 1024 for item in name_indexes)
+          # The runtime deliberately falls back to a full shard scan when index
+          # metadata is malformed. Catch the same metadata errors during catalogue
+          # generation so a broken manifest cannot be published unnoticed.
+          name_prefixes = [item.get("prefix") for item in name_indexes]
+          name_index_files = [item.get("file") for item in name_indexes]
+          assert all(isinstance(prefix, str) and len(prefix) == 1 and prefix.isascii()
+                     and prefix.isalnum() and prefix == prefix.lower()
+                     for prefix in name_prefixes), "Invalid name-index prefix"
+          assert len(name_prefixes) == len(set(name_prefixes)), "Duplicate name-index prefixes"
+          assert all(filename == f"name-index-{prefix}.json"
+                     for prefix, filename in zip(name_prefixes, name_index_files)), "Name-index filename does not match prefix"
+          assert len(name_index_files) == len(set(name_index_files)), "Duplicate name-index filenames"
+          isin_index_files = {item["file"] for item in manifest.get("isinIndexes", [])}
+          assert not (set(name_index_files) & shard_names), "Name index overlaps catalogue shard"
+          assert not (set(name_index_files) & isin_index_files), "Name index overlaps ISIN index"
+          assert "manifest.json" not in name_index_files, "Manifest cannot be a name index"
           indexed_trigrams = 0
           for item in name_indexes:
               index_path = Path("data/bonds-catalog") / item["file"]
