@@ -363,7 +363,8 @@ function indexedNameParts(key, manifest) {
   if (manifest.parts.some(part => !part || typeof part !== 'object' || !isSafeCatalogFilename(part.file))
     || manifest.nameIndexes.some(item => !item || typeof item !== 'object'
       || typeof item.prefix !== 'string' || !/^[a-z0-9]$/.test(item.prefix)
-      || !isSafeCatalogFilename(item.file))) return null;
+      || !isSafeCatalogFilename(item.file)
+      || item.file !== `name-index-${item.prefix}.json`)) return null;
   // There should be exactly one index file per first-character prefix.
   // Duplicates can make .find() select an incomplete index and hide matches.
   const nameIndexPrefixes = manifest.nameIndexes.map(item => item.prefix);
