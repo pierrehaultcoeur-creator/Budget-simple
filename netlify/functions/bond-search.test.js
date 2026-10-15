@@ -1652,3 +1652,36 @@ test('investment page retries loading a catalogue shard after a transient outage
   assert.match(page.elements.results.innerHTML, /Recovered shard bond/);
   assert.equal(page.elements.search.disabled, false);
 });
+
+test('investment page retries an ordinary name search after a transient server outage', async () => {
+  let serverAttempts = 0;
+  const page = loadInvestmentSearchPage(async url => {
+    if (!url.includes('/.netlify/functions/bond-search?')) {
+      throw new Error('Ordinary name searches should not depend on local catalogue files: ' + url);
+    }
+    serverAttempts += 1;
+    if (serverAttempts === 1) throw new Error('Temporary server outage');
+    return {
+      ok: true,
+      json: async () => ({
+        source: 'bond-master',
+        results: [{
+          isin: 'FR0000047607',
+          name: 'Recovered Example Issuer 2030',
+          source: 'ESMA FIRDS'
+        }]
+      })
+    };
+  });
+
+  page.elements.q.value = 'Example Issuer';
+  await page.doSearch();
+  assert.match(page.elements.status.textContent, /Recherche indisponible/);
+  assert.equal(page.elements.search.disabled, false);
+
+  await page.doSearch();
+  assert.equal(serverAttempts, 2, 'A failed server search must not block a later retry');
+  assert.match(page.elements.status.textContent, /1 résultat\(s\) via bond-master/);
+  assert.match(page.elements.results.innerHTML, /Recovered Example Issuer 2030/);
+  assert.equal(page.elements.search.disabled, false);
+});
