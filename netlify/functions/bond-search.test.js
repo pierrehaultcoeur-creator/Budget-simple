@@ -1685,3 +1685,47 @@ test('investment page retries an ordinary name search after a transient server o
   assert.match(page.elements.results.innerHTML, /Recovered Example Issuer 2030/);
   assert.equal(page.elements.search.disabled, false);
 });
+
+test('investment page retries loading an ISIN index after a transient outage', async () => {
+  let indexAttempts = 0;
+  const page = loadInvestmentSearchPage(async url => {
+    if (url.endsWith('manifest.json')) {
+      return {
+        ok: true,
+        json: async () => ({
+          parts: [{ file: 'part-0001.json' }],
+          isinIndexes: [{ prefix: 'FR', file: 'isin-index-FR.json' }]
+        })
+      };
+    }
+    if (url.endsWith('isin-index-FR.json')) {
+      indexAttempts += 1;
+      if (indexAttempts === 1) throw new Error('Temporary ISIN index outage');
+      return { ok: true, json: async () => ({ 'FR0000047607': 'part-0001.json' }) };
+    }
+    if (url.endsWith('part-0001.json')) {
+      return {
+        ok: true,
+        json: async () => [{ isin: 'FR0000047607', name: 'Recovered indexed bond' }]
+      };
+    }
+    if (url.includes('/.netlify/functions/bond-search?')) {
+      return {
+        ok: true,
+        json: async () => ({ source: 'bond-master', results: [] })
+      };
+    }
+    throw new Error('Unexpected URL: ' + url);
+  });
+
+  page.elements.q.value = 'FR0000047607';
+  await page.doSearch();
+  assert.match(page.elements.status.textContent, /0 résultat\(s\) via bond-master/);
+  assert.equal(page.elements.search.disabled, false);
+
+  await page.doSearch();
+  assert.equal(indexAttempts, 2, 'A failed ISIN index request must be removed from the cache');
+  assert.match(page.elements.status.textContent, /1 résultat\(s\) dans le catalogue ESMA/);
+  assert.match(page.elements.results.innerHTML, /Recovered indexed bond/);
+  assert.equal(page.elements.search.disabled, false);
+});
