@@ -244,6 +244,11 @@ function readNameIndex(file) {
     return value;
   } catch { return null; }
 }
+function nameIndexFiles(index, gram) {
+  if (!Object.prototype.hasOwnProperty.call(index, gram)) return [];
+  return Array.isArray(index[gram]) ? index[gram] : null;
+}
+
 function indexedNameParts(key, manifest) {
   if (key.length < 3 || !Array.isArray(manifest.nameIndexes)) return null;
 
@@ -264,8 +269,12 @@ function indexedNameParts(key, manifest) {
       if (!entry) return null;
       const index = readNameIndex(entry.file);
       if (!index || typeof index !== 'object' || Array.isArray(index)) return null;
-      if (!Array.isArray(index[gram])) return [];
-      const gramFiles = new Set(index[gram]);
+      const files = nameIndexFiles(index, gram);
+      // A missing trigram is a valid no-match; a malformed entry means the
+      // index cannot be trusted, so fall back to the complete shard scan.
+      if (files === null) return null;
+      if (!files.length) return [];
+      const gramFiles = new Set(files);
       tokenFiles = tokenFiles === null
         ? gramFiles
         : new Set([...tokenFiles].filter(file => gramFiles.has(file)));
@@ -515,7 +524,7 @@ async function openFigiSearch(q) {
   return Array.isArray(payload.data) ? payload.data.map(normalizeOpenFigi).filter(Boolean).slice(0, MAX_RESULTS) : [];
 }
 
-exports._test = { canonicalBond, publicBond, catalogSearch, rankCatalogRecords, rankCatalogRecordsByIsin, shardedCatalogSearch, exactIsinSearch, normalize, normalizeOpenFigi, scoreCatalogRecord, indexedNameParts, isFigiLikeQuery, shouldSearchShardedCatalog, shouldSearchShardedNames };
+exports._test = { canonicalBond, publicBond, catalogSearch, rankCatalogRecords, rankCatalogRecordsByIsin, shardedCatalogSearch, exactIsinSearch, normalize, normalizeOpenFigi, scoreCatalogRecord, indexedNameParts, nameIndexFiles, isFigiLikeQuery, shouldSearchShardedCatalog, shouldSearchShardedNames };
 
 exports.handler = async (event) => {
   const q = String(event?.queryStringParameters?.q || '').trim();
