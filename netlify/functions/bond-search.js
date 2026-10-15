@@ -208,11 +208,11 @@ function canonicalBond(record) {
     confidence: name ? 'catalog-record' : 'isin-only'
   };
 }
-function scanShardsByIsin(query, manifest, exact = false) {
+function scanShardsByIsin(query, manifest, exact = false, shardReader = readShard) {
   const normalizedQuery = String(query || '').replace(/\s+/g, '').toUpperCase();
   const results = [];
   for (const part of manifest.parts) {
-    for (const raw of readShard(part.file)) {
+    for (const raw of shardReader(part.file)) {
       const isin = String(raw?.isin || raw?.ISIN || raw?.isinCode || '')
         .replace(/\s+/g, '').toUpperCase();
       if (!ISIN_RE.test(isin) || (exact ? isin !== normalizedQuery : !isin.startsWith(normalizedQuery))) continue;
