@@ -360,7 +360,7 @@ function indexedNameParts(key, manifest) {
   // Treat malformed manifest entries as an unavailable index. This function
   // is also called with test/injected manifests, so do not assume readManifest
   // has already validated every nested value.
-  if (manifest.parts.some(part => !part || typeof part !== 'object' || !isSafeCatalogFilename(part.file))
+  if (!isValidManifestParts(manifest.parts)
     || manifest.nameIndexes.some(item => !item || typeof item !== 'object'
       || typeof item.prefix !== 'string' || !/^[a-z0-9]$/.test(item.prefix)
       || !isSafeCatalogFilename(item.file)
