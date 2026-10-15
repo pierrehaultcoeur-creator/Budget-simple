@@ -374,7 +374,9 @@ function indexedNameParts(key, manifest) {
   // valid-looking manifest can make a shard masquerade as an index and silently
   // suppress name matches instead of triggering the full-scan fallback.
   if (new Set(indexFiles).size !== indexFiles.length
-    || indexFiles.some(file => allowedFiles.has(file))) return null;
+    || indexFiles.some(file => allowedFiles.has(file)
+      || file === 'manifest.json'
+      || /^isin-index-.+\.json$/.test(file))) return null;
 
   // Match each searchable token independently so reordered terms remain searchable.
   // Intersecting the shard sets for each token's trigrams reduces work without
