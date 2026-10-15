@@ -1275,3 +1275,18 @@ test('ISIN prefix lookup falls back when an index entry points outside declared 
   assert.deepEqual(results.map(item => item.isin), ['FR0000047607']);
   assert.equal(results[0].name, 'Recovered partial ISIN from safe fallback');
 });
+
+
+test('catalogue manifest accepts only unique declared shard filenames', () => {
+  const validate = search._test.isValidManifestParts;
+  assert.equal(validate([{ file: 'part-0001.json' }, { file: 'part-0002.json' }]), true);
+  assert.equal(validate([]), false);
+  assert.equal(validate(null), false);
+  assert.equal(validate([{ file: 'manifest.json' }]), false);
+  assert.equal(validate([{ file: 'isin-index-FR.json' }]), false);
+  assert.equal(validate([{ file: '../part-0001.json' }]), false);
+  assert.equal(validate([{ file: 'part-0001.json' }, { file: 'part-0001.json' }]), false,
+    'Duplicate shard filenames must be rejected to avoid ambiguous scans');
+  assert.equal(validate([{ file: 'part-1.json' }]), false,
+    'Shard filenames must follow the generated catalogue naming convention');
+});
