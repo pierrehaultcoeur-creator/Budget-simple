@@ -913,6 +913,20 @@ test('public search handler resolves an ISIN with embedded whitespace', async ()
     `Expected spaced ISIN query to resolve to the exact catalogue record ${isin}`);
 });
 
+test('public search handler resolves a partial ISIN prefix with embedded whitespace', async () => {
+  const isin = firstIndexedIsin();
+  const prefix = isin.slice(0, 4);
+  const spacedPrefix = prefix.split('').join(' ');
+  const response = await search.handler({ queryStringParameters: { q: spacedPrefix } });
+  const payload = JSON.parse(response.body);
+
+  assert.equal(response.statusCode, 200);
+  assert.equal(payload.source, 'bond-master');
+  assert.ok(payload.results.length > 0, 'Expected a partial ISIN prefix to return catalogue candidates');
+  assert.ok(payload.results.every(item => String(item.isin || '').replace(/\\s+/g, '').toUpperCase().startsWith(prefix)),
+    `Expected all results to start with normalized ISIN prefix ${prefix}`);
+});
+
 test('four-character word queries fall through when no ISIN prefix matches', () => {
   const results = search._test.shardedCatalogSearch('BOND');
   assert.ok(results.length > 0, 'Expected ordinary word "BOND" to reach name search when no ISIN prefix matches');
