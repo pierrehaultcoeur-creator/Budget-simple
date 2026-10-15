@@ -738,6 +738,18 @@ test('mixed short and long name tokens keep the source shard while narrowing can
     `Expected mixed-token query "${query}" to find ISIN ${sample.isin} (${sample.name})`);
 });
 
+test('catalogue shard filenames reject path traversal and non-JSON files', () => {
+  const isSafe = search._test.isSafeCatalogFilename;
+  assert.equal(isSafe('part-0001.json'), true);
+  assert.equal(isSafe('__missing_name_index_test__.json'), true);
+  assert.equal(isSafe('../part-0001.json'), false);
+  assert.equal(isSafe('nested/part-0001.json'), false);
+  assert.equal(isSafe('/tmp/part-0001.json'), false);
+  assert.equal(isSafe('part-0001.csv'), false);
+  assert.equal(isSafe(''), false);
+  assert.equal(isSafe(null), false);
+});
+
 test('malformed trigram entries trigger a safe full-scan fallback', () => {
   const filesFor = search._test.nameIndexFiles;
   assert.deepEqual(filesFor({}, 'ban'), [],
