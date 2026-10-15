@@ -965,3 +965,23 @@ test('four-character word queries fall through when no ISIN prefix matches', () 
     || search._test.normalize(item.issuer).includes('bond')),
   'Expected at least one result to match the ordinary word query');
 });
+
+
+test('ISIN index references must point to declared catalogue shards', () => {
+  const isAllowed = search._test.isAllowedShardReference;
+  const allowed = {
+    parts: [{ file: 'part-0001.json' }, { file: 'part-0002.json' }]
+  };
+
+  assert.equal(isAllowed('part-0001.json', allowed), true);
+  assert.equal(isAllowed('part-0002.json', allowed), true);
+  assert.equal(isAllowed('manifest.json', allowed), false,
+    'Expected a safe JSON filename that is not a declared shard to be rejected');
+  assert.equal(isAllowed('isin-index-FR.json', allowed), false,
+    'Expected index files not to be accepted as catalogue shards');
+  assert.equal(isAllowed('missing-shard.json', allowed), false,
+    'Expected undeclared shard references to be rejected');
+  assert.equal(isAllowed('../part-0001.json', allowed), false);
+  assert.equal(isAllowed(42, allowed), false);
+  assert.equal(isAllowed(null, allowed), false);
+});
