@@ -40,13 +40,24 @@ function readCatalog() {
     return Array.isArray(data.records) ? data.records : [];
   } catch { return []; }
 }
+function isSafeCatalogFilename(filename) {
+  return typeof filename === 'string'
+    && filename.length > 0
+    && path.basename(filename) === filename
+    && filename.endsWith('.json');
+}
 function readManifest() {
   try {
     const manifest = JSON.parse(fs.readFileSync(MANIFEST_PATH, 'utf8'));
-    return Array.isArray(manifest.parts) ? manifest : null;
+    // A malformed part list cannot be scanned safely. Reject it before any
+    // shard path is read; malformed optional indexes are handled by fallback.
+    if (!manifest || !Array.isArray(manifest.parts)
+      || manifest.parts.some(part => !part || !isSafeCatalogFilename(part.file))) return null;
+    return manifest;
   } catch { return null; }
 }
 function readShard(filename) {
+  if (!isSafeCatalogFilename(filename)) return [];
   if (SHARD_CACHE.has(filename)) return SHARD_CACHE.get(filename);
   try {
     const payload = JSON.parse(fs.readFileSync(path.join(SHARDED_DIR, filename), 'utf8'));
@@ -61,7 +72,7 @@ function readShard(filename) {
 }
 function readIsinIndex(prefix, manifest) {
   const entry = (manifest.isinIndexes || []).find(item => item.prefix === prefix);
-  if (!entry || !entry.file) return null;
+  if (!entry || !isSafeCatalogFilename(entry.file)) return null;
   if (ISIN_INDEX_CACHE.has(entry.file)) return ISIN_INDEX_CACHE.get(entry.file);
   try {
     const index = JSON.parse(fs.readFileSync(path.join(SHARDED_DIR, entry.file), 'utf8'));
@@ -230,7 +241,7 @@ function indexedIsinPrefixSearch(query, manifest) {
   return results.slice(0, MAX_RESULTS);
 }
 function readNameIndex(file) {
-  if (!file) return null;
+  if (!isSafeCatalogFilename(file)) return null;
   if (NAME_INDEX_CACHE.has(file)) {
     const value = NAME_INDEX_CACHE.get(file);
     NAME_INDEX_CACHE.delete(file);
@@ -528,7 +539,7 @@ async function openFigiSearch(q) {
   return Array.isArray(payload.data) ? payload.data.map(normalizeOpenFigi).filter(Boolean).slice(0, MAX_RESULTS) : [];
 }
 
-exports._test = { canonicalBond, publicBond, catalogSearch, rankCatalogRecords, rankCatalogRecordsByIsin, shardedCatalogSearch, exactIsinSearch, normalize, normalizeOpenFigi, scoreCatalogRecord, indexedNameParts, nameIndexFiles, isFigiLikeQuery, shouldSearchShardedCatalog, shouldSearchShardedNames };
+exports._test = { canonicalBond, publicBond, catalogSearch, rankCatalogRecords, rankCatalogRecordsByIsin, shardedCatalogSearch, exactIsinSearch, normalize, normalizeOpenFigi, scoreCatalogRecord, indexedNameParts, nameIndexFiles, isSafeCatalogFilename, isFigiLikeQuery, shouldSearchShardedCatalog, shouldSearchShardedNames };
 
 exports.handler = async (event) => {
   const q = String(event?.queryStringParameters?.q || '').trim();
