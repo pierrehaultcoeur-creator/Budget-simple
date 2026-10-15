@@ -786,6 +786,26 @@ test('name index content validation rejects malformed keys and shard lists', () 
     'Expected arrays not to be accepted as name indexes');
 });
 
+test('cached name indexes are revalidated against the current shard manifest', () => {
+  const entry = manifest.nameIndexes.find(item => item && item.prefix === 'b');
+  assert.ok(entry, 'Expected a name index for the b prefix');
+  const index = JSON.parse(fs.readFileSync(path.join(catalogueDir, entry.file), 'utf8'));
+  const gram = Object.keys(index).find(key => Array.isArray(index[key]) && index[key].length > 0);
+  assert.ok(gram, 'Expected a populated trigram in the b index');
+  const referencedFile = index[gram][0];
+
+  const initialCandidates = search._test.indexedNameParts(gram, manifest);
+  assert.ok(Array.isArray(initialCandidates), 'Expected the valid cached index to be used');
+
+  const changedManifest = {
+    ...manifest,
+    parts: manifest.parts.filter(part => part.file !== referencedFile)
+  };
+  assert.ok(changedManifest.parts.length > 0, 'Expected remaining catalogue shards');
+  assert.equal(search._test.indexedNameParts(gram, changedManifest), null,
+    'Expected a cached index referencing a shard removed from the current manifest to trigger fallback');
+});
+
 test('name search falls back safely for malformed manifest index entries', () => {
   const indexedNameParts = search._test.indexedNameParts;
   assert.equal(indexedNameParts('banque exemple', {
