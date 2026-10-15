@@ -317,8 +317,15 @@ function nameIndexFiles(index, gram, allowedFiles) {
 }
 
 function indexedNameParts(key, manifest) {
-  if (key.length < 3 || !Array.isArray(manifest.parts) || !Array.isArray(manifest.nameIndexes)) return null;
-  const allowedFiles = new Set(manifest.parts.map(part => part.file).filter(file => typeof file === 'string'));
+  if (key.length < 3 || !manifest || typeof manifest !== 'object'
+    || !Array.isArray(manifest.parts) || !Array.isArray(manifest.nameIndexes)) return null;
+  // Treat malformed manifest entries as an unavailable index. This function
+  // is also called with test/injected manifests, so do not assume readManifest
+  // has already validated every nested value.
+  if (manifest.parts.some(part => !part || typeof part !== 'object' || !isSafeCatalogFilename(part.file))
+    || manifest.nameIndexes.some(item => !item || typeof item !== 'object'
+      || typeof item.prefix !== 'string' || !isSafeCatalogFilename(item.file))) return null;
+  const allowedFiles = new Set(manifest.parts.map(part => part.file));
 
   // Match each searchable token independently so reordered terms remain searchable.
   // Intersecting the shard sets for each token's trigrams reduces work without
