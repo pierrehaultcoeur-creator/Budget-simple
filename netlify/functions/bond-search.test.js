@@ -1031,3 +1031,29 @@ test('exact ISIN lookup scans shards when an indexed shard does not contain the 
   assert.equal(results[0].isin, isin);
   assert.equal(results[0].name, 'Recovered from fallback scan');
 });
+
+
+test('exact ISIN lookup scans shards when the index has no entry for the identifier', () => {
+  const isin = firstIndexedIsin();
+  const fakeManifest = { parts: [{ file: 'part-0001.json' }] };
+  const expected = search._test.canonicalBond({ isin, name: 'Recovered from incomplete index' });
+  let fallbackCalled = false;
+  const results = search._test.resolveExactIsinFromIndex(
+    isin,
+    fakeManifest,
+    {},
+    () => [],
+    (query, receivedManifest, exact) => {
+      fallbackCalled = true;
+      assert.equal(query, isin);
+      assert.equal(receivedManifest, fakeManifest);
+      assert.equal(exact, true);
+      return [expected];
+    }
+  );
+
+  assert.equal(fallbackCalled, true, 'Expected a missing index entry to trigger the shard scan');
+  assert.equal(results.length, 1);
+  assert.equal(results[0].isin, isin);
+  assert.equal(results[0].name, 'Recovered from incomplete index');
+});

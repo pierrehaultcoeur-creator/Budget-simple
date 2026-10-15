@@ -223,7 +223,7 @@ function scanShardsByIsin(query, manifest, exact = false) {
 }
 function resolveExactIsinFromIndex(isin, manifest, index, shardReader = readShard, scan = scanShardsByIsin) {
   if (!index) return scan(isin, manifest, true);
-  if (!Object.prototype.hasOwnProperty.call(index, isin)) return [];
+  if (!Object.prototype.hasOwnProperty.call(index, isin)) return scan(isin, manifest, true);
   const shardName = index[isin];
   // A present but invalid reference means the index cannot be trusted.
   if (!isAllowedShardReference(shardName, manifest)) {
