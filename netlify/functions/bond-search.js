@@ -205,17 +205,34 @@ function canonicalBond(record) {
     confidence: name ? 'catalog-record' : 'isin-only'
   };
 }
+function scanShardsByIsin(query, manifest, exact = false) {
+  const normalizedQuery = String(query || '').replace(/\s+/g, '').toUpperCase();
+  const results = [];
+  for (const part of manifest.parts) {
+    for (const raw of readShard(part.file)) {
+      const isin = String(raw?.isin || raw?.ISIN || raw?.isinCode || '')
+        .replace(/\s+/g, '').toUpperCase();
+      if (!isin || (exact ? isin !== normalizedQuery : !isin.startsWith(normalizedQuery))) continue;
+      const item = canonicalBond(raw);
+      if (item) results.push(item);
+    }
+  }
+  return results
+    .sort((a, b) => String(a.isin || '').localeCompare(String(b.isin || ''), 'en'))
+    .slice(0, MAX_RESULTS);
+}
 function exactIsinSearch(isin) {
   if (!ISIN_RE.test(isin)) return null;
   const manifest = readManifest();
   if (!manifest) return null;
   const index = readIsinIndex(isin.slice(0, 2), manifest);
-  if (!index) return null;
+  if (!index) return scanShardsByIsin(isin, manifest, true);
   if (!Object.prototype.hasOwnProperty.call(index, isin)) return [];
   const shardName = index[isin];
-  // A present but invalid reference means the index cannot be trusted. Let
-  // callers fall back to scanning the declared catalogue shards.
-  if (!isAllowedShardReference(shardName, manifest)) return null;
+  // A present but invalid reference means the index cannot be trusted.
+  if (!isAllowedShardReference(shardName, manifest)) {
+    return scanShardsByIsin(isin, manifest, true);
+  }
   const record = readShard(shardName).find(raw => {
     const value = String(raw?.isin || raw?.ISIN || raw?.isinCode || '').replace(/\s+/g, '').toUpperCase();
     return value === isin;
@@ -226,7 +243,7 @@ function exactIsinSearch(isin) {
 function indexedIsinPrefixSearch(query, manifest) {
   if (!/^[A-Z]{2}[A-Z0-9]{2,10}$/.test(query)) return null;
   const index = readIsinIndex(query.slice(0, 2), manifest);
-  if (!index) return null;
+  if (!index) return scanShardsByIsin(query, manifest);
   const matchingEntries = Object.entries(index)
     .filter(([isin]) => isin.startsWith(query))
     .sort(([a], [b]) => a.localeCompare(b));
@@ -235,7 +252,9 @@ function indexedIsinPrefixSearch(query, manifest) {
   // Validate every matching reference before applying the result limit, so a
   // corrupt entry cannot silently hide catalogue records behind the index.
   if (matchingEntries.some(([, filename]) =>
-    !isSafeCatalogFilename(filename) || !allowedFiles.has(filename))) return null;
+    !isSafeCatalogFilename(filename) || !allowedFiles.has(filename))) {
+    return scanShardsByIsin(query, manifest);
+  }
   const matches = matchingEntries.slice(0, MAX_RESULTS);
   const byShard = new Map();
   for (const [isin, filename] of matches) {
@@ -553,7 +572,7 @@ async function openFigiSearch(q) {
   return Array.isArray(payload.data) ? payload.data.map(normalizeOpenFigi).filter(Boolean).slice(0, MAX_RESULTS) : [];
 }
 
-exports._test = { canonicalBond, publicBond, catalogSearch, rankCatalogRecords, rankCatalogRecordsByIsin, shardedCatalogSearch, exactIsinSearch, normalize, normalizeOpenFigi, scoreCatalogRecord, indexedNameParts, nameIndexFiles, isSafeCatalogFilename, isAllowedShardReference, allowedShardFiles, isFigiLikeQuery, shouldSearchShardedCatalog, shouldSearchShardedNames };
+exports._test = { canonicalBond, publicBond, catalogSearch, rankCatalogRecords, rankCatalogRecordsByIsin, shardedCatalogSearch, exactIsinSearch, scanShardsByIsin, normalize, normalizeOpenFigi, scoreCatalogRecord, indexedNameParts, nameIndexFiles, isSafeCatalogFilename, isAllowedShardReference, allowedShardFiles, isFigiLikeQuery, shouldSearchShardedCatalog, shouldSearchShardedNames };
 
 exports.handler = async (event) => {
   const q = String(event?.queryStringParameters?.q || '').trim();
