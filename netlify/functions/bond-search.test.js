@@ -768,6 +768,24 @@ test('malformed trigram entries trigger a safe full-scan fallback', () => {
     'Expected valid references to known shards to be accepted');
 });
 
+test('name index content validation rejects malformed keys and shard lists', () => {
+  const isValidNameIndex = search._test.isValidNameIndex;
+  const allowed = new Set(['part-0001.json', 'part-0002.json']);
+  assert.equal(isValidNameIndex({ ban: ['part-0001.json'] }, 'b', allowed), true);
+  assert.equal(isValidNameIndex({ ban: ['part-0001.json'], bad: ['part-0002.json'] }, 'b', allowed), false,
+    'Expected every trigram to match the index prefix');
+  assert.equal(isValidNameIndex({ 'ba-': ['part-0001.json'] }, 'b', allowed), false,
+    'Expected non-alphanumeric trigrams to invalidate the index');
+  assert.equal(isValidNameIndex({ ban: [] }, 'b', allowed), false,
+    'Expected empty shard lists to invalidate the index');
+  assert.equal(isValidNameIndex({ ban: ['part-0001.json', 'part-0001.json'] }, 'b', allowed), false,
+    'Expected duplicate shard references to invalidate the index');
+  assert.equal(isValidNameIndex({ ban: ['missing-shard.json'] }, 'b', allowed), false,
+    'Expected undeclared shard references to invalidate the index');
+  assert.equal(isValidNameIndex([], 'b', allowed), false,
+    'Expected arrays not to be accepted as name indexes');
+});
+
 test('name search falls back safely for malformed manifest index entries', () => {
   const indexedNameParts = search._test.indexedNameParts;
   assert.equal(indexedNameParts('banque exemple', {
