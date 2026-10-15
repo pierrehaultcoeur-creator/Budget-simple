@@ -1003,3 +1003,31 @@ test('ISIN shard scan fallback returns only records matching a partial prefix', 
   assert.ok(results.every(item => String(item.isin || '').startsWith(prefix)),
     'Expected the fallback to exclude unrelated identifiers');
 });
+
+
+test('exact ISIN lookup scans shards when an indexed shard does not contain the record', () => {
+  const isin = firstIndexedIsin();
+  const fakeManifest = {
+    parts: [{ file: 'part-0001.json' }, { file: 'part-0002.json' }]
+  };
+  let fallbackCalled = false;
+  const expected = search._test.canonicalBond({ isin, name: 'Recovered from fallback scan' });
+  const results = search._test.resolveExactIsinFromIndex(
+    isin,
+    fakeManifest,
+    { [isin]: 'part-0001.json' },
+    () => [],
+    (query, receivedManifest, exact) => {
+      fallbackCalled = true;
+      assert.equal(query, isin);
+      assert.equal(receivedManifest, fakeManifest);
+      assert.equal(exact, true);
+      return [expected];
+    }
+  );
+
+  assert.equal(fallbackCalled, true, 'Expected a stale index hit to trigger a full shard scan');
+  assert.equal(results.length, 1);
+  assert.equal(results[0].isin, isin);
+  assert.equal(results[0].name, 'Recovered from fallback scan');
+});

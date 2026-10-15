@@ -221,25 +221,31 @@ function scanShardsByIsin(query, manifest, exact = false) {
     .sort((a, b) => String(a.isin || '').localeCompare(String(b.isin || ''), 'en'))
     .slice(0, MAX_RESULTS);
 }
+function resolveExactIsinFromIndex(isin, manifest, index, shardReader = readShard, scan = scanShardsByIsin) {
+  if (!index) return scan(isin, manifest, true);
+  if (!Object.prototype.hasOwnProperty.call(index, isin)) return [];
+  const shardName = index[isin];
+  // A present but invalid reference means the index cannot be trusted.
+  if (!isAllowedShardReference(shardName, manifest)) {
+    return scan(isin, manifest, true);
+  }
+  const record = shardReader(shardName).find(raw => {
+    const value = String(raw?.isin || raw?.ISIN || raw?.isinCode || '').replace(/\s+/g, '').toUpperCase();
+    return value === isin;
+  });
+  const result = canonicalBond(record);
+  // A valid-looking index reference can still be stale or point to a shard
+  // that no longer contains the indexed record. Scan before declaring a false negative.
+  return result ? [result] : scan(isin, manifest, true);
+}
 function exactIsinSearch(isin) {
   if (!ISIN_RE.test(isin)) return null;
   const manifest = readManifest();
   if (!manifest) return null;
   const index = readIsinIndex(isin.slice(0, 2), manifest);
-  if (!index) return scanShardsByIsin(isin, manifest, true);
-  if (!Object.prototype.hasOwnProperty.call(index, isin)) return [];
-  const shardName = index[isin];
-  // A present but invalid reference means the index cannot be trusted.
-  if (!isAllowedShardReference(shardName, manifest)) {
-    return scanShardsByIsin(isin, manifest, true);
-  }
-  const record = readShard(shardName).find(raw => {
-    const value = String(raw?.isin || raw?.ISIN || raw?.isinCode || '').replace(/\s+/g, '').toUpperCase();
-    return value === isin;
-  });
-  const result = canonicalBond(record);
-  return result ? [result] : [];
+  return resolveExactIsinFromIndex(isin, manifest, index);
 }
+
 function indexedIsinPrefixSearch(query, manifest) {
   if (!/^[A-Z]{2}[A-Z0-9]{2,10}$/.test(query)) return null;
   const index = readIsinIndex(query.slice(0, 2), manifest);
@@ -572,7 +578,7 @@ async function openFigiSearch(q) {
   return Array.isArray(payload.data) ? payload.data.map(normalizeOpenFigi).filter(Boolean).slice(0, MAX_RESULTS) : [];
 }
 
-exports._test = { canonicalBond, publicBond, catalogSearch, rankCatalogRecords, rankCatalogRecordsByIsin, shardedCatalogSearch, exactIsinSearch, scanShardsByIsin, normalize, normalizeOpenFigi, scoreCatalogRecord, indexedNameParts, nameIndexFiles, isSafeCatalogFilename, isAllowedShardReference, allowedShardFiles, isFigiLikeQuery, shouldSearchShardedCatalog, shouldSearchShardedNames };
+exports._test = { canonicalBond, publicBond, catalogSearch, rankCatalogRecords, rankCatalogRecordsByIsin, shardedCatalogSearch, exactIsinSearch, resolveExactIsinFromIndex, scanShardsByIsin, normalize, normalizeOpenFigi, scoreCatalogRecord, indexedNameParts, nameIndexFiles, isSafeCatalogFilename, isAllowedShardReference, allowedShardFiles, isFigiLikeQuery, shouldSearchShardedCatalog, shouldSearchShardedNames };
 
 exports.handler = async (event) => {
   const q = String(event?.queryStringParameters?.q || '').trim();
