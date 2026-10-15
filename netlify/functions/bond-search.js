@@ -52,7 +52,7 @@ function isValidManifestParts(parts) {
   for (const part of parts) {
     if (!part || typeof part !== 'object'
       || typeof part.file !== 'string'
-      || !/^part-\\d{4,}\\.json$/.test(part.file)
+      || !/^part-\d{4,}\.json$/.test(part.file)
       || !isSafeCatalogFilename(part.file)) return false;
     filenames.push(part.file);
   }
