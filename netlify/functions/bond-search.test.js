@@ -985,3 +985,21 @@ test('ISIN index references must point to declared catalogue shards', () => {
   assert.equal(isAllowed(42, allowed), false);
   assert.equal(isAllowed(null, allowed), false);
 });
+
+
+test('ISIN shard scan fallback resolves exact identifiers without trusting the index', () => {
+  const isin = firstIndexedIsin();
+  const results = search._test.scanShardsByIsin(isin, manifest, true);
+  assert.equal(results.length, 1);
+  assert.equal(results[0].isin, isin);
+});
+
+test('ISIN shard scan fallback returns only records matching a partial prefix', () => {
+  const isin = firstIndexedIsin();
+  const prefix = isin.slice(0, 4);
+  const results = search._test.scanShardsByIsin(prefix, manifest);
+  assert.ok(results.length > 0, `Expected shard scan to find ISIN prefix ${prefix}`);
+  assert.ok(results.length <= 30);
+  assert.ok(results.every(item => String(item.isin || '').startsWith(prefix)),
+    'Expected the fallback to exclude unrelated identifiers');
+});
