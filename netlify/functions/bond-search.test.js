@@ -1528,3 +1528,37 @@ test('investment page reports a server outage cleanly and re-enables search', as
   assert.match(page.elements.results.innerHTML, /Impossible de joindre le service de recherche/);
   assert.equal(page.elements.search.disabled, false);
 });
+
+
+test('investment page routes ordinary bond-name queries to server search', async () => {
+  const requests = [];
+  const page = loadInvestmentSearchPage(async url => {
+    requests.push(url);
+    if (url.includes('/.netlify/functions/bond-search?')) {
+      assert.ok(url.includes('q=Example%20Issuer') || url.includes('q=Example+Issuer'),
+        'Expected the name query to be URL-encoded');
+      return {
+        ok: true,
+        json: async () => ({
+          source: 'bond-master',
+          results: [{
+            isin: 'FR0000047607',
+            name: 'Example Issuer 2030',
+            issuer: 'Example Issuer',
+            source: 'ESMA FIRDS'
+          }]
+        })
+      };
+    }
+    throw new Error('Ordinary name searches should not fetch the local ISIN index: ' + url);
+  });
+
+  page.elements.q.value = 'Example Issuer';
+  await page.doSearch();
+
+  assert.equal(requests.length, 1);
+  assert.ok(requests[0].includes('/.netlify/functions/bond-search?'));
+  assert.match(page.elements.results.innerHTML, /Example Issuer 2030/);
+  assert.match(page.elements.status.textContent, /1 résultat\(s\) via bond-master/);
+  assert.equal(page.elements.search.disabled, false);
+});
