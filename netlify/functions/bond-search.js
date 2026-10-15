@@ -354,6 +354,16 @@ function nameIndexFiles(index, gram, allowedFiles) {
   return files;
 }
 
+function isValidNameIndex(index, prefix, allowedFiles) {
+  if (!index || typeof index !== 'object' || Array.isArray(index)
+    || typeof prefix !== 'string' || !/^[a-z0-9]$/.test(prefix)) return false;
+  return Object.entries(index).every(([gram, files]) =>
+    /^[a-z0-9]{3}$/.test(gram) && gram.startsWith(prefix)
+    && Array.isArray(files) && files.length > 0
+    && new Set(files).size === files.length
+    && files.every(file => typeof file === 'string' && allowedFiles.has(file)));
+}
+
 function indexedNameParts(key, manifest) {
   if (key.length < 3 || !manifest || typeof manifest !== 'object'
     || !Array.isArray(manifest.parts) || !Array.isArray(manifest.nameIndexes)) return null;
@@ -395,7 +405,9 @@ function indexedNameParts(key, manifest) {
       // all shards rather than silently hiding valid name matches.
       if (!entry) return null;
       const index = readNameIndex(entry.file);
-      if (!index || typeof index !== 'object' || Array.isArray(index)) return null;
+      // Validate every entry in the loaded index, not only the requested trigram.
+      // Corrupt keys or duplicate/unknown shard references invalidate the fast path.
+      if (!isValidNameIndex(index, entry.prefix, allowedFiles)) return null;
       const files = nameIndexFiles(index, gram, allowedFiles);
       // A missing trigram is a valid no-match; a malformed entry means the
       // index cannot be trusted, so fall back to the complete shard scan.
@@ -651,7 +663,7 @@ async function openFigiSearch(q) {
   return Array.isArray(payload.data) ? payload.data.map(normalizeOpenFigi).filter(Boolean).slice(0, MAX_RESULTS) : [];
 }
 
-exports._test = { canonicalBond, publicBond, catalogSearch, rankCatalogRecords, rankCatalogRecordsByIsin, shardedCatalogSearch, exactIsinSearch, resolveExactIsinFromIndex, resolveIsinPrefixFromIndex, scanShardsByIsin, normalize, normalizeOpenFigi, scoreCatalogRecord, indexedNameParts, nameIndexFiles, isSafeCatalogFilename, isValidManifestParts, isAllowedShardReference, allowedShardFiles, readIsinIndex, isValidIsinIndex, isFigiLikeQuery, shouldSearchShardedCatalog, shouldSearchShardedNames };
+exports._test = { canonicalBond, publicBond, catalogSearch, rankCatalogRecords, rankCatalogRecordsByIsin, shardedCatalogSearch, exactIsinSearch, resolveExactIsinFromIndex, resolveIsinPrefixFromIndex, scanShardsByIsin, normalize, normalizeOpenFigi, scoreCatalogRecord, indexedNameParts, nameIndexFiles, isValidNameIndex, isSafeCatalogFilename, isValidManifestParts, isAllowedShardReference, allowedShardFiles, readIsinIndex, isValidIsinIndex, isFigiLikeQuery, shouldSearchShardedCatalog, shouldSearchShardedNames };
 
 exports.handler = async (event) => {
   const q = String(event?.queryStringParameters?.q || '').trim();
