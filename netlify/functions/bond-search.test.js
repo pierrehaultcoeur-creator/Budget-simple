@@ -1365,7 +1365,7 @@ function loadInvestmentSearchPage(fetchImpl) {
     console: { warn() {}, error() {} },
     Map, Set, Promise
   };
-  vm.runInNewContext(scripts[scripts.length - 1] + '\nglobalThis.__investmentSearchTest = { getIndex, searchLocal };', context);
+  vm.runInNewContext(scripts[scripts.length - 1] + '\nglobalThis.__investmentSearchTest = { getIndex, searchLocal, doSearch, elements };', context);
   return context.__investmentSearchTest;
 }
 
@@ -1398,14 +1398,38 @@ test('investment page revalidates cached ISIN indexes against the current manife
   assert.equal(await page.getIndex('FR', changedManifest), null);
 });
 
-test('investment page falls back to server search when an ISIN prefix has no indexed matches', async () => {
+test('investment page actually calls server search when an ISIN prefix has no indexed matches', async () => {
   const manifest = {
     parts: [{ file: 'part-0001.json' }],
     isinIndexes: [{ prefix: 'FR', file: 'isin-index-FR.json' }]
   };
-  const page = loadInvestmentSearchPage(async url => ({
-    ok: true,
-    json: async () => url.endsWith('manifest.json') ? manifest : { 'FR0000047607': 'part-0001.json' }
-  }));
-  assert.equal(await page.searchLocal('FR99'), null);
+  const requests = [];
+  const page = loadInvestmentSearchPage(async url => {
+    requests.push(url);
+    if (url.endsWith('manifest.json')) {
+      return { ok: true, json: async () => manifest };
+    }
+    if (url.endsWith('isin-index-FR.json')) {
+      return { ok: true, json: async () => ({ 'FR0000047607': 'part-0001.json' }) };
+    }
+    if (url.includes('/.netlify/functions/bond-search?')) {
+      return {
+        ok: true,
+        json: async () => ({
+          source: 'bond-master',
+          results: [{ isin: 'FR9900000001', name: 'Server fallback bond', source: 'Catalogue ESMA' }]
+        })
+      };
+    }
+    throw new Error('Unexpected URL: ' + url);
+  });
+  page.elements.q.value = 'FR99';
+
+  await page.doSearch();
+
+  assert.ok(requests.some(url => url.includes('/.netlify/functions/bond-search?q=FR99')),
+    'A valid index with no prefix matches must fall back to the server endpoint');
+  assert.match(page.elements.status.textContent, /1 résultat/);
+  assert.match(page.elements.results.innerHTML, /Server fallback bond/);
+  assert.equal(page.elements.search.disabled, false);
 });
