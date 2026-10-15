@@ -94,9 +94,12 @@ function readIsinIndex(prefix, manifest) {
   if (!Array.isArray(entries) || entries.some(item => !item || typeof item !== 'object'
     || typeof item.prefix !== 'string' || !/^[A-Z]{2}$/.test(item.prefix)
     || !isSafeCatalogFilename(item.file))) return null;
-  // Duplicate prefixes can make .find() select an incomplete index and hide matches.
+  // Duplicate prefixes/files or an index pointing at a catalogue shard can hide matches.
   const prefixes = entries.map(item => item.prefix);
-  if (new Set(prefixes).size !== prefixes.length) return null;
+  const files = entries.map(item => item.file);
+  if (new Set(prefixes).size !== prefixes.length || new Set(files).size !== files.length) return null;
+  const shardFiles = new Set((Array.isArray(manifest?.parts) ? manifest.parts : []).map(part => part?.file));
+  if (files.some(file => shardFiles.has(file))) return null;
   const entry = entries.find(item => item.prefix === prefix);
   if (!entry) return null;
   if (ISIN_INDEX_CACHE.has(entry.file)) return ISIN_INDEX_CACHE.get(entry.file);
@@ -348,6 +351,12 @@ function indexedNameParts(key, manifest) {
   const nameIndexPrefixes = manifest.nameIndexes.map(item => item.prefix);
   if (new Set(nameIndexPrefixes).size !== nameIndexPrefixes.length) return null;
   const allowedFiles = new Set(manifest.parts.map(part => part.file));
+  const indexFiles = manifest.nameIndexes.map(item => item.file);
+  // Index files must be unique and separate from catalogue shards. Otherwise a
+  // valid-looking manifest can make a shard masquerade as an index and silently
+  // suppress name matches instead of triggering the full-scan fallback.
+  if (new Set(indexFiles).size !== indexFiles.length
+    || indexFiles.some(file => allowedFiles.has(file))) return null;
 
   // Match each searchable token independently so reordered terms remain searchable.
   // Intersecting the shard sets for each token's trigrams reduces work without
