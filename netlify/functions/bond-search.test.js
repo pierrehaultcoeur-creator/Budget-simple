@@ -1131,6 +1131,28 @@ test('ISIN prefix lookup ignores malformed keys in the index and recovers from s
   assert.deepEqual(results.map(item => item.isin), ['FR0000047607']);
 });
 
+test('ISIN prefix lookup ignores malformed keys when valid indexed entries exist', () => {
+  const query = 'FR';
+  const fakeManifest = { parts: [{ file: 'part-0001.json' }] };
+  const record = { isin: 'FR0000047607', name: 'Valid indexed ISIN' };
+  let fallbackCalled = false;
+  const results = search._test.resolveIsinPrefixFromIndex(
+    query,
+    fakeManifest,
+    {
+      'FRAB12345678': 'part-0001.json',
+      'FR0000047607': 'part-0001.json'
+    },
+    () => [record],
+    () => {
+      fallbackCalled = true;
+      throw new Error('A valid indexed entry should avoid fallback scanning');
+    }
+  );
+  assert.equal(fallbackCalled, false);
+  assert.deepEqual(results.map(item => item.isin), ['FR0000047607']);
+});
+
 test('ISIN shard scan excludes malformed identifiers from catalogue records', () => {
   const fakeManifest = { parts: [{ file: 'part-0001.json' }] };
   const records = [
