@@ -1084,6 +1084,12 @@ test('malformed ISIN index metadata is treated as unavailable and does not throw
   assert.equal(readIndex('FR', { isinIndexes: 'not-an-array' }), null);
   assert.equal(readIndex('FR', { isinIndexes: { prefix: 'FR', file: 'isin-index-FR.json' } }), null);
   assert.equal(readIndex('FR', { isinIndexes: [null, 42, { prefix: 'DE', file: 'isin-index-DE.json' }] }), null);
+  assert.equal(readIndex('FR', { isinIndexes: [{ prefix: '../', file: 'isin-index-FR.json' }] }), null);
+  assert.equal(readIndex('FR', { isinIndexes: [{ prefix: 'FR', file: '../isin-index-FR.json' }] }), null);
+  assert.equal(readIndex('FR', { isinIndexes: [
+    { prefix: 'FR', file: 'isin-index-FR-a.json' },
+    { prefix: 'FR', file: 'isin-index-FR-b.json' }
+  ] }), null, 'Duplicate country prefixes must disable the index and trigger fallback');
 });
 
 
