@@ -215,7 +215,7 @@ function scanShardsByIsin(query, manifest, exact = false) {
     for (const raw of readShard(part.file)) {
       const isin = String(raw?.isin || raw?.ISIN || raw?.isinCode || '')
         .replace(/\s+/g, '').toUpperCase();
-      if (!isin || (exact ? isin !== normalizedQuery : !isin.startsWith(normalizedQuery))) continue;
+      if (!ISIN_RE.test(isin) || (exact ? isin !== normalizedQuery : !isin.startsWith(normalizedQuery))) continue;
       const item = canonicalBond(raw);
       if (item) results.push(item);
     }
@@ -255,7 +255,7 @@ function resolveIsinPrefixFromIndex(query, manifest, index, shardReader = readSh
     return scan(query, manifest);
   }
   const matchingEntries = Object.entries(index)
-    .filter(([isin]) => typeof isin === 'string' && isin.startsWith(query))
+    .filter(([isin]) => typeof isin === 'string' && ISIN_RE.test(isin) && isin.startsWith(query))
     .sort(([a], [b]) => a.localeCompare(b));
   // A missing prefix in an incomplete/stale index must not hide records that
   // still exist in the catalogue shards.

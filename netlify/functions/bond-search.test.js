@@ -1108,3 +1108,15 @@ test('ISIN prefix lookup scans shards when indexed records are missing from thei
   assert.equal(fallbackCalled, true);
   assert.deepEqual(results.map(item => item.isin), ['FR1234567890']);
 });
+
+
+test('ISIN shard scan excludes malformed identifiers from catalogue records', () => {
+  const fakeManifest = { parts: [{ file: 'part-0001.json' }] };
+  const records = [
+    { isin: 'FR1234567890', name: 'Valid ISIN' },
+    { isin: 'FRAB', name: 'Malformed short identifier' },
+    { isin: 'FR123456789X', name: 'Malformed check digit' }
+  ];
+  const results = search._test.scanShardsByIsin('FR', fakeManifest, false, () => records);
+  assert.deepEqual(results.map(item => item.isin), ['FR1234567890']);
+});
