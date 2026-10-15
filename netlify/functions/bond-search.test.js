@@ -1434,3 +1434,44 @@ test('investment page actually calls server search when an ISIN prefix has no in
   assert.match(page.elements.results.innerHTML, /Server fallback bond/);
   assert.equal(page.elements.search.disabled, false);
 });
+
+
+test('investment page renders exact and partial ISIN matches from the local indexed catalogue', async () => {
+  const manifest = {
+    parts: [{ file: 'part-0001.json' }],
+    isinIndexes: [{ prefix: 'FR', file: 'isin-index-FR.json' }]
+  };
+  const index = {
+    FR0000047607: 'part-0001.json',
+    FR0000047615: 'part-0001.json'
+  };
+  const shard = [
+    { isin: 'FR0000047607', name: 'Local indexed bond one', issuer: 'Example issuer' },
+    { isin: 'FR0000047615', name: 'Local indexed bond two', issuer: 'Example issuer' }
+  ];
+
+  for (const query of ['FR0000047607', 'FR0000']) {
+    const requests = [];
+    const page = loadInvestmentSearchPage(async url => {
+      requests.push(url);
+      if (url.endsWith('manifest.json')) return { ok: true, json: async () => manifest };
+      if (url.endsWith('isin-index-FR.json')) return { ok: true, json: async () => index };
+      if (url.endsWith('part-0001.json')) return { ok: true, json: async () => shard };
+      throw new Error('Unexpected URL: ' + url);
+    });
+    page.elements.q.value = query;
+
+    await page.doSearch();
+
+    assert.match(page.elements.status.textContent, /résultat\(s\) dans le catalogue ESMA/);
+    assert.match(page.elements.results.innerHTML, /Local indexed bond one/);
+    assert.ok(!requests.some(url => url.includes('/.netlify/functions/bond-search?')),
+      'Valid exact and partial ISIN matches should be served locally without a remote fallback');
+    if (query === 'FR0000047607') {
+      assert.doesNotMatch(page.elements.results.innerHTML, /Local indexed bond two/);
+    } else {
+      assert.match(page.elements.results.innerHTML, /Local indexed bond two/);
+    }
+    assert.equal(page.elements.search.disabled, false);
+  }
+});
