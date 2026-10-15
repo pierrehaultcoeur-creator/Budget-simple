@@ -81,11 +81,25 @@ jobs:
           assert all(item["bytes"] < 100 * 1024 * 1024 for item in manifest.get("isinIndexes", []))
           assert all((Path("data/bonds-catalog") / item["file"]).exists() for item in manifest.get("isinIndexes", []))
           shard_names = {part["file"] for part in manifest["parts"]}
-          # Verify every ISIN index entry points to the shard that actually contains it.
+          # Recompute both lookup structures from the actual shards. Shape-only
+          # checks cannot detect a stale index that silently omits valid results.
+          import re
+          import unicodedata
           shard_isins = {}
+          expected_name_index = {}
+          searchable_fields = ("name", "shortName", "short_name", "issuer", "instrumentName", "nameOfFinancialInstrument")
           for part in manifest["parts"]:
               payload = json.loads((Path("data/bonds-catalog") / part["file"]).read_text(encoding="utf-8"))
-              shard_isins[part["file"]] = {str(record.get("isin") or "").upper() for record in payload.get("records", [])}
+              records = payload.get("records", [])
+              shard_isins[part["file"]] = {str(record.get("isin") or "").upper() for record in records}
+              for record in records:
+                  searchable = " ".join(str(record.get(field) or "") for field in searchable_fields)
+                  normalized = unicodedata.normalize("NFKD", searchable)
+                  normalized = "".join(char for char in normalized if not unicodedata.combining(char)).lower()
+                  tokens = re.findall(r"[a-z0-9]+", normalized)
+                  grams = {token[i:i + 3] for token in tokens for i in range(len(token) - 2)}
+                  for gram in grams:
+                      expected_name_index.setdefault(gram, set()).add(part["file"])
           indexed_isins = 0
           for item in manifest.get("isinIndexes", []):
               index_path = Path("data/bonds-catalog") / item["file"]
@@ -128,7 +142,12 @@ jobs:
                   assert gram.isascii() and gram.isalnum() and gram == gram.lower(), f"Name trigram crosses token boundaries or is not normalized: {gram!r}"
                   assert isinstance(files, list) and files, f"Empty shard list for trigram {gram!r}"
                   assert set(files) <= shard_names, f"Name index references unknown shards for {gram!r}"
+                  assert set(files) == expected_name_index.get(gram, set()), f"Stale or incomplete name index for trigram {gram!r}"
                   indexed_trigrams += 1
+          assert {gram for gram in expected_name_index} == {
+              gram for item in name_indexes
+              for gram in json.loads((Path("data/bonds-catalog") / item["file"]).read_text(encoding="utf-8"))
+          }, "Name index is missing one or more trigrams from the catalogue"
           print(f"Validated {manifest['recordCount']} records, {manifest['partCount']} shards, {indexed_isins} ISIN index entries across {len(manifest.get('isinIndexes', []))} indexes, and {indexed_trigrams} name trigrams across {len(name_indexes)} name indexes.")
           PY
 
