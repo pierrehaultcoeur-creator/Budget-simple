@@ -45,11 +45,11 @@ def records_from(payload):
 
 def compact_record(record):
     if isinstance(record, str):
-        isin = record.replace(' ', '').upper()
+        isin = ''.join(record.split()).upper()
         return {'isin': isin, 'name': None} if isin else None
     if not isinstance(record, dict):
         return None
-    isin = str(record.get('isin') or record.get('ISIN') or record.get('isinCode') or '').replace(' ', '').upper()
+    isin = ''.join(str(record.get('isin') or record.get('ISIN') or record.get('isinCode') or '').split()).upper()
     if not isin:
         return None
     out = dict(record)
