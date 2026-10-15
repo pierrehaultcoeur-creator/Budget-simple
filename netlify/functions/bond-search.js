@@ -79,9 +79,15 @@ function isAllowedShardReference(filename, manifest) {
 function readIsinIndex(prefix, manifest) {
   // Optional index metadata may be malformed even when the manifest's shard
   // list is valid. Treat it as unavailable so callers can use shard scanning.
-  const entries = Array.isArray(manifest?.isinIndexes) ? manifest.isinIndexes : [];
-  const entry = entries.find(item => item && item.prefix === prefix);
-  if (!entry || !isSafeCatalogFilename(entry.file)) return null;
+  const entries = manifest?.isinIndexes;
+  if (!Array.isArray(entries) || entries.some(item => !item || typeof item !== 'object'
+    || typeof item.prefix !== 'string' || !/^[A-Z]{2}$/.test(item.prefix)
+    || !isSafeCatalogFilename(item.file))) return null;
+  // Duplicate prefixes can make .find() select an incomplete index and hide matches.
+  const prefixes = entries.map(item => item.prefix);
+  if (new Set(prefixes).size !== prefixes.length) return null;
+  const entry = entries.find(item => item.prefix === prefix);
+  if (!entry) return null;
   if (ISIN_INDEX_CACHE.has(entry.file)) return ISIN_INDEX_CACHE.get(entry.file);
   try {
     const index = JSON.parse(fs.readFileSync(path.join(SHARDED_DIR, entry.file), 'utf8'));
