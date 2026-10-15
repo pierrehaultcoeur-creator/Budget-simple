@@ -1251,3 +1251,27 @@ test('exact ISIN lookup falls back when the index points outside declared catalo
   assert.deepEqual(results.map(item => item.isin), [isin]);
   assert.equal(results[0].name, 'Recovered from safe fallback');
 });
+
+
+test('ISIN prefix lookup falls back when an index entry points outside declared catalogue shards', () => {
+  const query = 'FR00';
+  const fakeManifest = { parts: [{ file: 'part-0001.json' }] };
+  let fallbackCalled = false;
+  const expected = search._test.canonicalBond({ isin: 'FR0000047607', name: 'Recovered partial ISIN from safe fallback' });
+  const results = search._test.resolveIsinPrefixFromIndex(
+    query,
+    fakeManifest,
+    { 'FR0000047607': '../manifest.json' },
+    () => { throw new Error('Untrusted index reference must never be read'); },
+    (receivedQuery, receivedManifest) => {
+      fallbackCalled = true;
+      assert.equal(receivedQuery, query);
+      assert.equal(receivedManifest, fakeManifest);
+      return [expected];
+    }
+  );
+
+  assert.equal(fallbackCalled, true);
+  assert.deepEqual(results.map(item => item.isin), ['FR0000047607']);
+  assert.equal(results[0].name, 'Recovered partial ISIN from safe fallback');
+});
