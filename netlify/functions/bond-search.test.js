@@ -779,6 +779,13 @@ test('name search falls back safely for malformed manifest index entries', () =>
     nameIndexes: [{ prefix: 'b', file: '../outside.json' }]
   }), null, 'Expected unsafe index filenames to trigger a full-scan fallback');
   assert.equal(indexedNameParts('banque exemple', {
+    parts: manifest.parts,
+    nameIndexes: [
+      { prefix: 'b', file: 'name-index-b-1.json' },
+      { prefix: 'b', file: 'name-index-b-2.json' }
+    ]
+  }), null, 'Expected duplicate prefixes to trigger a full-scan fallback');
+  assert.equal(indexedNameParts('banque exemple', {
     parts: [null],
     nameIndexes: []
   }), null, 'Expected malformed shard entries to trigger a full-scan fallback');
