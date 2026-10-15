@@ -1065,3 +1065,46 @@ test('malformed ISIN index metadata is treated as unavailable and does not throw
   assert.equal(readIndex('FR', { isinIndexes: { prefix: 'FR', file: 'isin-index-FR.json' } }), null);
   assert.equal(readIndex('FR', { isinIndexes: [null, 42, { prefix: 'DE', file: 'isin-index-DE.json' }] }), null);
 });
+
+
+test('ISIN prefix lookup scans shards when the index has no matching prefix entries', () => {
+  const query = 'ZZ99';
+  const fakeManifest = { parts: [{ file: 'part-0001.json' }] };
+  let fallbackCalled = false;
+  const expected = search._test.canonicalBond({ isin: 'ZZ9912345678', name: 'Recovered partial ISIN' });
+  const results = search._test.resolveIsinPrefixFromIndex(
+    query,
+    fakeManifest,
+    { 'ZZ0012345678': 'part-0001.json' },
+    () => { throw new Error('Shard reader should not be called when there are no matching entries'); },
+    (receivedQuery, receivedManifest) => {
+      fallbackCalled = true;
+      assert.equal(receivedQuery, query);
+      assert.equal(receivedManifest, fakeManifest);
+      return [expected];
+    }
+  );
+  assert.equal(fallbackCalled, true);
+  assert.deepEqual(results.map(item => item.isin), ['ZZ9912345678']);
+});
+
+test('ISIN prefix lookup scans shards when indexed records are missing from their shard', () => {
+  const query = 'FR12';
+  const fakeManifest = { parts: [{ file: 'part-0001.json' }, { file: 'part-0002.json' }] };
+  let fallbackCalled = false;
+  const expected = search._test.canonicalBond({ isin: 'FR1234567890', name: 'Recovered stale partial ISIN' });
+  const results = search._test.resolveIsinPrefixFromIndex(
+    query,
+    fakeManifest,
+    { 'FR1234567890': 'part-0001.json' },
+    () => [],
+    (receivedQuery, receivedManifest) => {
+      fallbackCalled = true;
+      assert.equal(receivedQuery, query);
+      assert.equal(receivedManifest, fakeManifest);
+      return [expected];
+    }
+  );
+  assert.equal(fallbackCalled, true);
+  assert.deepEqual(results.map(item => item.isin), ['FR1234567890']);
+});

@@ -249,20 +249,23 @@ function exactIsinSearch(isin) {
   return resolveExactIsinFromIndex(isin, manifest, index);
 }
 
-function indexedIsinPrefixSearch(query, manifest) {
+function resolveIsinPrefixFromIndex(query, manifest, index, shardReader = readShard, scan = scanShardsByIsin) {
   if (!/^[A-Z]{2}[A-Z0-9]{2,10}$/.test(query)) return null;
-  const index = readIsinIndex(query.slice(0, 2), manifest);
-  if (!index) return scanShardsByIsin(query, manifest);
+  if (!index || typeof index !== 'object' || Array.isArray(index)) {
+    return scan(query, manifest);
+  }
   const matchingEntries = Object.entries(index)
-    .filter(([isin]) => isin.startsWith(query))
+    .filter(([isin]) => typeof isin === 'string' && isin.startsWith(query))
     .sort(([a], [b]) => a.localeCompare(b));
-  if (!matchingEntries.length) return [];
+  // A missing prefix in an incomplete/stale index must not hide records that
+  // still exist in the catalogue shards.
+  if (!matchingEntries.length) return scan(query, manifest);
   const allowedFiles = allowedShardFiles(manifest);
   // Validate every matching reference before applying the result limit, so a
   // corrupt entry cannot silently hide catalogue records behind the index.
   if (matchingEntries.some(([, filename]) =>
     !isSafeCatalogFilename(filename) || !allowedFiles.has(filename))) {
-    return scanShardsByIsin(query, manifest);
+    return scan(query, manifest);
   }
   const matches = matchingEntries.slice(0, MAX_RESULTS);
   const byShard = new Map();
@@ -272,15 +275,23 @@ function indexedIsinPrefixSearch(query, manifest) {
   }
   const results = [];
   for (const [filename, isins] of byShard) {
-    for (const raw of readShard(filename)) {
-      const isin = String(raw?.isin || raw?.ISIN || raw?.isinCode || '').replace(/\s+/g, '').toUpperCase();
+    for (const raw of shardReader(filename)) {
+      const isin = String(raw?.isin || raw?.ISIN || raw?.isinCode || '').replace(/\\s+/g, '').toUpperCase();
       if (isins.has(isin)) {
         const item = canonicalBond(raw);
         if (item) results.push(item);
       }
     }
   }
+  // A stale index may point at valid shards whose records have since moved or
+  // disappeared. Recover from the source shards instead of returning a false negative.
+  if (results.length < matches.length) return scan(query, manifest);
   return results.slice(0, MAX_RESULTS);
+}
+function indexedIsinPrefixSearch(query, manifest) {
+  if (!/^[A-Z]{2}[A-Z0-9]{2,10}$/.test(query)) return null;
+  const index = readIsinIndex(query.slice(0, 2), manifest);
+  return resolveIsinPrefixFromIndex(query, manifest, index);
 }
 function readNameIndex(file) {
   if (!isSafeCatalogFilename(file)) return null;
@@ -581,7 +592,7 @@ async function openFigiSearch(q) {
   return Array.isArray(payload.data) ? payload.data.map(normalizeOpenFigi).filter(Boolean).slice(0, MAX_RESULTS) : [];
 }
 
-exports._test = { canonicalBond, publicBond, catalogSearch, rankCatalogRecords, rankCatalogRecordsByIsin, shardedCatalogSearch, exactIsinSearch, resolveExactIsinFromIndex, scanShardsByIsin, normalize, normalizeOpenFigi, scoreCatalogRecord, indexedNameParts, nameIndexFiles, isSafeCatalogFilename, isAllowedShardReference, allowedShardFiles, readIsinIndex, isFigiLikeQuery, shouldSearchShardedCatalog, shouldSearchShardedNames };
+exports._test = { canonicalBond, publicBond, catalogSearch, rankCatalogRecords, rankCatalogRecordsByIsin, shardedCatalogSearch, exactIsinSearch, resolveExactIsinFromIndex, resolveIsinPrefixFromIndex, scanShardsByIsin, normalize, normalizeOpenFigi, scoreCatalogRecord, indexedNameParts, nameIndexFiles, isSafeCatalogFilename, isAllowedShardReference, allowedShardFiles, readIsinIndex, isFigiLikeQuery, shouldSearchShardedCatalog, shouldSearchShardedNames };
 
 exports.handler = async (event) => {
   const q = String(event?.queryStringParameters?.q || '').trim();
