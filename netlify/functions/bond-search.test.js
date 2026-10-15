@@ -768,8 +768,21 @@ test('malformed trigram entries trigger a safe full-scan fallback', () => {
     'Expected valid references to known shards to be accepted');
 });
 
-test('name search falls back to full shard scan when the name index is unavailable', () => {
-  assert.equal(search._test.indexedNameParts('banque exemple', {
+test('name search falls back safely for malformed manifest index entries', () => {
+  const indexedNameParts = search._test.indexedNameParts;
+  assert.equal(indexedNameParts('banque exemple', {
+    parts: manifest.parts,
+    nameIndexes: [null]
+  }), null, 'Expected null name-index entries to trigger a full-scan fallback');
+  assert.equal(indexedNameParts('banque exemple', {
+    parts: manifest.parts,
+    nameIndexes: [{ prefix: 'b', file: '../outside.json' }]
+  }), null, 'Expected unsafe index filenames to trigger a full-scan fallback');
+  assert.equal(indexedNameParts('banque exemple', {
+    parts: [null],
+    nameIndexes: []
+  }), null, 'Expected malformed shard entries to trigger a full-scan fallback');
+  assert.equal(indexedNameParts('banque exemple', {
     parts: manifest.parts,
     nameIndexes: []
   }), null, 'Expected missing index entries to trigger a full-scan fallback');
