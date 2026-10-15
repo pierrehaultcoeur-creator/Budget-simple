@@ -12,7 +12,7 @@ SPEC.loader.exec_module(module)
 
 class SplitterIndexTests(unittest.TestCase):
     def test_compact_record_removes_all_whitespace_from_isin(self):
-        self.assertEqual(module.compact_record({"isin": " FR\\t0000120271\\n"})["isin"], "FR0000120271")
+        self.assertEqual(module.compact_record({"isin": " FR\t0000120271\n"})["isin"], "FR0000120271")
         self.assertEqual(module.compact_record(" US 0378331005 ")["isin"], "US0378331005")
 
     def test_builds_prefix_partitioned_isin_index(self):
