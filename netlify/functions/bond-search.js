@@ -276,7 +276,7 @@ function resolveIsinPrefixFromIndex(query, manifest, index, shardReader = readSh
   const results = [];
   for (const [filename, isins] of byShard) {
     for (const raw of shardReader(filename)) {
-      const isin = String(raw?.isin || raw?.ISIN || raw?.isinCode || '').replace(/\\s+/g, '').toUpperCase();
+      const isin = String(raw?.isin || raw?.ISIN || raw?.isinCode || '').replace(/\s+/g, '').toUpperCase();
       if (isins.has(isin)) {
         const item = canonicalBond(raw);
         if (item) results.push(item);
