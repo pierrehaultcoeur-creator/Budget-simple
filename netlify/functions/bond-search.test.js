@@ -1354,7 +1354,7 @@ test('catalogue manifest accepts only unique declared shard filenames', () => {
 
 function loadInvestmentSearchPage(fetchImpl) {
   const html = fs.readFileSync(path.join(__dirname, '..', '..', 'investissement.html'), 'utf8');
-  const scripts = [...html.matchAll(/<script\\b[^>]*>([\\s\\S]*?)<\\/script>/gi)].map(match => match[1]).filter(script => script.trim());
+  const scripts = [...html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)].map(match => match[1]).filter(script => script.trim());
   const elements = Object.fromEntries(['status', 'results', 'q', 'search'].map(id => [id, {
     value: '', disabled: false, innerHTML: '', textContent: '',
     addEventListener() {}
@@ -1365,7 +1365,7 @@ function loadInvestmentSearchPage(fetchImpl) {
     console: { warn() {}, error() {} },
     Map, Set, Promise
   };
-  vm.runInNewContext(scripts[scripts.length - 1] + '\\nglobalThis.__investmentSearchTest = { getIndex, searchLocal };', context);
+  vm.runInNewContext(scripts[scripts.length - 1] + '\nglobalThis.__investmentSearchTest = { getIndex, searchLocal };', context);
   return context.__investmentSearchTest;
 }
 
