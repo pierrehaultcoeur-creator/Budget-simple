@@ -748,6 +748,12 @@ test('malformed trigram entries trigger a safe full-scan fallback', () => {
     'Expected a malformed trigram value to trigger fallback rather than hide valid matches');
   assert.equal(filesFor({ ban: null }, 'ban'), null,
     'Expected null index entries to be treated as malformed');
+  assert.equal(filesFor({ ban: [42] }, 'ban'), null,
+    'Expected non-string shard references to trigger fallback');
+  assert.equal(filesFor({ ban: ['missing-shard.json'] }, 'ban', new Set(['part-0001.json'])), null,
+    'Expected unknown shard references to trigger fallback');
+  assert.deepEqual(filesFor({ ban: ['part-0001.json'] }, 'ban', new Set(['part-0001.json'])), ['part-0001.json'],
+    'Expected valid references to known shards to be accepted');
 });
 
 test('name search falls back to full shard scan when the name index is unavailable', () => {
