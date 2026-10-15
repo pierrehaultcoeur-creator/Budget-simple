@@ -1508,3 +1508,23 @@ test('investment page falls back to server search when the local catalogue canno
   assert.match(page.elements.status.textContent, /1 résultat\(s\) via Test server/);
   assert.equal(page.elements.search.disabled, false);
 });
+
+
+test('investment page reports a server outage cleanly and re-enables search', async () => {
+  const requests = [];
+  const page = loadInvestmentSearchPage(async url => {
+    requests.push(url);
+    if (url.endsWith('manifest.json')) throw new Error('Simulated local catalogue outage');
+    if (url.includes('/.netlify/functions/bond-search?')) throw new Error('Simulated server outage');
+    throw new Error('Unexpected URL: ' + url);
+  });
+
+  page.elements.q.value = 'FR0000047607';
+  await page.doSearch();
+
+  assert.ok(requests.some(url => url.includes('/.netlify/functions/bond-search?')),
+    'Expected a server fallback attempt');
+  assert.match(page.elements.status.textContent, /Recherche indisponible/);
+  assert.match(page.elements.results.innerHTML, /Impossible de joindre le service de recherche/);
+  assert.equal(page.elements.search.disabled, false);
+});
