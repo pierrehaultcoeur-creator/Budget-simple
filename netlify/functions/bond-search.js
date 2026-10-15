@@ -115,7 +115,12 @@ function readIsinIndex(prefix, manifest) {
   if (files.some(file => shardFiles.has(file))) return null;
   const entry = entries.find(item => item.prefix === prefix);
   if (!entry) return null;
-  if (ISIN_INDEX_CACHE.has(entry.file)) return ISIN_INDEX_CACHE.get(entry.file);
+  if (ISIN_INDEX_CACHE.has(entry.file)) {
+    const cachedIndex = ISIN_INDEX_CACHE.get(entry.file);
+    // Cache entries must still satisfy the current manifest. This keeps warm
+    // runtimes and injected/test manifests from bypassing reference validation.
+    return isValidIsinIndex(cachedIndex, prefix, manifest) ? cachedIndex : null;
+  }
   try {
     const index = JSON.parse(fs.readFileSync(path.join(SHARDED_DIR, entry.file), 'utf8'));
     if (!isValidIsinIndex(index, prefix, manifest)) return null;
