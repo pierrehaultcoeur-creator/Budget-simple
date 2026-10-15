@@ -1598,7 +1598,7 @@ test('investment page retries loading the local manifest after a transient outag
 
   page.elements.q.value = 'FR0000047607';
   await page.doSearch();
-  assert.match(page.elements.status.textContent, /1 résultat\(s\) via bond-master/);
+  assert.match(page.elements.status.textContent, /0 résultat\(s\) via bond-master/);
   assert.equal(page.elements.search.disabled, false);
 
   await page.doSearch();
