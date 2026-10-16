@@ -102,7 +102,7 @@ def write_shards(records, source_metadata=None):
         target.write_text(json.dumps({'version': 1, 'records': shard}, ensure_ascii=False, separators=(',', ':')) + '\n', encoding='utf-8')
         raw = target.read_bytes()
         total += len(shard)
-        has_names = has_names or any(bool(x.get('name') or x.get('shortName') or x.get('short_name') or x.get('issuer')) for x in shard)
+        has_names = has_names or any(bool(x.get(field)) for x in shard for field in (\n            'name', 'shortName', 'short_name', 'issuer', 'instrumentName', 'nameOfFinancialInstrument'\n        ))
         manifest_parts.append({'file': filename, 'records': len(shard), 'bytes': len(raw), 'sha256': hashlib.sha256(raw).hexdigest()})
         if len(raw) >= 100 * 1024 * 1024:
             raise RuntimeError(f'{filename} exceeds GitHub 100 MB limit')
