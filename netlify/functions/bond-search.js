@@ -396,6 +396,10 @@ function indexedNameParts(key, manifest) {
   if (!tokens.length) return null;
 
   let candidateFiles = null;
+  // A query often needs many trigrams from the same index file. Validate each
+  // loaded index once per search, not once per trigram: full-object validation
+  // is deliberately strict but must not multiply work by the query length.
+  const validatedIndexes = new Map();
   for (const token of tokens) {
     let tokenFiles = null;
     for (let i = 0; i <= token.length - 3; i += 1) {
@@ -406,8 +410,12 @@ function indexedNameParts(key, manifest) {
       if (!entry) return null;
       const index = readNameIndex(entry.file);
       // Validate every entry in the loaded index, not only the requested trigram.
+      // Cache the result locally for this search because many trigrams share a file.
       // Corrupt keys or duplicate/unknown shard references invalidate the fast path.
-      if (!isValidNameIndex(index, entry.prefix, allowedFiles)) return null;
+      if (!validatedIndexes.has(entry.file)) {
+        validatedIndexes.set(entry.file, isValidNameIndex(index, entry.prefix, allowedFiles));
+      }
+      if (!validatedIndexes.get(entry.file)) return null;
       const files = nameIndexFiles(index, gram, allowedFiles);
       // A missing trigram is a valid no-match; a malformed entry means the
       // index cannot be trusted, so fall back to the complete shard scan.
