@@ -42,6 +42,16 @@ test('exact ISIN lookup returns the indexed bond', () => {
   assert.equal(results[0].type, 'bond');
 });
 
+test('known French ISIN FR0000047607 resolves through the generated index', () => {
+  // Keep one stable, real-world identifier in the regression suite in addition
+  // to the dynamically selected sample. This protects the user-facing lookup
+  // path against accidental index/catalogue drift.
+  const results = search._test.shardedCatalogSearch('FR0000047607');
+  assert.equal(results.length, 1);
+  assert.equal(results[0].isin, 'FR0000047607');
+  assert.equal(results[0].type, 'bond');
+});
+
 test('partial ISIN prefix lookup returns only matching ISINs', () => {
   const isin = firstIndexedIsin();
   const prefix = isin.slice(0, 4);
