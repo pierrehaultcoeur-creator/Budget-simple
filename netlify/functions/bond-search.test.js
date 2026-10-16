@@ -1896,23 +1896,32 @@ test('indexed name search returns the same ranked results as full scans across c
 
     const tokens = [...new Set(search._test.normalize(sample.name)
       .split(' ').filter(token => token.length >= 4))];
-    const query = `${tokens[0].slice(0, 3)} ${tokens[1].slice(0, 3)}`;
-    const expected = [];
+    // Check both token orders. Users can enter issuer/name fragments in a
+    // different order from the source name, and each order must preserve the
+    // exact ranking returned by the full-scan oracle.
+    const queries = [
+      `${tokens[0].slice(0, 3)} ${tokens[1].slice(0, 3)}`,
+      `${tokens[1].slice(0, 3)} ${tokens[0].slice(0, 3)}`
+    ];
 
-    for (const raw of fullScanRecords) {
-      const item = search._test.canonicalBond(raw);
-      if (!item) continue;
-      const score = search._test.scoreCatalogRecord(item, query);
-      if (score > 0) expected.push({ item, score });
+    for (const query of queries) {
+      const expected = [];
+
+      for (const raw of fullScanRecords) {
+        const item = search._test.canonicalBond(raw);
+        if (!item) continue;
+        const score = search._test.scoreCatalogRecord(item, query);
+        if (score > 0) expected.push({ item, score });
+      }
+
+      expected.sort((a, b) => b.score - a.score
+        || String(a.item.name || '').localeCompare(String(b.item.name || ''), 'en'));
+      const expectedIsins = expected.slice(0, 30).map(entry => entry.item.isin);
+      const indexedIsins = search._test.shardedCatalogSearch(query).map(item => item.isin);
+
+      assert.deepEqual(indexedIsins, expectedIsins,
+        `Indexed query "${query}" from shard ${part.file} should match full-scan ranked results`);
     }
-
-    expected.sort((a, b) => b.score - a.score
-      || String(a.item.name || '').localeCompare(String(b.item.name || ''), 'en'));
-    const expectedIsins = expected.slice(0, 30).map(entry => entry.item.isin);
-    const indexedIsins = search._test.shardedCatalogSearch(query).map(item => item.isin);
-
-    assert.deepEqual(indexedIsins, expectedIsins,
-      `Indexed query "${query}" from shard ${part.file} should match full-scan ranked results`);
   }
 });
 
