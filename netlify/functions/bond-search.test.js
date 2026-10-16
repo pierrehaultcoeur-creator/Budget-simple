@@ -1865,3 +1865,42 @@ test('name index retains matching records across representative catalogue shards
 
   assert.equal(checked, sampleIndexes.length);
 });
+
+test('indexed name search returns the same ranked results as a full catalogue scan', () => {
+  // Select a deterministic query from a middle shard, then use the complete
+  // catalogue as an oracle to detect any false negatives introduced by indexing.
+  const part = manifest.parts[Math.floor((manifest.parts.length - 1) / 2)];
+  const shard = JSON.parse(fs.readFileSync(path.join(catalogueDir, part.file), 'utf8'));
+  const records = Array.isArray(shard) ? shard : (shard.records || shard.items || []);
+  const sample = records.find(record => {
+    if (typeof record.name !== 'string' || !record.isin) return false;
+    const tokens = [...new Set(search._test.normalize(record.name)
+      .split(' ').filter(token => token.length >= 4))];
+    return tokens.length >= 2;
+  });
+  assert.ok(sample, `Expected a searchable name in middle shard ${part.file}`);
+
+  const tokens = [...new Set(search._test.normalize(sample.name)
+    .split(' ').filter(token => token.length >= 4))];
+  const query = `${tokens[0].slice(0, 3)} ${tokens[1].slice(0, 3)}`;
+  const expected = [];
+
+  for (const cataloguePart of manifest.parts) {
+    const payload = JSON.parse(fs.readFileSync(path.join(catalogueDir, cataloguePart.file), 'utf8'));
+    const shardRecords = Array.isArray(payload) ? payload : (payload.records || payload.items || []);
+    for (const raw of shardRecords) {
+      const item = search._test.canonicalBond(raw);
+      if (!item) continue;
+      const score = search._test.scoreCatalogRecord(item, search._test.normalize(query));
+      if (score > 0) expected.push({ item, score });
+    }
+  }
+
+  expected.sort((a, b) => b.score - a.score
+    || String(a.item.name || '').localeCompare(String(b.item.name || ''), 'en'));
+  const expectedIsins = expected.slice(0, 30).map(entry => entry.item.isin);
+  const indexedIsins = search._test.shardedCatalogSearch(query).map(item => item.isin);
+
+  assert.deepEqual(indexedIsins, expectedIsins,
+    `Indexed query "${query}" should match the full-scan ranked results`);
+});
