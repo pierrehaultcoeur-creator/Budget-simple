@@ -91,8 +91,7 @@ jobs:
           shard_names = {part["file"] for part in manifest["parts"]}
           # Recompute both lookup structures from the actual shards. Shape-only
           # checks cannot detect a stale index that silently omits valid results.
-          import re
-          import unicodedata
+          from scripts.split_bonds_catalog import trigrams
           shard_isins = {}
           expected_name_index = {}
           searchable_fields = ("name", "shortName", "short_name", "issuer", "instrumentName", "nameOfFinancialInstrument")
@@ -102,11 +101,7 @@ jobs:
               shard_isins[part["file"]] = {str(record.get("isin") or "").upper() for record in records}
               for record in records:
                   searchable = " ".join(str(record.get(field) or "") for field in searchable_fields)
-                  normalized = unicodedata.normalize("NFKD", searchable)
-                  normalized = "".join(char for char in normalized if not unicodedata.category(char).startswith("M")).lower()
-                  tokens = re.findall(r"[a-z0-9]+", normalized)
-                  grams = {token[i:i + 3] for token in tokens for i in range(len(token) - 2)}
-                  for gram in grams:
+                  for gram in trigrams(searchable):
                       expected_name_index.setdefault(gram, set()).add(part["file"])
           indexed_isins = 0
           for item in manifest.get("isinIndexes", []):
