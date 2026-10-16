@@ -171,5 +171,28 @@ class SplitterIndexTests(unittest.TestCase):
                 module.TARGET_BYTES = old_target
 
 
+    def test_searchable_name_manifest_flag_covers_every_indexed_field(self):
+        records = [
+            {"isin": "FR0000120271", "name": None, "instrumentName": "Instrument Alpha 2030"},
+            {"isin": "US0378331005", "name": "", "nameOfFinancialInstrument": "Instrument Beta 2031"},
+        ]
+        with tempfile.TemporaryDirectory() as tmp:
+            old_out = module.OUT
+            try:
+                module.OUT = pathlib.Path(tmp) / "catalogue"
+                module.write_shards(records)
+                manifest = json.loads((module.OUT / "manifest.json").read_text(encoding="utf-8"))
+                self.assertTrue(manifest["hasSearchableNames"])
+                self.assertTrue(manifest["nameIndexes"])
+                indexes = {}
+                for entry in manifest["nameIndexes"]:
+                    indexes.update(json.loads((module.OUT / entry["file"]).read_text(encoding="utf-8")))
+                self.assertIn("ins", indexes)
+                self.assertIn("alp", indexes)
+                self.assertIn("bet", indexes)
+            finally:
+                module.OUT = old_out
+
+
 if __name__ == "__main__":
     unittest.main()
