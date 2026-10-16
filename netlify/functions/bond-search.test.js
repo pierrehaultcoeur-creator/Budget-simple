@@ -1947,9 +1947,20 @@ test('name index preserves short-name ranking across catalogue regions', () => {
     const records = Array.isArray(payload) ? payload : (payload.records || payload.items || []);
     const sample = records.find(record => {
       if (typeof record?.shortName !== 'string' || !record.isin) return false;
-      const tokens = [...new Set(search._test.normalize(record.shortName)
+      const normalizedShortName = search._test.normalize(record.shortName);
+      const tokens = [...new Set(normalizedShortName
         .split(' ').filter(token => token.length >= 3))];
-      return tokens.length >= 2;
+      if (tokens.length < 2) return false;
+
+      // The public search returns at most 30 results. Prefer a short name whose
+      // exact-match group is small enough that this sample can be asserted in
+      // the returned page instead of accidentally selecting a duplicate-heavy
+      // name whose record ranks beyond the result limit.
+      const exactShortNameMatches = fullScanRecords.filter(raw =>
+        search._test.normalize(raw?.shortName || raw?.short_name) === normalizedShortName);
+      return exactShortNameMatches.length > 0
+        && exactShortNameMatches.length <= 30
+        && exactShortNameMatches.some(raw => raw.isin === record.isin);
     });
     assert.ok(sample, `Expected a searchable shortName in shard ${part.file}`);
 
