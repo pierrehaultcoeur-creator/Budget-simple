@@ -153,6 +153,21 @@ test('short names are eligible for bond search ranking', () => {
     'Expected a short-name prefix query to match the bond');
 });
 
+test('accented and punctuated short names keep normalized exact-match ranking', () => {
+  const score = search._test.scoreCatalogRecord;
+  const record = {
+    name: 'Long legal description of the debt instrument',
+    shortName: 'Société-Générale / EMTN 2030',
+    issuer: 'Société Générale'
+  };
+
+  assert.equal(search._test.normalize(record.shortName), 'societe generale emtn 2030');
+  assert.equal(score(record, 'societe generale emtn 2030'), 900,
+    'Expected accents and punctuation not to weaken an exact normalized short-name match');
+  assert.ok(score(record, 'generale societe') > 0,
+    'Expected reordered normalized short-name tokens to remain searchable');
+});
+
 test('exact short-name matches outrank broad name fragments but not exact legal names', () => {
   const score = search._test.scoreCatalogRecord;
   const exactShortName = score({
