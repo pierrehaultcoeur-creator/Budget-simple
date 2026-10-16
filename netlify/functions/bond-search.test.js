@@ -1961,12 +1961,21 @@ test('name index preserves short-name ranking across catalogue regions', () => {
     Math.floor((manifest.parts.length - 1) / 2),
     manifest.parts.length - 1
   ])];
-  // Build the exhaustive oracle once; compare samples from multiple catalogue
-  // regions without repeatedly loading hundreds of thousands of records.
+  // Build the exhaustive oracle and exact-short-name lookup once. Re-filtering
+  // the entire catalogue from inside records.find() made sample selection O(N²)
+  // on real ESMA data and kept the regression job running far longer than needed.
   const fullScanRecords = manifest.parts.flatMap(cataloguePart => {
     const payload = JSON.parse(fs.readFileSync(path.join(catalogueDir, cataloguePart.file), 'utf8'));
     return Array.isArray(payload) ? payload : (payload.records || payload.items || []);
   });
+  const shortNameIsins = new Map();
+  for (const raw of fullScanRecords) {
+    if (!raw?.isin) continue;
+    const normalized = search._test.normalize(raw?.shortName || raw?.short_name);
+    if (!normalized) continue;
+    if (!shortNameIsins.has(normalized)) shortNameIsins.set(normalized, new Set());
+    shortNameIsins.get(normalized).add(raw.isin);
+  }
 
   for (const partIndex of sampleIndexes) {
     const part = manifest.parts[partIndex];
@@ -1983,11 +1992,10 @@ test('name index preserves short-name ranking across catalogue regions', () => {
       // exact-match group is small enough that this sample can be asserted in
       // the returned page instead of accidentally selecting a duplicate-heavy
       // name whose record ranks beyond the result limit.
-      const exactShortNameMatches = fullScanRecords.filter(raw =>
-        search._test.normalize(raw?.shortName || raw?.short_name) === normalizedShortName);
-      return exactShortNameMatches.length > 0
-        && exactShortNameMatches.length <= 30
-        && exactShortNameMatches.some(raw => raw.isin === record.isin);
+      const exactShortNameIsins = shortNameIsins.get(normalizedShortName);
+      return exactShortNameIsins?.size > 0
+        && exactShortNameIsins.size <= 30
+        && exactShortNameIsins.has(record.isin);
     });
     assert.ok(sample, `Expected a searchable shortName in shard ${part.file}`);
 
