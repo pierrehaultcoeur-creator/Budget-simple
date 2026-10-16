@@ -1925,66 +1925,65 @@ test('indexed name search returns the same ranked results as full scans across c
   }
 });
 
-test('name index retains searchable short-name matches from the real catalogue', () => {
+test('name index preserves short-name ranking across catalogue regions', () => {
   // The ESMA catalogue has shortName records, but issuer metadata is not guaranteed
   // to be populated in every catalogue snapshot. Issuer indexing is covered by the
   // synthetic generator regression tests in tests/test_split_bonds_catalog.py.
-  for (const field of ['shortName']) {
-    let found = false;
-    for (const part of manifest.parts) {
-      const payload = JSON.parse(fs.readFileSync(path.join(catalogueDir, part.file), 'utf8'));
-      const records = Array.isArray(payload) ? payload : (payload.records || payload.items || []);
-      const sample = records.find(record => {
-        const value = record && record[field];
-        if (typeof value !== 'string' || !record.isin) return false;
-        const tokens = [...new Set(search._test.normalize(value)
-          .split(' ').filter(token => token.length >= 3))];
-        return tokens.length >= 2;
-      });
-      if (!sample) continue;
+  const sampleIndexes = [...new Set([
+    0,
+    Math.floor((manifest.parts.length - 1) / 2),
+    manifest.parts.length - 1
+  ])];
+  // Build the exhaustive oracle once; compare samples from multiple catalogue
+  // regions without repeatedly loading hundreds of thousands of records.
+  const fullScanRecords = manifest.parts.flatMap(cataloguePart => {
+    const payload = JSON.parse(fs.readFileSync(path.join(catalogueDir, cataloguePart.file), 'utf8'));
+    return Array.isArray(payload) ? payload : (payload.records || payload.items || []);
+  });
 
-      const tokens = [...new Set(search._test.normalize(sample[field])
+  for (const partIndex of sampleIndexes) {
+    const part = manifest.parts[partIndex];
+    const payload = JSON.parse(fs.readFileSync(path.join(catalogueDir, part.file), 'utf8'));
+    const records = Array.isArray(payload) ? payload : (payload.records || payload.items || []);
+    const sample = records.find(record => {
+      if (typeof record?.shortName !== 'string' || !record.isin) return false;
+      const tokens = [...new Set(search._test.normalize(record.shortName)
         .split(' ').filter(token => token.length >= 3))];
-      const query = `${tokens[0].slice(0, 3)} ${tokens[1].slice(0, 3)}`;
-      const candidates = search._test.indexedNameParts(query, manifest);
-      assert.ok(Array.isArray(candidates), `Expected indexed candidates for ${field} query "${query}"`);
-      assert.ok(candidates.some(candidate => candidate.file === part.file),
-        `Expected ${field} query "${query}" to retain source shard ${part.file} for ISIN ${sample.isin}`);
+      return tokens.length >= 2;
+    });
+    assert.ok(sample, `Expected a searchable shortName in shard ${part.file}`);
 
-      // Candidate retention alone is insufficient: the final ranking/scoring
-      // stage must also recognize the indexed field when users search its full value.
-      const exactQuery = search._test.normalize(sample[field]);
-      const exactResults = search._test.shardedCatalogSearch(exactQuery);
-      assert.ok(exactResults.some(item => item.isin === sample.isin),
-        `Expected exact ${field} search "${exactQuery}" to return ISIN ${sample.isin}`);
+    const tokens = [...new Set(search._test.normalize(sample.shortName)
+      .split(' ').filter(token => token.length >= 3))];
+    const query = `${tokens[0].slice(0, 3)} ${tokens[1].slice(0, 3)}`;
+    const exactQuery = search._test.normalize(sample.shortName);
+    const candidates = search._test.indexedNameParts(query, manifest);
+    assert.ok(Array.isArray(candidates), `Expected indexed candidates for shortName query "${query}"`);
+    assert.ok(candidates.some(candidate => candidate.file === part.file),
+      `Expected shortName query "${query}" to retain source shard ${part.file} for ISIN ${sample.isin}`);
 
-      // Compare both the partial multi-token query and the full field value
-      // against the full-scan oracle. Candidate retention alone does not prove
-      // that shortName scoring preserves the complete result set and ranking.
-      const fullScanRecords = manifest.parts.flatMap(cataloguePart => {
-        const payload = JSON.parse(fs.readFileSync(path.join(catalogueDir, cataloguePart.file), 'utf8'));
-        return Array.isArray(payload) ? payload : (payload.records || payload.items || []);
-      });
-      for (const candidateQuery of [...new Set([query, exactQuery])]) {
-        const expected = [];
-        for (const raw of fullScanRecords) {
-          const item = search._test.canonicalBond(raw);
-          if (!item) continue;
-          const score = search._test.scoreCatalogRecord(item, candidateQuery);
-          if (score > 0) expected.push({ item, score });
-        }
-        expected.sort((a, b) => b.score - a.score
-          || String(a.item.name || '').localeCompare(String(b.item.name || ''), 'en'));
-        const indexedResults = search._test.shardedCatalogSearch(candidateQuery);
-        assert.deepEqual(
-          indexedResults.map(item => item.isin),
-          expected.slice(0, 30).map(entry => entry.item.isin),
-          `Indexed ${field} search "${candidateQuery}" should match full-scan ranked results`
-        );
+    const exactResults = search._test.shardedCatalogSearch(exactQuery);
+    assert.ok(exactResults.some(item => item.isin === sample.isin),
+      `Expected exact shortName search "${exactQuery}" to return ISIN ${sample.isin}`);
+
+    // Compare partial multi-token and full-field queries against the full-scan
+    // oracle, including both result membership and exact ranking/order.
+    for (const candidateQuery of [...new Set([query, exactQuery])]) {
+      const expected = [];
+      for (const raw of fullScanRecords) {
+        const item = search._test.canonicalBond(raw);
+        if (!item) continue;
+        const score = search._test.scoreCatalogRecord(item, candidateQuery);
+        if (score > 0) expected.push({ item, score });
       }
-      found = true;
-      break;
+      expected.sort((a, b) => b.score - a.score
+        || String(a.item.name || '').localeCompare(String(b.item.name || ''), 'en'));
+      const indexedResults = search._test.shardedCatalogSearch(candidateQuery);
+      assert.deepEqual(
+        indexedResults.map(item => item.isin),
+        expected.slice(0, 30).map(entry => entry.item.isin),
+        `Indexed shortName search "${candidateQuery}" from shard ${part.file} should match full-scan ranked results`
+      );
     }
-    assert.ok(found, `Expected at least one searchable catalogue record for ${field}`);
   }
 });
