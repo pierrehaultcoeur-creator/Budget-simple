@@ -1957,6 +1957,28 @@ test('name index retains searchable short-name matches from the real catalogue',
       const exactResults = search._test.shardedCatalogSearch(exactQuery);
       assert.ok(exactResults.some(item => item.isin === sample.isin),
         `Expected exact ${field} search "${exactQuery}" to return ISIN ${sample.isin}`);
+
+      // Check the complete ordered result set against the full-scan oracle too.
+      // This catches cases where shortName finds the sample but changes ranking
+      // or causes other matching records to be omitted from the indexed path.
+      const fullScanRecords = manifest.parts.flatMap(cataloguePart => {
+        const payload = JSON.parse(fs.readFileSync(path.join(catalogueDir, cataloguePart.file), 'utf8'));
+        return Array.isArray(payload) ? payload : (payload.records || payload.items || []);
+      });
+      const expected = [];
+      for (const raw of fullScanRecords) {
+        const item = search._test.canonicalBond(raw);
+        if (!item) continue;
+        const score = search._test.scoreCatalogRecord(item, exactQuery);
+        if (score > 0) expected.push({ item, score });
+      }
+      expected.sort((a, b) => b.score - a.score
+        || String(a.item.name || '').localeCompare(String(b.item.name || ''), 'en'));
+      assert.deepEqual(
+        exactResults.map(item => item.isin),
+        expected.slice(0, 30).map(entry => entry.item.isin),
+        `Indexed exact ${field} search "${exactQuery}" should match full-scan ranked results`
+      );
       found = true;
       break;
     }
