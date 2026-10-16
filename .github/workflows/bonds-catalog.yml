@@ -103,7 +103,7 @@ jobs:
               for record in records:
                   searchable = " ".join(str(record.get(field) or "") for field in searchable_fields)
                   normalized = unicodedata.normalize("NFKD", searchable)
-                  normalized = "".join(char for char in normalized if not unicodedata.combining(char)).lower()
+                  normalized = "".join(char for char in normalized if not unicodedata.category(char).startswith("M")).lower()
                   tokens = re.findall(r"[a-z0-9]+", normalized)
                   grams = {token[i:i + 3] for token in tokens for i in range(len(token) - 2)}
                   for gram in grams:
