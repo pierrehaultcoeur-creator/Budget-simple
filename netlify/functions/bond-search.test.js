@@ -1904,3 +1904,35 @@ test('indexed name search returns the same ranked results as a full catalogue sc
   assert.deepEqual(indexedIsins, expectedIsins,
     `Indexed query "${query}" should match the full-scan ranked results`);
 });
+
+
+test('name index retains searchable short-name and issuer matches', () => {
+  // The generator indexes more than legal names. Check these secondary fields
+  // explicitly so a future schema change cannot silently break their fast path.
+  for (const field of ['shortName', 'short_name', 'issuer']) {
+    let found = false;
+    for (const part of manifest.parts) {
+      const payload = JSON.parse(fs.readFileSync(path.join(catalogueDir, part.file), 'utf8'));
+      const records = Array.isArray(payload) ? payload : (payload.records || payload.items || []);
+      const sample = records.find(record => {
+        const value = record && record[field];
+        if (typeof value !== 'string' || !record.isin) return false;
+        const tokens = [...new Set(search._test.normalize(value)
+          .split(' ').filter(token => token.length >= 3))];
+        return tokens.length >= 2;
+      });
+      if (!sample) continue;
+
+      const tokens = [...new Set(search._test.normalize(sample[field])
+        .split(' ').filter(token => token.length >= 3))];
+      const query = `${tokens[0].slice(0, 3)} ${tokens[1].slice(0, 3)}`;
+      const candidates = search._test.indexedNameParts(query, manifest);
+      assert.ok(Array.isArray(candidates), `Expected indexed candidates for ${field} query "${query}"`);
+      assert.ok(candidates.some(candidate => candidate.file === part.file),
+        `Expected ${field} query "${query}" to retain source shard ${part.file} for ISIN ${sample.isin}`);
+      found = true;
+      break;
+    }
+    assert.ok(found, `Expected at least one searchable catalogue record for ${field}`);
+  }
+});
