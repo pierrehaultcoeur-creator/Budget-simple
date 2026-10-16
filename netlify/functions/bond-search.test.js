@@ -1875,6 +1875,12 @@ test('indexed name search returns the same ranked results as full scans across c
     Math.floor((manifest.parts.length - 1) / 2),
     manifest.parts.length - 1
   ])];
+  // Load the full-scan oracle once. Re-reading every catalogue shard for each
+  // regional sample made this correctness test needlessly slow without adding coverage.
+  const fullScanRecords = manifest.parts.flatMap(cataloguePart => {
+    const payload = JSON.parse(fs.readFileSync(path.join(catalogueDir, cataloguePart.file), 'utf8'));
+    return Array.isArray(payload) ? payload : (payload.records || payload.items || []);
+  });
 
   for (const partIndex of sampleIndexes) {
     const part = manifest.parts[partIndex];
@@ -1893,15 +1899,11 @@ test('indexed name search returns the same ranked results as full scans across c
     const query = `${tokens[0].slice(0, 3)} ${tokens[1].slice(0, 3)}`;
     const expected = [];
 
-    for (const cataloguePart of manifest.parts) {
-      const payload = JSON.parse(fs.readFileSync(path.join(catalogueDir, cataloguePart.file), 'utf8'));
-      const shardRecords = Array.isArray(payload) ? payload : (payload.records || payload.items || []);
-      for (const raw of shardRecords) {
-        const item = search._test.canonicalBond(raw);
-        if (!item) continue;
-        const score = search._test.scoreCatalogRecord(item, query);
-        if (score > 0) expected.push({ item, score });
-      }
+    for (const raw of fullScanRecords) {
+      const item = search._test.canonicalBond(raw);
+      if (!item) continue;
+      const score = search._test.scoreCatalogRecord(item, query);
+      if (score > 0) expected.push({ item, score });
     }
 
     expected.sort((a, b) => b.score - a.score
