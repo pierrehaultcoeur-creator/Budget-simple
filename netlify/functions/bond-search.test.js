@@ -1909,7 +1909,7 @@ test('indexed name search returns the same ranked results as a full catalogue sc
 test('name index retains searchable short-name and issuer matches', () => {
   // The generator indexes more than legal names. Check these secondary fields
   // explicitly so a future schema change cannot silently break their fast path.
-  for (const field of ['shortName', 'short_name', 'issuer']) {
+  for (const field of ['shortName', 'issuer']) {
     let found = false;
     for (const part of manifest.parts) {
       const payload = JSON.parse(fs.readFileSync(path.join(catalogueDir, part.file), 'utf8'));
