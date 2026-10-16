@@ -1939,6 +1939,13 @@ test('name index retains searchable short-name matches from the real catalogue',
       assert.ok(Array.isArray(candidates), `Expected indexed candidates for ${field} query "${query}"`);
       assert.ok(candidates.some(candidate => candidate.file === part.file),
         `Expected ${field} query "${query}" to retain source shard ${part.file} for ISIN ${sample.isin}`);
+
+      // Candidate retention alone is insufficient: the final ranking/scoring
+      // stage must also recognize the indexed field when users search its full value.
+      const exactQuery = search._test.normalize(sample[field]);
+      const exactResults = search._test.shardedCatalogSearch(exactQuery);
+      assert.ok(exactResults.some(item => item.isin === sample.isin),
+        `Expected exact ${field} search "${exactQuery}" to return ISIN ${sample.isin}`);
       found = true;
       break;
     }
