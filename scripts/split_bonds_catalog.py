@@ -102,7 +102,7 @@ def write_shards(records, source_metadata=None):
         target.write_text(json.dumps({'version': 1, 'records': shard}, ensure_ascii=False, separators=(',', ':')) + '\n', encoding='utf-8')
         raw = target.read_bytes()
         total += len(shard)
-            has_names = has_names or any(
+        has_names = has_names or any(
             bool(record.get(field))
             for record in shard
             for field in (
