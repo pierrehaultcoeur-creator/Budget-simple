@@ -5,6 +5,15 @@ on:
   push:
     branches:
       - feature/bond-search-index
+    paths:
+      - 'scripts/bonds_catalog.py'
+      - 'scripts/split_bonds_catalog.py'
+      - 'scripts/audit_bonds_catalog.py'
+      - 'tests/test_bonds_catalog.py'
+      - 'tests/test_split_bonds_catalog.py'
+      - 'tests/test_audit_bonds_catalog.py'
+      - 'data/bonds-catalog/**'
+      - '.github/workflows/bonds-catalog.yml'
   schedule:
     # Sundays at 10:30 UTC, after ESMA's weekly full-file publication window.
     - cron: "30 10 * * 0"
