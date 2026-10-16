@@ -19,7 +19,7 @@ NAME_INDEX_PREFIX = 'name-index-'
 
 def normalize_search(value):
     text = unicodedata.normalize('NFKD', str(value or ''))
-    text = ''.join(char for char in text if not unicodedata.combining(char))
+    text = ''.join(char for char in text if not unicodedata.category(char).startswith('M'))
     return re.sub(r'[^a-z0-9]+', ' ', text.lower()).strip()
 
 def trigrams(value):

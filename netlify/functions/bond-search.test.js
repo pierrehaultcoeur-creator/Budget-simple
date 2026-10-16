@@ -153,6 +153,11 @@ test('short names are eligible for bond search ranking', () => {
     'Expected a short-name prefix query to match the bond');
 });
 
+test('normalization removes spacing combining marks consistently with Python', () => {
+  // U+093E is category Mc and has canonical combining class 0.
+  assert.equal(search._test.normalize('a\u093ebc'), 'abc');
+});
+
 test('normalization strips combining marks beyond the basic combining diacritical block', () => {
   // U+1AB0 COMBINING DOUBLED CIRCUMFLEX ACCENT is outside U+0300–U+036F.
   const value = 'a\u1ab0bc';
