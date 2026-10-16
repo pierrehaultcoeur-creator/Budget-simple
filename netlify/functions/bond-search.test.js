@@ -153,6 +153,13 @@ test('short names are eligible for bond search ranking', () => {
     'Expected a short-name prefix query to match the bond');
 });
 
+test('normalization strips combining marks beyond the basic combining diacritical block', () => {
+  // U+1AB0 COMBINING DOUBLED CIRCUMFLEX ACCENT is outside U+0300–U+036F.
+  const value = 'a\u1ab0bc';
+  assert.equal(search._test.normalize(value), 'abc',
+    'Expected JS normalization to match Python Unicode combining-mark removal');
+});
+
 test('accented and punctuated short names keep normalized exact-match ranking', () => {
   const score = search._test.scoreCatalogRecord;
   const record = {

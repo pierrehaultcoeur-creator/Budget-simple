@@ -27,7 +27,7 @@ function json(statusCode, body) {
 
 function normalize(value) {
   return String(value || '').normalize('NFKD')
-    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\p{M}/gu, '')
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, ' ')
     .trim();
