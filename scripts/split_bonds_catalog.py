@@ -70,16 +70,28 @@ def write_shards(records, source_metadata=None):
         except (OSError, json.JSONDecodeError):
             previous_manifest = None
 
+    # Normalize and validate the full input before touching the existing output.
+    # A duplicate ISIN must fail without leaving the last good catalogue half-deleted.
+    normalized_records = []
+    seen_isins = set()
+    for raw in records:
+        item = compact_record(raw)
+        if not item:
+            continue
+        isin = str(item.get('isin') or '').upper()
+        if ISIN_RE.fullmatch(isin):
+            if isin in seen_isins:
+                raise ValueError(f'Duplicate valid ISIN in catalogue shards: {isin}')
+            seen_isins.add(isin)
+        normalized_records.append(item)
+
     OUT.mkdir(parents=True, exist_ok=True)
     for pattern in ('part-*.json', 'isin-index-*.json', 'name-index-*.json', 'manifest.json'):
         for old in OUT.glob(pattern):
             old.unlink()
 
     shards, current, current_bytes = [], [], 2
-    for raw in records:
-        item = compact_record(raw)
-        if not item:
-            continue
+    for item in normalized_records:
         encoded = json.dumps(item, ensure_ascii=False, separators=(',', ':')).encode('utf-8')
         extra = len(encoded) + (1 if current else 0)
         if current and current_bytes + extra > TARGET_BYTES:
@@ -94,7 +106,6 @@ def write_shards(records, source_metadata=None):
     manifest_parts = []
     index_buckets = {}
     name_index_buckets = {}
-    seen_isins = set()
     total = 0
     has_names = False
     for idx, shard in enumerate(shards, 1):
@@ -117,9 +128,6 @@ def write_shards(records, source_metadata=None):
         for record in shard:
             isin = str(record.get('isin') or '').upper()
             if ISIN_RE.fullmatch(isin):
-                if isin in seen_isins:
-                    raise ValueError(f'Duplicate valid ISIN in catalogue shards: {isin}')
-                seen_isins.add(isin)
                 index_buckets.setdefault(isin[:2], {})[isin] = filename
             searchable = ' '.join(str(record.get(field) or '') for field in (
                 'name', 'shortName', 'short_name', 'issuer', 'instrumentName', 'nameOfFinancialInstrument'
