@@ -1737,13 +1737,17 @@ test('investment page actually calls server search when an ISIN prefix has no in
 
 
 test('investment page renders exact and partial ISIN matches from the local indexed catalogue', async () => {
-  const manifest = {
-    parts: [{ file: 'part-0001.json' }],
-    isinIndexes: [{ prefix: 'FR', file: 'isin-index-FR.json' }]
-  };
   const index = {
     FR0000047607: 'part-0001.json',
     FR0000047615: 'part-0001.json'
+  };
+  const manifest = {
+    parts: [{ file: 'part-0001.json' }],
+    isinIndexes: [{
+      prefix: 'FR',
+      file: 'isin-index-FR.json',
+      gitBlobSha: gitBlobSha(JSON.stringify(index))
+    }]
   };
   const shard = [
     { isin: 'FR0000047607', name: 'Local indexed bond one', issuer: 'Example issuer' },
@@ -2099,7 +2103,7 @@ test('investment page retries loading the local manifest after a transient outag
         ok: true,
         json: async () => ({
           parts: [{ file: 'part-0001.json' }],
-          isinIndexes: [{ prefix: 'FR', file: 'isin-index-FR.json' }]
+          isinIndexes: [{ prefix: 'FR', file: 'isin-index-FR.json', gitBlobSha: gitBlobSha(JSON.stringify({ 'FR0000047607': 'part-0001.json' })) }]
         })
       };
     }
@@ -2142,7 +2146,7 @@ test('investment page retries loading a catalogue shard after a transient outage
         ok: true,
         json: async () => ({
           parts: [{ file: 'part-0001.json' }],
-          isinIndexes: [{ prefix: 'FR', file: 'isin-index-FR.json' }]
+          isinIndexes: [{ prefix: 'FR', file: 'isin-index-FR.json', gitBlobSha: gitBlobSha(JSON.stringify({ 'FR0000047607': 'part-0001.json' })) }]
         })
       };
     }
@@ -2219,7 +2223,7 @@ test('investment page retries loading an ISIN index after a transient outage', a
         ok: true,
         json: async () => ({
           parts: [{ file: 'part-0001.json' }],
-          isinIndexes: [{ prefix: 'FR', file: 'isin-index-FR.json' }]
+          isinIndexes: [{ prefix: 'FR', file: 'isin-index-FR.json', gitBlobSha: gitBlobSha(JSON.stringify({ 'FR0000047607': 'part-0001.json' })) }]
         })
       };
     }
