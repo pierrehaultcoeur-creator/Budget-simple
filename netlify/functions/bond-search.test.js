@@ -2318,6 +2318,14 @@ test('name index retains matching records across every catalogue shard', () => {
     assert.ok(Array.isArray(candidates), `Expected indexed candidates for "${query}"`);
     assert.ok(candidates.some(candidate => candidate.file === part.file),
       `Expected query "${query}" to retain source shard ${part.file} for ISIN ${sample.isin}`);
+
+    // Candidate inclusion alone is not enough: exercise the real ranking and
+    // record-loading path with the full tokens and require the sampled record
+    // to survive the result limit for every shard in the committed catalogue.
+    const exactTokenQuery = `${tokens[0]} ${tokens[1]}`;
+    const results = search._test.shardedCatalogSearch(exactTokenQuery);
+    assert.ok(results.some(result => result.isin === sample.isin),
+      `Expected runtime search "${exactTokenQuery}" to return ISIN ${sample.isin} from ${part.file}`);
     checked += 1;
   }
 
