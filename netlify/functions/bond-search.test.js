@@ -1257,6 +1257,28 @@ test('name index content fingerprint mismatch disables indexed search', () => {
     'A cached or freshly loaded name index with a different fingerprint must trigger full-scan fallback');
 });
 
+test('search indexes without manifest fingerprints are never trusted', () => {
+  const isinManifest = {
+    ...manifest,
+    isinIndexes: manifest.isinIndexes.map(item => {
+      const { gitBlobSha, ...withoutFingerprint } = item;
+      return withoutFingerprint;
+    })
+  };
+  assert.equal(search._test.readIsinIndex('FR', isinManifest), null,
+    'An ISIN index without a manifest fingerprint must trigger shard-scan fallback');
+
+  const nameManifest = {
+    ...manifest,
+    nameIndexes: manifest.nameIndexes.map(item => {
+      const { gitBlobSha, ...withoutFingerprint } = item;
+      return withoutFingerprint;
+    })
+  };
+  assert.equal(search._test.indexedNameParts('bond example', nameManifest), null,
+    'A name index without a manifest fingerprint must trigger full-scan fallback');
+});
+
 test('ISIN index contents must contain only valid ISINs mapped to declared shards for their prefix', () => {
   const validate = search._test.isValidIsinIndex;
   const fakeManifest = { parts: [{ file: 'part-0001.json' }, { file: 'part-0002.json' }] };
