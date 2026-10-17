@@ -143,7 +143,8 @@ def write_shards(records, source_metadata=None):
         raw = target.read_bytes()
         if len(raw) >= 100 * 1024 * 1024:
             raise RuntimeError(f'{filename} exceeds GitHub 100 MB limit')
-        index_files.append({'prefix': prefix, 'file': filename, 'entries': len(mapping), 'bytes': len(raw)})
+        index_files.append({'prefix': prefix, 'file': filename, 'entries': len(mapping), 'bytes': len(raw),
+                            'gitBlobSha': hashlib.sha1(b'blob ' + str(len(raw)).encode('ascii') + b'\\0' + raw).hexdigest()})
 
     name_index_files = []
     for prefix, mapping in sorted(name_index_buckets.items()):
@@ -154,7 +155,8 @@ def write_shards(records, source_metadata=None):
         raw = target.read_bytes()
         if len(raw) >= 100 * 1024 * 1024:
             raise RuntimeError(f'{filename} exceeds GitHub 100 MB limit')
-        name_index_files.append({'prefix': prefix, 'file': filename, 'trigrams': len(mapping), 'bytes': len(raw)})
+        name_index_files.append({'prefix': prefix, 'file': filename, 'trigrams': len(mapping), 'bytes': len(raw),
+                                 'gitBlobSha': hashlib.sha1(b'blob ' + str(len(raw)).encode('ascii') + b'\\0' + raw).hexdigest()})
 
     source_metadata = source_metadata if isinstance(source_metadata, dict) else {}
     manifest = {
