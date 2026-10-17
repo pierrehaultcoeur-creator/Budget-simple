@@ -1,217 +1,217 @@
 {
   "version": 3,
-  "generatedAt": "2026-10-15T17:55:29+00:00",
-  "sourcePublicationDate": "20261010",
+  "generatedAt": "2026-10-17T11:24:22+00:00",
+  "sourcePublicationDate": "20261017",
   "source": "ESMA FIRDS",
   "sourceFileType": "FULINS_D",
   "sourceFile": "bonds-catalog.json",
-  "recordCount": 630565,
+  "recordCount": 631239,
   "partCount": 34,
   "hasSearchableNames": true,
   "parts": [
     {
       "file": "part-0001.json",
-      "records": 19219,
-      "bytes": 8388530,
-      "sha256": "a9317d4ddb9ff708a4ad22a3171fee57db8f0f9b287f85e233deacd5b66ff6ce"
+      "records": 19220,
+      "bytes": 8388339,
+      "sha256": "442444d3e3110369e4afb99efd6d924725a5bec0fae71b15031df181f56b5bd9"
     },
     {
       "file": "part-0002.json",
-      "records": 18459,
-      "bytes": 8388439,
-      "sha256": "10501a5904e92defeefe8b7d71c82080889ddd9ec3ba3664857be459ff078564"
+      "records": 18465,
+      "bytes": 8388561,
+      "sha256": "5148179aa9007f6753198aa6193fd29b98e22dc44c40f0caebca64400bc92955"
     },
     {
       "file": "part-0003.json",
-      "records": 18630,
-      "bytes": 8388276,
-      "sha256": "09073bcec4d3ce9bfe948572c461550e35e6bdcf750f61038923e5592ac23c5d"
+      "records": 18616,
+      "bytes": 8388414,
+      "sha256": "c6421acc14fe28dc6d85d176b8637a97074c85af7b8de2c4c6d63de906933a1b"
     },
     {
       "file": "part-0004.json",
-      "records": 18133,
-      "bytes": 8388484,
-      "sha256": "d4dca62ae6d63d87e9767b7ff887c7dc771419d57b9d8618d32a191cd6c7b8ef"
+      "records": 18107,
+      "bytes": 8388563,
+      "sha256": "7452298b0b53aa34a751368a49d4dae4c972fc30dbdae71a910a76319d6c4bd6"
     },
     {
       "file": "part-0005.json",
-      "records": 17972,
-      "bytes": 8388592,
-      "sha256": "aaca8f063e7e2962d4b0b562c5fc518260a2814ec274e82ffe40c78c045715f0"
+      "records": 17976,
+      "bytes": 8388511,
+      "sha256": "602bb2cd8038f6a0b1dd6b3ae1153f683ab0805f27c7b73df7864a5aa75c4d5a"
     },
     {
       "file": "part-0006.json",
-      "records": 17949,
-      "bytes": 8388620,
-      "sha256": "0278eb03208f400cf9f2fd7f13059022cb498fbc21b1edb714ce4fa6356bdab3"
+      "records": 17966,
+      "bytes": 8388418,
+      "sha256": "860a72de3070ae52345d8fdc8613a1c77a1abed6daadf87842ef94558d634020"
     },
     {
       "file": "part-0007.json",
-      "records": 17875,
-      "bytes": 8388182,
-      "sha256": "13c392bbf41728fa59c80eef677c948a642c295c18543758189e6a5de3617b60"
+      "records": 17901,
+      "bytes": 8388472,
+      "sha256": "8e09e9d97995998e6b6ad2d0f0d8728d9997ac454bbf3a88c25dee65cee02af8"
     },
     {
       "file": "part-0008.json",
-      "records": 17668,
-      "bytes": 8388250,
-      "sha256": "2b59b158ea65de36019e8a8be7258d0fb4dba41a952253025606838f8707c0e1"
+      "records": 17664,
+      "bytes": 8388606,
+      "sha256": "830a8c68dd24bb138c31eef8c9160c5e9e12edad612087c77670a6e5804a32de"
     },
     {
       "file": "part-0009.json",
-      "records": 18833,
-      "bytes": 8388267,
-      "sha256": "0898568eec33540f7babbfeb8def7ffa4f9d464d5a347ef768dac9d59dfb43d7"
+      "records": 18690,
+      "bytes": 8388276,
+      "sha256": "29d99987219a78c044e39bf99d0f76d50dfc98e34dcd08e789d8f37acf927734"
     },
     {
       "file": "part-0010.json",
-      "records": 18295,
-      "bytes": 8388485,
-      "sha256": "45c3b038695cfb01e1b9c4d7dbc89871fe2588fbf027540a9450d7d40494e259"
+      "records": 18387,
+      "bytes": 8388484,
+      "sha256": "e8e4ef12dc05011b8525e11ad0f1131db63b9aa914fcfd3800ad9b0f2b7e0b4e"
     },
     {
       "file": "part-0011.json",
-      "records": 17590,
-      "bytes": 8388613,
-      "sha256": "6e810d90e83a0aff80d0ab33fd30a7a6fc7afc3ea7a3a0fae0c6650c44d8cb30"
+      "records": 17631,
+      "bytes": 8388317,
+      "sha256": "62ef118e148930e6eb11370eb697963d25bfb3fff6d5a69049fbcfc89637d6c7"
     },
     {
       "file": "part-0012.json",
-      "records": 18182,
-      "bytes": 8388401,
-      "sha256": "d65881487d7c6af86819a816ccca832c5960795d90230ce066a6266f88f0e098"
+      "records": 18140,
+      "bytes": 8388333,
+      "sha256": "bd1746f1724a29ac0ff8d9ce87304dcd0a50b8491ecc984105e6d31d057b0dc1"
     },
     {
       "file": "part-0013.json",
-      "records": 17956,
-      "bytes": 8388396,
-      "sha256": "095250602af03b68c17e6f91ed61dc95516191da0db30b22a8797dc134f98e27"
+      "records": 17977,
+      "bytes": 8388557,
+      "sha256": "19d6f102a2d3afdbe00e8955ab82ec1444cb398e74363728c6b9a24d2a1013c0"
     },
     {
       "file": "part-0014.json",
       "records": 17968,
-      "bytes": 8388357,
-      "sha256": "81399bf4dcfe86a3c5984333afde70c35f92c177085232df34666dc5c6e2dda5"
+      "bytes": 8388507,
+      "sha256": "24f4cc733986d35baa7df7cd1ab0132c8f7363e52cfb3996e04d4d995282ff37"
     },
     {
       "file": "part-0015.json",
       "records": 18151,
-      "bytes": 8388342,
-      "sha256": "4290cee46b184fa702680a267a38dcdf560b256f1ed2e783f96c02899a3ec583"
+      "bytes": 8388186,
+      "sha256": "58b1dd7bb45b0610ffd29df33da01e33a54cbf269f505fe00576cf76c7c5daf6"
     },
     {
       "file": "part-0016.json",
-      "records": 17984,
-      "bytes": 8388463,
-      "sha256": "f2067542bc5cb4aa9b7659da16ab6013583fd27f9dcbf1243e152e516e9bad50"
+      "records": 17993,
+      "bytes": 8388222,
+      "sha256": "7866d94b4c19fcee9ddcc407f3feef759aa87c34d7aa3891d3d27a72b70939c8"
     },
     {
       "file": "part-0017.json",
       "records": 17770,
-      "bytes": 8388219,
-      "sha256": "8a544541316bf0f5fe93cc70303ac524676972864b2e54bbb90cd892729a4fef"
+      "bytes": 8388484,
+      "sha256": "8d91067b9e60d4ec94f1a21b7ae2a898de486cc1af9ab471673803098de64f21"
     },
     {
       "file": "part-0018.json",
-      "records": 18001,
-      "bytes": 8388506,
-      "sha256": "c09f60e5d35057596b49b2dd26d5ddac44025ddf3f23a1c6a093e40929302669"
+      "records": 17964,
+      "bytes": 8388499,
+      "sha256": "4634b658d01f6b4be4430f0f86c29cdd9288f7ba7d5e0ea4f060f5ccaca3984a"
     },
     {
       "file": "part-0019.json",
-      "records": 18338,
-      "bytes": 8388580,
-      "sha256": "e779f7f313667005a8542aca5dae871e320abbe8b191138bf369bfd95ecdf4aa"
+      "records": 18304,
+      "bytes": 8388278,
+      "sha256": "d1f7d6618fbc4d63a7503992a031c8949d7432ff6f2fedf758b826f6ee77214a"
     },
     {
       "file": "part-0020.json",
-      "records": 17918,
-      "bytes": 8388199,
-      "sha256": "f6a7eca4b4fcc129847ef104789d9c6f9fe8235181219205df70ff8861a47c8d"
+      "records": 17972,
+      "bytes": 8388550,
+      "sha256": "9569061fa61b391e8fd88c6ada899653fa297aa8b3a7da6f3ce2eaa806cc0db9"
     },
     {
       "file": "part-0021.json",
-      "records": 19455,
-      "bytes": 8388454,
-      "sha256": "f20f91b16c404e4a5c79f5633b9ff79f8807b05116fff591c12e880aa0b81d83"
+      "records": 19438,
+      "bytes": 8388506,
+      "sha256": "4e5899cafb391ae94bcbf1b339905d74a90e267f07a78161a28d68dc35f1500d"
     },
     {
       "file": "part-0022.json",
-      "records": 19017,
-      "bytes": 8388341,
-      "sha256": "9503ad26dfde3d01d761c27c04c69a01d3d00c81dc332ba41a4ae22a97fa07c4"
+      "records": 18984,
+      "bytes": 8388217,
+      "sha256": "f377fd5e069c1e811fbbdd71e20f60be89f755b0cfb808395550e5f6ee668e8b"
     },
     {
       "file": "part-0023.json",
-      "records": 19737,
-      "bytes": 8388421,
-      "sha256": "fb67509e9dbc8467487c617effde489e2a8519ba5c8e85d34f32e2f1bb1fde7f"
+      "records": 19719,
+      "bytes": 8388288,
+      "sha256": "e12e1563c92fad6a6253c66226fd5d29b4de7410a78239dea85f65b557465979"
     },
     {
       "file": "part-0024.json",
-      "records": 19629,
-      "bytes": 8388159,
-      "sha256": "7c79e0b11d4783c1aebac732402acf909a900e3e261442f94ffd69491b45d68d"
+      "records": 19645,
+      "bytes": 8388214,
+      "sha256": "cb45c73ccd9e6378c8a0c4314346886332f893bfdc9ed975a52cd5ae7d961aa9"
     },
     {
       "file": "part-0025.json",
-      "records": 19271,
-      "bytes": 8388405,
-      "sha256": "e6d1110f46ba14287c9049745debaab67eb29ca25e30c180c26dc483b071f4f6"
+      "records": 19337,
+      "bytes": 8388203,
+      "sha256": "e1a28e5ecb95c30ef6f6c07130bbe70a66028ea28a9be0a934b422b63d70af4c"
     },
     {
       "file": "part-0026.json",
-      "records": 18941,
-      "bytes": 8388575,
-      "sha256": "cd73ddce051ba81aad5822cf5cb1caa7c134d09791969144af26edefe634066f"
+      "records": 18899,
+      "bytes": 8388394,
+      "sha256": "1fe8012c215c161117f759cd52098cc2a81ea8ce4f9d178b9ab82be7c91a1fc7"
     },
     {
       "file": "part-0027.json",
-      "records": 18287,
-      "bytes": 8388298,
-      "sha256": "614c80695c7fb77375d166f42d67f4b2100a665730cbc57d27e0f5fa158ea4ea"
+      "records": 18324,
+      "bytes": 8388588,
+      "sha256": "b2717881f83e625cca6a8a28df1c1602f5ffdec4916a16904a8a38412bed58a8"
     },
     {
       "file": "part-0028.json",
-      "records": 18942,
-      "bytes": 8388287,
-      "sha256": "098d5f30af183583b5e43cc48ea478f84859874bdadd0bcf1970531c59f6d2df"
+      "records": 18904,
+      "bytes": 8388300,
+      "sha256": "880b2edc392349d7d4359b9bbf92278a6744901993289adae2422c9dc18fa34c"
     },
     {
       "file": "part-0029.json",
-      "records": 18716,
-      "bytes": 8388533,
-      "sha256": "7967e8680e25cb033e8391d5cf3f1f310de2a7f9731592d4063d0c784199b62d"
+      "records": 18752,
+      "bytes": 8388544,
+      "sha256": "1d49e934c15d48e843a26a1bfeaa3f3c6f71f3654b7009e5691b656c28e81a63"
     },
     {
       "file": "part-0030.json",
-      "records": 18741,
-      "bytes": 8388362,
-      "sha256": "dc10960bd3e577dd404ac6cea92d0b29a34a30e86f997849bc9ca74260804742"
+      "records": 18696,
+      "bytes": 8388268,
+      "sha256": "43199fd245e82b5500152d429a3d29385a0215aef05134bc88076cc8cb93eeb9"
     },
     {
       "file": "part-0031.json",
-      "records": 19198,
-      "bytes": 8388300,
-      "sha256": "b2ae18891d391fdd971f746da1fd79b8abce6adb4e8652750937e586da42b38d"
+      "records": 19187,
+      "bytes": 8388386,
+      "sha256": "9f97f1b7ff404aa63bb5045b84ab4841616b3fccef14c373e880ed5dc3ba68a0"
     },
     {
       "file": "part-0032.json",
-      "records": 19345,
-      "bytes": 8388394,
-      "sha256": "808dc474a0de0408c684ab61129db82410048735436fcac81e79d4d99674d275"
+      "records": 19376,
+      "bytes": 8388344,
+      "sha256": "71a462c23b295972a0731f820795818817d7fa264679b055c5582f1868d2bef5"
     },
     {
       "file": "part-0033.json",
-      "records": 19612,
-      "bytes": 8388312,
-      "sha256": "9ecc576abdae7c34aee8f9540e54bf026d8b6b562065da7b8462c9cd516fafbd"
+      "records": 19610,
+      "bytes": 8388245,
+      "sha256": "1748b269130d7ec8d8ff42f084ac6a7aab6e0801d133fcc9b2ddc767eca4cecd"
     },
     {
       "file": "part-0034.json",
-      "records": 18783,
-      "bytes": 7993177,
-      "sha256": "d5234914a691be401902f97b2c2078e142a6658be5904147b50b458511909db7"
+      "records": 19506,
+      "bytes": 8315873,
+      "sha256": "e2c72c2d56ded34884350afaf95383613155e9f21da33f1983498ab0dc46c4e2"
     }
   ],
   "isinIndexes": [
@@ -230,26 +230,26 @@
     {
       "prefix": "AT",
       "file": "isin-index-AT.json",
-      "entries": 4869,
-      "bytes": 155810
+      "entries": 5068,
+      "bytes": 162178
     },
     {
       "prefix": "AU",
       "file": "isin-index-AU.json",
-      "entries": 1594,
-      "bytes": 51010
+      "entries": 1598,
+      "bytes": 51138
     },
     {
       "prefix": "BE",
       "file": "isin-index-BE.json",
-      "entries": 1484,
-      "bytes": 47490
+      "entries": 1481,
+      "bytes": 47394
     },
     {
       "prefix": "BG",
       "file": "isin-index-BG.json",
-      "entries": 178,
-      "bytes": 5698
+      "entries": 179,
+      "bytes": 5730
     },
     {
       "prefix": "BM",
@@ -266,14 +266,14 @@
     {
       "prefix": "CA",
       "file": "isin-index-CA.json",
-      "entries": 2370,
-      "bytes": 75842
+      "entries": 2376,
+      "bytes": 76034
     },
     {
       "prefix": "CH",
       "file": "isin-index-CH.json",
-      "entries": 42496,
-      "bytes": 1359874
+      "entries": 42602,
+      "bytes": 1363266
     },
     {
       "prefix": "CL",
@@ -308,8 +308,8 @@
     {
       "prefix": "DE",
       "file": "isin-index-DE.json",
-      "entries": 311772,
-      "bytes": 9976706
+      "entries": 311967,
+      "bytes": 9982946
     },
     {
       "prefix": "DK",
@@ -326,38 +326,38 @@
     {
       "prefix": "EG",
       "file": "isin-index-EG.json",
-      "entries": 184,
-      "bytes": 5890
+      "entries": 180,
+      "bytes": 5762
     },
     {
       "prefix": "ES",
       "file": "isin-index-ES.json",
-      "entries": 2529,
-      "bytes": 80930
+      "entries": 2528,
+      "bytes": 80898
     },
     {
       "prefix": "EU",
       "file": "isin-index-EU.json",
-      "entries": 280,
-      "bytes": 8962
+      "entries": 281,
+      "bytes": 8994
     },
     {
       "prefix": "FI",
       "file": "isin-index-FI.json",
-      "entries": 543,
-      "bytes": 17378
+      "entries": 539,
+      "bytes": 17250
     },
     {
       "prefix": "FR",
       "file": "isin-index-FR.json",
-      "entries": 30893,
-      "bytes": 988578
+      "entries": 30906,
+      "bytes": 988994
     },
     {
       "prefix": "GB",
       "file": "isin-index-GB.json",
-      "entries": 1073,
-      "bytes": 34338
+      "entries": 1065,
+      "bytes": 34082
     },
     {
       "prefix": "GE",
@@ -386,8 +386,8 @@
     {
       "prefix": "HK",
       "file": "isin-index-HK.json",
-      "entries": 319,
-      "bytes": 10210
+      "entries": 320,
+      "bytes": 10242
     },
     {
       "prefix": "HR",
@@ -398,8 +398,8 @@
     {
       "prefix": "HU",
       "file": "isin-index-HU.json",
-      "entries": 432,
-      "bytes": 13826
+      "entries": 433,
+      "bytes": 13858
     },
     {
       "prefix": "ID",
@@ -410,8 +410,8 @@
     {
       "prefix": "IE",
       "file": "isin-index-IE.json",
-      "entries": 1079,
-      "bytes": 34530
+      "entries": 1090,
+      "bytes": 34882
     },
     {
       "prefix": "IL",
@@ -422,14 +422,14 @@
     {
       "prefix": "IS",
       "file": "isin-index-IS.json",
-      "entries": 251,
-      "bytes": 8034
+      "entries": 250,
+      "bytes": 8002
     },
     {
       "prefix": "IT",
       "file": "isin-index-IT.json",
-      "entries": 4833,
-      "bytes": 154658
+      "entries": 4868,
+      "bytes": 155778
     },
     {
       "prefix": "JE",
@@ -440,8 +440,8 @@
     {
       "prefix": "JP",
       "file": "isin-index-JP.json",
-      "entries": 528,
-      "bytes": 16898
+      "entries": 530,
+      "bytes": 16962
     },
     {
       "prefix": "KR",
@@ -470,14 +470,14 @@
     {
       "prefix": "LT",
       "file": "isin-index-LT.json",
-      "entries": 64,
-      "bytes": 2050
+      "entries": 65,
+      "bytes": 2082
     },
     {
       "prefix": "LU",
       "file": "isin-index-LU.json",
-      "entries": 274,
-      "bytes": 8770
+      "entries": 278,
+      "bytes": 8898
     },
     {
       "prefix": "LV",
@@ -494,14 +494,14 @@
     {
       "prefix": "MT",
       "file": "isin-index-MT.json",
-      "entries": 461,
-      "bytes": 14754
+      "entries": 466,
+      "bytes": 14914
     },
     {
       "prefix": "MX",
       "file": "isin-index-MX.json",
-      "entries": 51,
-      "bytes": 1634
+      "entries": 52,
+      "bytes": 1666
     },
     {
       "prefix": "MY",
@@ -516,16 +516,10 @@
       "bytes": 34
     },
     {
-      "prefix": "NG",
-      "file": "isin-index-NG.json",
-      "entries": 1,
-      "bytes": 34
-    },
-    {
       "prefix": "NL",
       "file": "isin-index-NL.json",
-      "entries": 1097,
-      "bytes": 35106
+      "entries": 1106,
+      "bytes": 35394
     },
     {
       "prefix": "NO",
@@ -566,14 +560,14 @@
     {
       "prefix": "PL",
       "file": "isin-index-PL.json",
-      "entries": 892,
-      "bytes": 28546
+      "entries": 893,
+      "bytes": 28578
     },
     {
       "prefix": "PT",
       "file": "isin-index-PT.json",
-      "entries": 416,
-      "bytes": 13314
+      "entries": 417,
+      "bytes": 13346
     },
     {
       "prefix": "QM",
@@ -596,8 +590,8 @@
     {
       "prefix": "RO",
       "file": "isin-index-RO.json",
-      "entries": 277,
-      "bytes": 8866
+      "entries": 285,
+      "bytes": 9122
     },
     {
       "prefix": "RS",
@@ -620,8 +614,8 @@
     {
       "prefix": "SE",
       "file": "isin-index-SE.json",
-      "entries": 3656,
-      "bytes": 116994
+      "entries": 3640,
+      "bytes": 116482
     },
     {
       "prefix": "SG",
@@ -632,14 +626,14 @@
     {
       "prefix": "SI",
       "file": "isin-index-SI.json",
-      "entries": 60,
-      "bytes": 1922
+      "entries": 63,
+      "bytes": 2018
     },
     {
       "prefix": "SK",
       "file": "isin-index-SK.json",
-      "entries": 245,
-      "bytes": 7842
+      "entries": 228,
+      "bytes": 7298
     },
     {
       "prefix": "SM",
@@ -686,8 +680,8 @@
     {
       "prefix": "US",
       "file": "isin-index-US.json",
-      "entries": 43447,
-      "bytes": 1390306
+      "entries": 43444,
+      "bytes": 1390210
     },
     {
       "prefix": "XC",
@@ -704,8 +698,8 @@
     {
       "prefix": "XS",
       "file": "isin-index-XS.json",
-      "entries": 165405,
-      "bytes": 5292962
+      "entries": 165529,
+      "bytes": 5296930
     },
     {
       "prefix": "ZA",
@@ -724,218 +718,218 @@
     {
       "prefix": "0",
       "file": "name-index-0.json",
-      "trigrams": 538,
-      "bytes": 71796
+      "trigrams": 537,
+      "bytes": 72264
     },
     {
       "prefix": "1",
       "file": "name-index-1.json",
-      "trigrams": 487,
-      "bytes": 77474
+      "trigrams": 486,
+      "bytes": 78622
     },
     {
       "prefix": "2",
       "file": "name-index-2.json",
       "trigrams": 627,
-      "bytes": 81195
+      "bytes": 80923
     },
     {
       "prefix": "3",
       "file": "name-index-3.json",
-      "trigrams": 426,
-      "bytes": 64253
+      "trigrams": 422,
+      "bytes": 64850
     },
     {
       "prefix": "4",
       "file": "name-index-4.json",
-      "trigrams": 332,
-      "bytes": 55375
+      "trigrams": 333,
+      "bytes": 56267
     },
     {
       "prefix": "5",
       "file": "name-index-5.json",
-      "trigrams": 363,
-      "bytes": 56354
+      "trigrams": 364,
+      "bytes": 57161
     },
     {
       "prefix": "6",
       "file": "name-index-6.json",
-      "trigrams": 300,
-      "bytes": 52501
+      "trigrams": 299,
+      "bytes": 53360
     },
     {
       "prefix": "7",
       "file": "name-index-7.json",
-      "trigrams": 318,
-      "bytes": 53121
+      "trigrams": 315,
+      "bytes": 53879
     },
     {
       "prefix": "8",
       "file": "name-index-8.json",
       "trigrams": 299,
-      "bytes": 53037
+      "bytes": 53292
     },
     {
       "prefix": "9",
       "file": "name-index-9.json",
       "trigrams": 270,
-      "bytes": 50765
+      "bytes": 51275
     },
     {
       "prefix": "a",
       "file": "name-index-a.json",
-      "trigrams": 770,
-      "bytes": 138456
+      "trigrams": 768,
+      "bytes": 139035
     },
     {
       "prefix": "b",
       "file": "name-index-b.json",
-      "trigrams": 682,
-      "bytes": 87194
+      "trigrams": 677,
+      "bytes": 87494
     },
     {
       "prefix": "c",
       "file": "name-index-c.json",
       "trigrams": 756,
-      "bytes": 100060
+      "bytes": 100587
     },
     {
       "prefix": "d",
       "file": "name-index-d.json",
       "trigrams": 670,
-      "bytes": 79006
+      "bytes": 79380
     },
     {
       "prefix": "e",
       "file": "name-index-e.json",
-      "trigrams": 752,
-      "bytes": 133093
+      "trigrams": 757,
+      "bytes": 133983
     },
     {
       "prefix": "f",
       "file": "name-index-f.json",
       "trigrams": 571,
-      "bytes": 55536
+      "bytes": 56131
     },
     {
       "prefix": "g",
       "file": "name-index-g.json",
-      "trigrams": 589,
-      "bytes": 63330
+      "trigrams": 591,
+      "bytes": 63652
     },
     {
       "prefix": "h",
       "file": "name-index-h.json",
-      "trigrams": 535,
-      "bytes": 60399
+      "trigrams": 534,
+      "bytes": 60782
     },
     {
       "prefix": "i",
       "file": "name-index-i.json",
-      "trigrams": 675,
-      "bytes": 111890
+      "trigrams": 678,
+      "bytes": 112271
     },
     {
       "prefix": "j",
       "file": "name-index-j.json",
       "trigrams": 245,
-      "bytes": 16820
+      "bytes": 16905
     },
     {
       "prefix": "k",
       "file": "name-index-k.json",
-      "trigrams": 546,
-      "bytes": 56169
+      "trigrams": 548,
+      "bytes": 56678
     },
     {
       "prefix": "l",
       "file": "name-index-l.json",
-      "trigrams": 685,
-      "bytes": 97673
+      "trigrams": 687,
+      "bytes": 97740
     },
     {
       "prefix": "m",
       "file": "name-index-m.json",
-      "trigrams": 571,
-      "bytes": 75035
+      "trigrams": 570,
+      "bytes": 75435
     },
     {
       "prefix": "n",
       "file": "name-index-n.json",
       "trigrams": 734,
-      "bytes": 119587
+      "bytes": 120063
     },
     {
       "prefix": "o",
       "file": "name-index-o.json",
-      "trigrams": 666,
-      "bytes": 109421
+      "trigrams": 664,
+      "bytes": 109728
     },
     {
       "prefix": "p",
       "file": "name-index-p.json",
-      "trigrams": 648,
-      "bytes": 78388
+      "trigrams": 650,
+      "bytes": 78693
     },
     {
       "prefix": "q",
       "file": "name-index-q.json",
-      "trigrams": 184,
-      "bytes": 10484
+      "trigrams": 181,
+      "bytes": 10358
     },
     {
       "prefix": "r",
       "file": "name-index-r.json",
-      "trigrams": 753,
-      "bytes": 122119
+      "trigrams": 756,
+      "bytes": 122925
     },
     {
       "prefix": "s",
       "file": "name-index-s.json",
-      "trigrams": 787,
-      "bytes": 126250
+      "trigrams": 789,
+      "bytes": 127065
     },
     {
       "prefix": "t",
       "file": "name-index-t.json",
-      "trigrams": 682,
-      "bytes": 94538
+      "trigrams": 683,
+      "bytes": 95209
     },
     {
       "prefix": "u",
       "file": "name-index-u.json",
-      "trigrams": 540,
-      "bytes": 73189
+      "trigrams": 541,
+      "bytes": 73520
     },
     {
       "prefix": "v",
       "file": "name-index-v.json",
-      "trigrams": 434,
-      "bytes": 40568
+      "trigrams": 432,
+      "bytes": 40841
     },
     {
       "prefix": "w",
       "file": "name-index-w.json",
-      "trigrams": 353,
-      "bytes": 30978
+      "trigrams": 355,
+      "bytes": 31334
     },
     {
       "prefix": "x",
       "file": "name-index-x.json",
       "trigrams": 358,
-      "bytes": 32191
+      "bytes": 32344
     },
     {
       "prefix": "y",
       "file": "name-index-y.json",
       "trigrams": 390,
-      "bytes": 32294
+      "bytes": 32311
     },
     {
       "prefix": "z",
       "file": "name-index-z.json",
-      "trigrams": 324,
-      "bytes": 26547
+      "trigrams": 325,
+      "bytes": 26691
     }
   ],
   "notes": "ISIN discovery catalogue only; an ISIN is not a verified quote or a fully enriched bond record."
