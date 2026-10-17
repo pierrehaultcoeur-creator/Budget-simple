@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import io
 import json
+import math
 import os
 import re
 import sys
@@ -235,6 +236,11 @@ def normalized_coupon(raw: str | None) -> tuple[str | None, str | None]:
     try:
         number = float(value)
     except ValueError:
+        return None, "INVALID_SOURCE_VALUE"
+    # float() accepts NaN and infinities; they are malformed source values,
+    # not ordinary numeric outliers. Never let them acquire a misleading
+    # suspicious-but-numeric status.
+    if not math.isfinite(number):
         return None, "INVALID_SOURCE_VALUE"
     if not (-100 <= number <= 100):
         return None, "SUSPICIOUS_SOURCE_VALUE"
