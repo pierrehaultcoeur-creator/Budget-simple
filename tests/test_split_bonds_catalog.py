@@ -59,6 +59,21 @@ class SplitterIndexTests(unittest.TestCase):
                 module.TARGET_BYTES = old_target
 
 
+    def test_rejects_duplicate_well_formed_isins_instead_of_overwriting_index_entries(self):
+        records = [
+            {"isin": "FR0000120271", "name": "First record"},
+            {"isin": "FR0000120271", "name": "Duplicate record"},
+        ]
+        with tempfile.TemporaryDirectory() as tmp:
+            old_out = module.OUT
+            try:
+                module.OUT = pathlib.Path(tmp) / "catalogue"
+                with self.assertRaisesRegex(ValueError, "Duplicate valid ISIN"):
+                    module.write_shards(records)
+            finally:
+                module.OUT = old_out
+
+
     def test_preserves_generated_at_when_catalogue_and_indexes_are_unchanged(self):
         records = [
             {"isin": "FR0000120271", "name": "Banque Exemple 2030", "cfi": "DBFTFR"},
