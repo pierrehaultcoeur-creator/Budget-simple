@@ -1,3 +1,4 @@
+import hashlib
 import importlib.util
 import json
 import pathlib
@@ -57,6 +58,27 @@ class SplitterIndexTests(unittest.TestCase):
             finally:
                 module.OUT = old_out
                 module.TARGET_BYTES = old_target
+
+
+    def test_search_index_fingerprints_match_git_blob_hashes(self):
+        records = [
+            {"isin": "FR0000120271", "name": "Banque Exemple 2030", "issuer": "Groupe Exemple"},
+            {"isin": "US0378331005", "name": "Apple Inc Bond", "shortName": "Apple 2035"},
+        ]
+        with tempfile.TemporaryDirectory() as tmp:
+            old_out = module.OUT
+            try:
+                module.OUT = pathlib.Path(tmp) / "catalogue"
+                module.write_shards(records)
+                manifest = json.loads((module.OUT / "manifest.json").read_text(encoding="utf-8"))
+                for entry in manifest["isinIndexes"] + manifest["nameIndexes"]:
+                    raw = (module.OUT / entry["file"]).read_bytes()
+                    header = b"blob " + str(len(raw)).encode("ascii") + b"\\0"
+                    expected = hashlib.sha1(header + raw).hexdigest()
+                    self.assertEqual(entry.get("gitBlobSha"), expected,
+                        f"Manifest fingerprint must match Git blob framing for {entry['file']}")
+            finally:
+                module.OUT = old_out
 
 
     def test_rejects_duplicate_well_formed_isins_without_destroying_previous_catalogue(self):
