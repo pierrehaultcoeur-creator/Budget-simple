@@ -36,6 +36,9 @@ jobs:
       - name: Run offline parser and catalogue-index tests
         run: python -m unittest tests.test_bonds_catalog tests.test_split_bonds_catalog tests.test_audit_bonds_catalog
 
+      - name: Verify committed name-index completeness
+        run: python -m unittest tests.test_committed_name_indexes
+
       - name: Run bond search regression tests
         run: node --test netlify/functions/bond-search.test.js
 
