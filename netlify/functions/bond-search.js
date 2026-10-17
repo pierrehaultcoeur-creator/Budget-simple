@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 
 const CATALOG_PATH = path.join(__dirname, '..', '..', 'bond-catalog.json');
 const SHARDED_DIR = path.join(__dirname, '..', '..', 'data', 'bonds-catalog');
@@ -13,6 +14,11 @@ const MAX_NAME_INDEX_CACHE = 3;
 const OPENFIGI_URL = 'https://api.openfigi.com/v3/filter';
 const MAX_RESULTS = 30;
 const ISIN_RE = /^[A-Z]{2}[A-Z0-9]{9}[0-9]$/;
+
+function gitBlobSha(content) {
+  const header = Buffer.from(`blob ${Buffer.byteLength(content, 'utf8')}\0`, 'utf8');
+  return crypto.createHash('sha1').update(header).update(content, 'utf8').digest('hex');
+}
 
 function json(statusCode, body) {
   return {
@@ -118,15 +124,19 @@ function readIsinIndex(prefix, manifest) {
   const entry = entries.find(item => item.prefix === prefix);
   if (!entry) return null;
   if (ISIN_INDEX_CACHE.has(entry.file)) {
-    const cachedIndex = ISIN_INDEX_CACHE.get(entry.file);
-    // Cache entries must still satisfy the current manifest. This keeps warm
-    // runtimes and injected/test manifests from bypassing reference validation.
+    const cached = ISIN_INDEX_CACHE.get(entry.file);
+    // Cache entries must still satisfy the current manifest, including its
+    // content fingerprint, so a replaced index cannot survive in a warm runtime.
+    if (entry.gitBlobSha && cached.gitBlobSha !== entry.gitBlobSha) return null;
+    const cachedIndex = cached.index;
     return isValidIsinIndex(cachedIndex, prefix, manifest, entry.entries) ? cachedIndex : null;
   }
   try {
-    const index = JSON.parse(fs.readFileSync(path.join(SHARDED_DIR, entry.file), 'utf8'));
+    const raw = fs.readFileSync(path.join(SHARDED_DIR, entry.file), 'utf8');
+    if (entry.gitBlobSha && gitBlobSha(raw) !== entry.gitBlobSha) return null;
+    const index = JSON.parse(raw);
     if (!isValidIsinIndex(index, prefix, manifest, entry.entries)) return null;
-    ISIN_INDEX_CACHE.set(entry.file, index);
+    ISIN_INDEX_CACHE.set(entry.file, { index, gitBlobSha: entry.gitBlobSha || null });
     while (ISIN_INDEX_CACHE.size > MAX_ISIN_INDEX_CACHE) {
       ISIN_INDEX_CACHE.delete(ISIN_INDEX_CACHE.keys().next().value);
     }
@@ -333,17 +343,20 @@ function indexedIsinPrefixSearch(query, manifest) {
   const index = readIsinIndex(query.slice(0, 2), manifest);
   return resolveIsinPrefixFromIndex(query, manifest, index);
 }
-function readNameIndex(file) {
+function readNameIndex(file, expectedGitBlobSha) {
   if (!isSafeCatalogFilename(file)) return null;
   if (NAME_INDEX_CACHE.has(file)) {
-    const value = NAME_INDEX_CACHE.get(file);
+    const cached = NAME_INDEX_CACHE.get(file);
+    if (expectedGitBlobSha && cached.gitBlobSha !== expectedGitBlobSha) return null;
     NAME_INDEX_CACHE.delete(file);
-    NAME_INDEX_CACHE.set(file, value);
-    return value;
+    NAME_INDEX_CACHE.set(file, cached);
+    return cached.index;
   }
   try {
-    const value = JSON.parse(fs.readFileSync(path.join(SHARDED_DIR, file), 'utf8'));
-    NAME_INDEX_CACHE.set(file, value);
+    const raw = fs.readFileSync(path.join(SHARDED_DIR, file), 'utf8');
+    if (expectedGitBlobSha && gitBlobSha(raw) !== expectedGitBlobSha) return null;
+    const value = JSON.parse(raw);
+    NAME_INDEX_CACHE.set(file, { index: value, gitBlobSha: expectedGitBlobSha || null });
     while (NAME_INDEX_CACHE.size > MAX_NAME_INDEX_CACHE) NAME_INDEX_CACHE.delete(NAME_INDEX_CACHE.keys().next().value);
     return value;
   } catch { return null; }
@@ -412,7 +425,7 @@ function indexedNameParts(key, manifest) {
       // If the index structure or file is unavailable, fall back to scanning
       // all shards rather than silently hiding valid name matches.
       if (!entry) return null;
-      const index = readNameIndex(entry.file);
+      const index = readNameIndex(entry.file, entry.gitBlobSha);
       // Validate every entry in the loaded index, not only the requested trigram.
       // Cache the result locally for this search because many trigrams share a file.
       // Corrupt keys or duplicate/unknown shard references invalidate the fast path.
