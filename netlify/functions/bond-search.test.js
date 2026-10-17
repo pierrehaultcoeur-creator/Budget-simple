@@ -1655,6 +1655,34 @@ test('investment page reports a server outage cleanly and re-enables search', as
 });
 
 
+test('investment page renders real SAINT-GOBAIN results from the public handler', async () => {
+  const serverResponse = await search.handler({
+    queryStringParameters: { q: 'SAINT-GOBAIN' }
+  });
+  assert.equal(serverResponse.statusCode, 200);
+  const payload = JSON.parse(serverResponse.body);
+  assert.ok(payload.results.some(item => search._test.normalize(
+    [item.name, item.shortName, item.issuer].filter(Boolean).join(' ')
+  ).includes('saint gobain')), 'Expected the real handler to return a matching catalogue record');
+
+  const requests = [];
+  const page = loadInvestmentSearchPage(async url => {
+    requests.push(url);
+    if (!url.includes('/.netlify/functions/bond-search?')) {
+      throw new Error('Ordinary name search should call the public handler only: ' + url);
+    }
+    return { ok: true, json: async () => payload };
+  });
+
+  page.elements.q.value = 'SAINT-GOBAIN';
+  await page.doSearch();
+
+  assert.equal(requests.length, 1);
+  assert.match(page.elements.status.textContent, /résultat\(s\) via bond-master/);
+  assert.match(page.elements.results.innerHTML, /SAINT|Saint|saint/i);
+  assert.equal(page.elements.search.disabled, false);
+});
+
 test('investment page routes ordinary bond-name queries to server search', async () => {
   const requests = [];
   const page = loadInvestmentSearchPage(async url => {
