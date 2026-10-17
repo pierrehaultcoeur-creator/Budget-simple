@@ -19,6 +19,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_INPUT = ROOT / "data" / "bonds-catalog.json"
 ISIN_RE = re.compile(r"^[A-Z]{2}[A-Z0-9]{9}[0-9]$")
+CFI_RE = re.compile(r"^[A-Z]{6}$")
 MATURITY_SENTINELS = {"9999-12-31", "9999-12-30", "0000-00-00"}
 # CFI group labels follow ESMA's published ISO 10962 group descriptions.
 # Keep ordinary bonds separate from related debt classes and structured products.
@@ -69,6 +70,7 @@ def audit_records(records: list[dict]) -> dict:
     valid_checksum = 0
     missing = Counter()
     cfi_prefixes = Counter()
+    invalid_cfi_format = 0
     sentinel_maturities = 0
     malformed_maturities = 0
     coupon_non_numeric = 0
@@ -90,9 +92,12 @@ def audit_records(records: list[dict]) -> dict:
             valid_shape += 1
             valid_checksum += int(valid_isin_checksum(isin))
 
-        cfi = str(record.get("cfi") or "").upper()
+        cfi = str(record.get("cfi") or "").strip().upper()
         if cfi:
-            cfi_prefixes[cfi[:2]] += 1
+            if CFI_RE.fullmatch(cfi):
+                cfi_prefixes[cfi[:2]] += 1
+            else:
+                invalid_cfi_format += 1
 
         for field in fields:
             if record.get(field) in (None, ""):
@@ -146,6 +151,7 @@ def audit_records(records: list[dict]) -> dict:
         "invalidIsinChecksumAmongShaped": valid_shape - valid_checksum,
         "missingFieldCounts": {field: missing[field] for field in fields},
         "cfiPrefixCounts": dict(sorted(cfi_prefixes.items())),
+        "invalidCfiFormatCount": invalid_cfi_format,
         "cfiGroupLabels": CFI_GROUP_LABELS,
         "conventionalBondCfiGroups": sorted(CONVENTIONAL_BOND_CFI_GROUPS),
         "conventionalBondCount": conventional_bond_count,
