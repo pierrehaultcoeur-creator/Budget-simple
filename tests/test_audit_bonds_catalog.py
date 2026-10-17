@@ -51,6 +51,16 @@ class BondCatalogueAuditTests(unittest.TestCase):
         self.assertEqual(report["unclassifiedCfiCount"], 0)
         self.assertEqual(report["cfiGroupLabels"]["DB"], "Bonds")
 
+    def test_unknown_cfi_group_is_reported_as_unclassified(self):
+        report = module.audit_records([
+            {"isin": "FR0000047607", "cfi": "DXXXXXX"},
+        ])
+        self.assertEqual(report["unclassifiedCfiCount"], 1)
+        self.assertEqual(report["conventionalBondCount"], 0)
+        self.assertEqual(report["relatedDebtCount"], 0)
+        self.assertEqual(report["structuredProductCount"], 0)
+        self.assertEqual(report["otherDebtCount"], 0)
+
     def test_rejects_impossible_maturity_calendar_dates(self):
         report = module.audit_records([
             {"isin": "FR0000047607", "maturityDate": "2026-02-31"},
