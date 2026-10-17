@@ -87,13 +87,15 @@ function allowedShardFiles(manifest) {
 function isAllowedShardReference(filename, manifest) {
   return isSafeCatalogFilename(filename) && allowedShardFiles(manifest).has(filename);
 }
-function isValidIsinIndex(index, prefix, manifest) {
+function isValidIsinIndex(index, prefix, manifest, expectedEntries) {
   if (!index || typeof index !== 'object' || Array.isArray(index)
     || !Array.isArray(manifest?.parts) || !/^[A-Z]{2}$/.test(prefix)) return false;
   const allowedFiles = new Set(manifest.parts
     .map(part => part?.file)
     .filter(file => typeof file === 'string' && isSafeCatalogFilename(file)));
   if (!allowedFiles.size) return false;
+  if (expectedEntries !== undefined && (!Number.isInteger(expectedEntries)
+    || expectedEntries < 0 || Object.keys(index).length !== expectedEntries)) return false;
   // Validate the whole index, not just the requested ISIN. A partially corrupt
   // index must never be trusted for a fast path that can hide other records.
   return Object.entries(index).every(([isin, filename]) =>
@@ -119,11 +121,11 @@ function readIsinIndex(prefix, manifest) {
     const cachedIndex = ISIN_INDEX_CACHE.get(entry.file);
     // Cache entries must still satisfy the current manifest. This keeps warm
     // runtimes and injected/test manifests from bypassing reference validation.
-    return isValidIsinIndex(cachedIndex, prefix, manifest) ? cachedIndex : null;
+    return isValidIsinIndex(cachedIndex, prefix, manifest, entry.entries) ? cachedIndex : null;
   }
   try {
     const index = JSON.parse(fs.readFileSync(path.join(SHARDED_DIR, entry.file), 'utf8'));
-    if (!isValidIsinIndex(index, prefix, manifest)) return null;
+    if (!isValidIsinIndex(index, prefix, manifest, entry.entries)) return null;
     ISIN_INDEX_CACHE.set(entry.file, index);
     while (ISIN_INDEX_CACHE.size > MAX_ISIN_INDEX_CACHE) {
       ISIN_INDEX_CACHE.delete(ISIN_INDEX_CACHE.keys().next().value);
@@ -354,9 +356,11 @@ function nameIndexFiles(index, gram, allowedFiles) {
   return files;
 }
 
-function isValidNameIndex(index, prefix, allowedFiles) {
+function isValidNameIndex(index, prefix, allowedFiles, expectedTrigrams) {
   if (!index || typeof index !== 'object' || Array.isArray(index)
     || typeof prefix !== 'string' || !/^[a-z0-9]$/.test(prefix)) return false;
+  if (expectedTrigrams !== undefined && (!Number.isInteger(expectedTrigrams)
+    || expectedTrigrams < 0 || Object.keys(index).length !== expectedTrigrams)) return false;
   return Object.entries(index).every(([gram, files]) =>
     /^[a-z0-9]{3}$/.test(gram) && gram.startsWith(prefix)
     && Array.isArray(files) && files.length > 0
@@ -413,7 +417,7 @@ function indexedNameParts(key, manifest) {
       // Cache the result locally for this search because many trigrams share a file.
       // Corrupt keys or duplicate/unknown shard references invalidate the fast path.
       if (!validatedIndexes.has(entry.file)) {
-        validatedIndexes.set(entry.file, isValidNameIndex(index, entry.prefix, allowedFiles));
+        validatedIndexes.set(entry.file, isValidNameIndex(index, entry.prefix, allowedFiles, entry.trigrams));
       }
       if (!validatedIndexes.get(entry.file)) return null;
       const files = nameIndexFiles(index, gram, allowedFiles);
