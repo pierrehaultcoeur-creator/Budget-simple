@@ -1838,6 +1838,48 @@ test('investment page falls back to server for a valid ISIN prefix absent from t
   assert.equal(page.elements.search.disabled, false);
 });
 
+test('investment page falls back when the real ISIN index has no matching entries', async () => {
+  const frenchIndex = (manifest.isinIndexes || []).find(entry => entry.prefix === 'FR');
+  assert.ok(frenchIndex, 'Expected the real manifest to declare the French ISIN index');
+
+  const requests = [];
+  const page = loadInvestmentSearchPage(async url => {
+    requests.push(url);
+    if (url === './data/bonds-catalog/manifest.json') {
+      return { ok: true, json: async () => manifest };
+    }
+    if (url === './data/bonds-catalog/' + frenchIndex.file) {
+      return {
+        ok: true,
+        json: async () => JSON.parse(fs.readFileSync(path.join(catalogueDir, frenchIndex.file), 'utf8'))
+      };
+    }
+    if (url.includes('/.netlify/functions/bond-search?')) {
+      assert.ok(url.includes('q=FRZZ'),
+        'Expected a valid but unmatched French ISIN prefix to be sent to the server');
+      return {
+        ok: true,
+        json: async () => ({
+          source: 'bond-master',
+          results: [{ isin: 'FR0000047607', name: 'Server fallback for unmatched prefix', source: 'Catalogue ESMA' }]
+        })
+      };
+    }
+    throw new Error('An unmatched prefix should not load a catalogue shard: ' + url);
+  });
+
+  page.elements.q.value = 'FRZZ';
+  await page.doSearch();
+
+  assert.ok(requests.includes('./data/bonds-catalog/manifest.json'));
+  assert.ok(requests.includes('./data/bonds-catalog/' + frenchIndex.file),
+    'Expected the actual French ISIN index to be checked');
+  assert.ok(requests.some(url => url.includes('/.netlify/functions/bond-search?')),
+    'Expected a server fallback when the real index has no matching ISIN');
+  assert.match(page.elements.results.innerHTML, /Server fallback for unmatched prefix/);
+  assert.equal(page.elements.search.disabled, false);
+});
+
 test('investment page routes ordinary bond-name queries to server search', async () => {
   const requests = [];
   const page = loadInvestmentSearchPage(async url => {
