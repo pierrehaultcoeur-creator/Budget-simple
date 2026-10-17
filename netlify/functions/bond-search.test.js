@@ -1775,6 +1775,42 @@ test('investment page normalizes case and whitespace for an exact real ESMA ISIN
   assert.equal(page.elements.search.disabled, false);
 });
 
+test('investment page falls back to server for a valid ISIN prefix absent from the real catalogue manifest', async () => {
+  const indexedPrefixes = new Set((manifest.isinIndexes || []).map(entry => entry.prefix));
+  const prefix = ['ZZ', 'QQ', 'XX', 'AA'].find(candidate => !indexedPrefixes.has(candidate));
+  assert.ok(prefix, 'Expected at least one test prefix absent from the real catalogue manifest');
+
+  const requests = [];
+  const page = loadInvestmentSearchPage(async url => {
+    requests.push(url);
+    if (url === './data/bonds-catalog/manifest.json') {
+      return { ok: true, json: async () => manifest };
+    }
+    if (url.includes('/.netlify/functions/bond-search?')) {
+      assert.ok(url.includes('q=' + encodeURIComponent(prefix + '00')),
+        'Expected the normalized absent-prefix query to reach the server');
+      return {
+        ok: true,
+        json: async () => ({
+          source: 'bond-master',
+          results: [{ isin: 'FR0000047607', name: 'Fallback result for absent prefix', source: 'Catalogue ESMA' }]
+        })
+      };
+    }
+    throw new Error('An absent country prefix should not load an index or shard: ' + url);
+  });
+
+  page.elements.q.value = prefix + '00';
+  await page.doSearch();
+
+  assert.ok(requests.includes('./data/bonds-catalog/manifest.json'),
+    'Expected the actual catalogue manifest to be consulted');
+  assert.ok(requests.some(url => url.includes('/.netlify/functions/bond-search?')),
+    'Expected a server fallback when the real manifest has no index for the prefix');
+  assert.match(page.elements.results.innerHTML, /Fallback result for absent prefix/);
+  assert.equal(page.elements.search.disabled, false);
+});
+
 test('investment page routes ordinary bond-name queries to server search', async () => {
   const requests = [];
   const page = loadInvestmentSearchPage(async url => {
