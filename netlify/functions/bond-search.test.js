@@ -8,6 +8,58 @@ const search = require('./bond-search');
 const catalogueDir = path.join(__dirname, '..', '..', 'data', 'bonds-catalog');
 const manifest = JSON.parse(fs.readFileSync(path.join(catalogueDir, 'manifest.json'), 'utf8'));
 
+test('committed ESMA snapshot has complete shard and search-index metadata', () => {
+  assert.equal(manifest.source, 'ESMA FIRDS');
+  assert.match(manifest.sourcePublicationDate, /^\\d{8}$/);
+  assert.equal(manifest.partCount, manifest.parts.length);
+
+  const shardFiles = new Set(manifest.parts.map(part => part.file));
+  assert.equal(shardFiles.size, manifest.parts.length, 'Catalogue shard filenames must be unique');
+  let actualRecords = 0;
+  for (const part of manifest.parts) {
+    const filePath = path.join(catalogueDir, part.file);
+    assert.ok(fs.existsSync(filePath), `Missing catalogue shard ${part.file}`);
+    const payload = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+    const records = Array.isArray(payload) ? payload : (payload.records || payload.items || []);
+    assert.equal(records.length, part.records, `Record count mismatch in ${part.file}`);
+    actualRecords += records.length;
+  }
+  assert.equal(actualRecords, manifest.recordCount, 'Manifest record count must match the committed shards');
+
+  const isinPrefixes = new Set();
+  let indexedIsins = 0;
+  for (const entry of manifest.isinIndexes) {
+    assert.ok(!isinPrefixes.has(entry.prefix), `Duplicate ISIN index prefix ${entry.prefix}`);
+    isinPrefixes.add(entry.prefix);
+    const index = JSON.parse(fs.readFileSync(path.join(catalogueDir, entry.file), 'utf8'));
+    assert.equal(Object.keys(index).length, entry.entries, `ISIN index count mismatch in ${entry.file}`);
+    for (const [isin, shard] of Object.entries(index)) {
+      assert.match(isin, /^[A-Z]{2}[A-Z0-9]{9}[0-9]$/);
+      assert.equal(isin.slice(0, 2), entry.prefix, `ISIN ${isin} is in the wrong prefix index`);
+      assert.ok(shardFiles.has(shard), `ISIN ${isin} references undeclared shard ${shard}`);
+    }
+    indexedIsins += Object.keys(index).length;
+  }
+  assert.equal(indexedIsins, manifest.recordCount, 'ISIN indexes must cover every catalogue record');
+
+  const namePrefixes = new Set();
+  let indexedTrigrams = 0;
+  for (const entry of manifest.nameIndexes) {
+    assert.ok(!namePrefixes.has(entry.prefix), `Duplicate name index prefix ${entry.prefix}`);
+    namePrefixes.add(entry.prefix);
+    const index = JSON.parse(fs.readFileSync(path.join(catalogueDir, entry.file), 'utf8'));
+    assert.equal(Object.keys(index).length, entry.trigrams, `Trigram count mismatch in ${entry.file}`);
+    for (const [gram, shards] of Object.entries(index)) {
+      assert.equal(gram[0], entry.prefix, `Trigram ${gram} is in the wrong prefix index`);
+      assert.ok(Array.isArray(shards), `Trigram ${gram} must map to a shard list`);
+      assert.ok(shards.every(shard => shardFiles.has(shard)), `Trigram ${gram} references an undeclared shard`);
+    }
+    indexedTrigrams += Object.keys(index).length;
+  }
+  assert.equal(manifest.hasSearchableNames, manifest.nameIndexes.length > 0);
+  assert.ok(indexedTrigrams > 0, 'Expected the committed catalogue to contain searchable-name trigrams');
+});
+
 function firstIndexedIsin() {
   for (const entry of manifest.isinIndexes || []) {
     const index = JSON.parse(fs.readFileSync(path.join(catalogueDir, entry.file), 'utf8'));
