@@ -94,6 +94,7 @@ def write_shards(records, source_metadata=None):
     manifest_parts = []
     index_buckets = {}
     name_index_buckets = {}
+    seen_isins = set()
     total = 0
     has_names = False
     for idx, shard in enumerate(shards, 1):
@@ -116,6 +117,9 @@ def write_shards(records, source_metadata=None):
         for record in shard:
             isin = str(record.get('isin') or '').upper()
             if ISIN_RE.fullmatch(isin):
+                if isin in seen_isins:
+                    raise ValueError(f'Duplicate valid ISIN in catalogue shards: {isin}')
+                seen_isins.add(isin)
                 index_buckets.setdefault(isin[:2], {})[isin] = filename
             searchable = ' '.join(str(record.get(field) or '') for field in (
                 'name', 'shortName', 'short_name', 'issuer', 'instrumentName', 'nameOfFinancialInstrument'
