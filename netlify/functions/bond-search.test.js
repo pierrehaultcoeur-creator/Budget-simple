@@ -16,15 +16,24 @@ test('committed ESMA snapshot has complete shard and search-index metadata', () 
   const shardFiles = new Set(manifest.parts.map(part => part.file));
   assert.equal(shardFiles.size, manifest.parts.length, 'Catalogue shard filenames must be unique');
   let actualRecords = 0;
+  const isinToShard = new Map();
   for (const part of manifest.parts) {
     const filePath = path.join(catalogueDir, part.file);
     assert.ok(fs.existsSync(filePath), `Missing catalogue shard ${part.file}`);
     const payload = JSON.parse(fs.readFileSync(filePath, 'utf8'));
     const records = Array.isArray(payload) ? payload : (payload.records || payload.items || []);
     assert.equal(records.length, part.records, `Record count mismatch in ${part.file}`);
+    for (const record of records) {
+      const isin = String(record.isin || '').trim().toUpperCase();
+      if (/^[A-Z]{2}[A-Z0-9]{9}[0-9]$/.test(isin)) {
+        assert.ok(!isinToShard.has(isin), `Duplicate ISIN in committed shards: ${isin}`);
+        isinToShard.set(isin, part.file);
+      }
+    }
     actualRecords += records.length;
   }
   assert.equal(actualRecords, manifest.recordCount, 'Manifest record count must match the committed shards');
+  assert.equal(isinToShard.size, manifest.recordCount, 'Every committed record must have one unique, well-formed ISIN');
 
   const isinPrefixes = new Set();
   let indexedIsins = 0;
@@ -37,6 +46,7 @@ test('committed ESMA snapshot has complete shard and search-index metadata', () 
       assert.match(isin, /^[A-Z]{2}[A-Z0-9]{9}[0-9]$/);
       assert.equal(isin.slice(0, 2), entry.prefix, `ISIN ${isin} is in the wrong prefix index`);
       assert.ok(shardFiles.has(shard), `ISIN ${isin} references undeclared shard ${shard}`);
+      assert.equal(isinToShard.get(isin), shard, `ISIN ${isin} must point to the shard that actually contains it`);
     }
     indexedIsins += Object.keys(index).length;
   }
