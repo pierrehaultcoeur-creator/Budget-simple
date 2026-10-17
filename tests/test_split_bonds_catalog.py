@@ -48,6 +48,10 @@ class SplitterIndexTests(unittest.TestCase):
                 us_index = json.loads((module.OUT / indexes["US"]["file"]).read_text(encoding="utf-8"))
                 self.assertIn("FR0000120271", fr_index)
                 self.assertIn("US0378331005", us_index)
+                self.assertEqual(set(fr_index), {"FR0000120271"})
+                self.assertEqual(set(us_index), {"US0378331005"})
+                self.assertEqual(sum(item["entries"] for item in manifest["isinIndexes"]), 2,
+                    "Every well-formed ISIN must appear once, while malformed identifiers stay out of the lookup index")
                 self.assertTrue(any(part["file"] == fr_index["FR0000120271"] for part in manifest["parts"]))
                 self.assertTrue(any(part["file"] == us_index["US0378331005"] for part in manifest["parts"]))
             finally:
