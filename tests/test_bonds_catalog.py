@@ -9,6 +9,76 @@ SPEC.loader.exec_module(module)
 
 
 class ParserTests(unittest.TestCase):
+    def test_cfi_groups_distinguish_bonds_from_structured_products(self):
+        self.assertEqual(module.classify_cfi("DBVUPN"), ("DB", "Obligation (bond)"))
+        self.assertEqual(
+            module.classify_cfi("DEXXXX"),
+            ("DE", "Produit structuré sans protection du capital"),
+        )
+
+    def test_suspicious_coupon_is_withheld_not_rescaled(self):
+        self.assertEqual(module.normalized_coupon("3375"), (None, "SUSPICIOUS_SOURCE_VALUE"))
+        self.assertEqual(module.normalized_coupon("3.375"), ("3.375", "SOURCE_PERCENTAGE"))
+        self.assertEqual(module.normalized_coupon("NaN"), (None, "INVALID_SOURCE_VALUE"))
+        self.assertEqual(module.normalized_coupon("Infinity"), (None, "INVALID_SOURCE_VALUE"))
+        self.assertEqual(module.normalized_coupon("-Infinity"), (None, "INVALID_SOURCE_VALUE"))
+        self.assertEqual(module.normalized_coupon(None), (None, None))
+
+    def test_maturity_sentinel_is_not_a_real_maturity(self):
+        sentinel = module.ET.fromstring(
+            "<DebtInstrmAttrbts><MtrtyDt>9999-12-31</MtrtyDt></DebtInstrmAttrbts>"
+        )
+        self.assertEqual(
+            module.normalized_maturity(sentinel),
+            (None, "9999-12-31", "SENTINEL_UNSPECIFIED"),
+        )
+        real_date = module.ET.fromstring(
+            "<DebtInstrmAttrbts><MtrtyDt>2030-12-31</MtrtyDt></DebtInstrmAttrbts>"
+        )
+        self.assertEqual(
+            module.normalized_maturity(real_date),
+            ("2030-12-31", "2030-12-31", "SOURCE_DATE"),
+        )
+
+    def test_invalid_maturity_is_preserved_for_audit_but_not_exposed_as_a_date(self):
+        invalid_dates = ("2030-02-31", "2030-13-01", "not-a-date")
+        for raw in invalid_dates:
+            with self.subTest(raw=raw):
+                node = module.ET.fromstring(
+                    f"<DebtInstrmAttrbts><MtrtyDt>{raw}</MtrtyDt></DebtInstrmAttrbts>"
+                )
+                self.assertEqual(
+                    module.normalized_maturity(node),
+                    (None, raw, "INVALID_SOURCE_VALUE"),
+                )
+
+    def test_iso_datetime_maturity_is_validated_and_preserved(self):
+        raw = "2030-12-31T00:00:00Z"
+        node = module.ET.fromstring(
+            f"<DebtInstrmAttrbts><MtrtyDt>{raw}</MtrtyDt></DebtInstrmAttrbts>"
+        )
+        self.assertEqual(
+            module.normalized_maturity(node),
+            (raw, raw, "SOURCE_DATE"),
+        )
+
+    def test_sentinel_metadata_does_not_inflate_record_completeness(self):
+        real = {
+            "isin": "FR0000047607",
+            "name": "Example bond",
+            "maturityDate": "2030-12-31",
+            "couponRate": "3.25",
+        }
+        sentinel = {
+            "isin": "FR0000047607",
+            "name": "Example bond",
+            "maturityDate": None,
+            "maturityDateRaw": "9999-12-31",
+            "maturityDateStatus": "SENTINEL_UNSPECIFIED",
+            "couponRate": "3.25",
+        }
+        self.assertGreater(module.completeness(real), module.completeness(sentinel))
+
     def test_debt_filter_and_fields(self):
         xml = (ROOT / "tests" / "sample_fulins.xml").read_bytes()
         records = module.parse_xml(xml)
@@ -19,6 +89,8 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(records[0]["currency"], "EUR")
         self.assertEqual(records[0]["maturityDate"], "2030-12-31")
         self.assertEqual(records[0]["couponRate"], "3.25")
+        self.assertEqual(records[0]["couponRateRaw"], "3.25")
+        self.assertEqual(records[0]["couponRateStatus"], "SOURCE_PERCENTAGE")
         self.assertEqual(records[0]["marketMic"], "XPAR")
 
 

@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import io
 import json
+import math
 import os
 import re
 import sys
@@ -167,20 +168,28 @@ def parse_xml(xml_bytes: bytes) -> list[dict]:
                 node.clear()
                 continue
 
+            maturity, maturity_raw, maturity_status = normalized_maturity(debt)
+            coupon_raw = (
+                first_descendant_text(debt, "Fxd")
+                or first_descendant_text(debt, "IntrstRate")
+                if debt is not None else None
+            )
+            coupon, coupon_status = normalized_coupon(coupon_raw)
+            cfi_group, instrument_type = classify_cfi(cfi)
             record = {
                 "isin": isin,
                 "name": direct_child_text(general, "FullNm"),
                 "shortName": direct_child_text(general, "ShrtNm"),
                 "cfi": cfi,
+                "cfiGroup": cfi_group,
+                "instrumentType": instrument_type,
                 "currency": direct_child_text(general, "NtnlCcy"),
-                "maturityDate": (
-                    first_descendant_text(debt, "MtrtyDt") if debt is not None else None
-                ),
-                "couponRate": (
-                    first_descendant_text(debt, "Fxd")
-                    or first_descendant_text(debt, "IntrstRate")
-                    if debt is not None else None
-                ),
+                "maturityDate": maturity,
+                "maturityDateRaw": maturity_raw,
+                "maturityDateStatus": maturity_status,
+                "couponRate": coupon,
+                "couponRateRaw": coupon_raw,
+                "couponRateStatus": coupon_status,
                 "issuerLei": first_descendant_text(node, "Issr"),
                 "marketMic": first_descendant_text(trading, "Id") if trading is not None else None,
             }
@@ -191,8 +200,80 @@ def parse_xml(xml_bytes: bytes) -> list[dict]:
     return records
 
 
+MATURITY_SENTINELS = {"9999-12-31", "9999-12-30", "0000-00-00"}
+CFI_GROUP_LABELS = {
+    "DA": "Titre adossé à des actifs (ABS)",
+    "DB": "Obligation (bond)",
+    "DC": "Obligation convertible",
+    "DD": "Certificat représentatif de dette",
+    "DW": "Obligation avec bons de souscription",
+    "DT": "Medium-term note",
+    "DS": "Produit structuré avec protection du capital",
+    "DE": "Produit structuré sans protection du capital",
+    "DG": "Titre adossé à des créances hypothécaires (MBS)",
+    "DN": "Obligation municipale",
+    "DY": "Instrument monétaire",
+    "DM": "Autre instrument de dette",
+}
+
+
+def classify_cfi(cfi: str | None) -> tuple[str | None, str]:
+    code = str(cfi or "").strip().upper()
+    group = code[:2] if len(code) >= 2 and code.startswith("D") else None
+    return group, CFI_GROUP_LABELS.get(group, "Instrument de dette — groupe CFI à vérifier")
+
+
+def normalized_coupon(raw: str | None) -> tuple[str | None, str | None]:
+    """Accept ESMA coupon percentages only when plausibly expressed as percentages.
+
+    ESMA reporting instructions define this field as a percentage (e.g. 3.375
+    means 3.375%). Values above 100 are withheld from the usable coupon field
+    and retained verbatim for audit; they are never silently rescaled.
+    """
+    if raw is None or not str(raw).strip():
+        return None, None
+    value = str(raw).strip().replace(",", ".")
+    try:
+        number = float(value)
+    except ValueError:
+        return None, "INVALID_SOURCE_VALUE"
+    # float() accepts NaN and infinities; they are malformed source values,
+    # not ordinary numeric outliers. Never let them acquire a misleading
+    # suspicious-but-numeric status.
+    if not math.isfinite(number):
+        return None, "INVALID_SOURCE_VALUE"
+    if not (-100 <= number <= 100):
+        return None, "SUSPICIOUS_SOURCE_VALUE"
+    return value, "SOURCE_PERCENTAGE"
+
+
+def normalized_maturity(debt: ET.Element | None) -> tuple[str | None, str | None, str | None]:
+    """Keep source maturity data, but expose only valid dates as usable maturities."""
+    raw = first_descendant_text(debt, "MtrtyDt") if debt is not None else None
+    if not raw:
+        return None, None, None
+    if raw in MATURITY_SENTINELS:
+        return None, raw, "SENTINEL_UNSPECIFIED"
+
+    try:
+        if "T" in raw:
+            parsed = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+            if parsed.date().isoformat() != raw[:10]:
+                raise ValueError("invalid ISO date component")
+        else:
+            parsed_date = date.fromisoformat(raw)
+            if parsed_date.isoformat() != raw:
+                raise ValueError("date must use YYYY-MM-DD format")
+    except ValueError:
+        return None, raw, "INVALID_SOURCE_VALUE"
+
+    return raw, raw, "SOURCE_DATE"
+
 def completeness(record: dict) -> int:
-    return sum(value not in (None, "") for value in record.values())
+    # Count only meaningful catalogue fields. Raw sentinel values and quality
+    # flags are provenance, not additional financial-data completeness.
+    fields = ("isin", "name", "shortName", "cfi", "currency", "maturityDate", "couponRate", "issuerLei", "marketMic")
+    return sum(record.get(field) not in (None, "") for field in fields)
 
 
 def build_catalogue() -> dict:
