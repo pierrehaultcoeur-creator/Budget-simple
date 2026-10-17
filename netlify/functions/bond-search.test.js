@@ -225,6 +225,22 @@ test('short names are eligible for bond search ranking', () => {
     'Expected a short-name prefix query to match the bond');
 });
 
+test('reordered and partial short-name tokens match independently of issuer metadata', () => {
+  const score = search._test.scoreCatalogRecord;
+  const record = {
+    name: 'Long legal description of a debt instrument',
+    shortName: 'Société-Générale / EMTN 2030',
+    issuer: 'Unrelated Issuer'
+  };
+
+  assert.ok(score(record, 'emtn societe') > 0,
+    'Expected reordered short-name tokens to match even when issuer metadata differs');
+  assert.ok(score(record, 'gener emtn') > 0,
+    'Expected distinct partial short-name tokens to match the short name');
+  assert.equal(score(record, 'soc emtn unrelated'), 0,
+    'Expected query tokens not to be combined across short name and issuer fields');
+});
+
 test('normalization removes spacing combining marks consistently with Python', () => {
   // U+093E is category Mc and has canonical combining class 0.
   assert.equal(search._test.normalize('a\u093ebc'), 'abc');
