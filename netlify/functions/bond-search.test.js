@@ -1918,14 +1918,10 @@ test('investment page handles HTTP and invalid-JSON server responses without loc
   }
 });
 
-test('name index retains matching records across representative catalogue shards', () => {
-  // Exercise the generated index against records beyond the first shard, so
-  // a missing trigram-to-shard entry cannot pass only because early shards work.
-  const sampleIndexes = [...new Set([
-    0,
-    Math.floor((manifest.parts.length - 1) / 2),
-    manifest.parts.length - 1
-  ])];
+test('name index retains matching records across every catalogue shard', () => {
+  // Check every declared shard, not only the first, middle, and last. This
+  // verifies generated trigram coverage across the full catalogue manifest.
+  const sampleIndexes = manifest.parts.map((_, index) => index);
   let checked = 0;
 
   for (const partIndex of sampleIndexes) {
