@@ -2332,6 +2332,7 @@ test('name index preserves short-name ranking across catalogue regions', () => {
     const tokens = [...new Set(search._test.normalize(sample.shortName)
       .split(' ').filter(token => token.length >= 3))];
     const query = `${tokens[0].slice(0, 3)} ${tokens[1].slice(0, 3)}`;
+    const reorderedQuery = `${tokens[1].slice(0, 3)} ${tokens[0].slice(0, 3)}`;
     const exactQuery = search._test.normalize(sample.shortName);
     const candidates = search._test.indexedNameParts(query, manifest);
     assert.ok(Array.isArray(candidates), `Expected indexed candidates for shortName query "${query}"`);
@@ -2344,7 +2345,7 @@ test('name index preserves short-name ranking across catalogue regions', () => {
 
     // Compare partial multi-token and full-field queries against the full-scan
     // oracle, including both result membership and exact ranking/order.
-    for (const candidateQuery of [...new Set([query, exactQuery])]) {
+    for (const candidateQuery of [...new Set([query, reorderedQuery, exactQuery])]) {
       const expected = [];
       for (const raw of fullScanRecords) {
         const item = search._test.canonicalBond(raw);
