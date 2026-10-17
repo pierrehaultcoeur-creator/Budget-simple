@@ -469,6 +469,18 @@ test('catalogue search can find a real record by its name', () => {
   assert.ok(results.some(item => item.isin === sample.isin), `Expected name search to find ISIN ${sample.isin}`);
 });
 
+test('public search handler returns a matching SAINT-GOBAIN catalogue result', async () => {
+  const response = await search.handler({ queryStringParameters: { q: 'SAINT-GOBAIN' } });
+  assert.equal(response.statusCode, 200);
+  const payload = JSON.parse(response.body);
+  assert.equal(payload.source, 'bond-master');
+  assert.ok(payload.results.length > 0, 'Expected public name search to return results');
+  assert.ok(payload.results.some(item => search._test.normalize(
+    [item.name, item.shortName, item.issuer].filter(Boolean).join(' ')
+  ).includes('saint gobain')),
+  'Expected the public response to include a matching SAINT-GOBAIN record');
+});
+
 test('public search handler returns a real catalogue record for a name query', async () => {
   const shardName = manifest.parts[0].file;
   const shard = JSON.parse(fs.readFileSync(path.join(catalogueDir, shardName), 'utf8'));
