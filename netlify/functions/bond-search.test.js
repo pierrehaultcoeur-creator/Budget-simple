@@ -1224,6 +1224,24 @@ test('cached ISIN indexes are revalidated against the current manifest', () => {
     'A cached index must not bypass validation against the current shard list');
 });
 
+test('ISIN index content fingerprint mismatch disables cached and fresh index reads', () => {
+  const entry = manifest.isinIndexes.find(item => item.prefix === 'FR');
+  assert.ok(entry?.gitBlobSha, 'Expected generated manifest to include an index content fingerprint');
+  const changed = { ...manifest, isinIndexes: manifest.isinIndexes.map(item =>
+    item.prefix === 'FR' ? { ...item, gitBlobSha: '0'.repeat(40) } : item) };
+  assert.equal(search._test.readIsinIndex('FR', changed), null,
+    'A cached index with a different manifest fingerprint must not be trusted');
+});
+
+test('name index content fingerprint mismatch disables indexed search', () => {
+  const entry = manifest.nameIndexes[0];
+  assert.ok(entry?.gitBlobSha, 'Expected generated manifest to include a name-index content fingerprint');
+  const changed = { ...manifest, nameIndexes: manifest.nameIndexes.map(item =>
+    item.file === entry.file ? { ...item, gitBlobSha: '0'.repeat(40) } : item) };
+  assert.equal(search._test.indexedNameParts('bond example', changed), null,
+    'A cached or freshly loaded name index with a different fingerprint must trigger full-scan fallback');
+});
+
 test('ISIN index contents must contain only valid ISINs mapped to declared shards for their prefix', () => {
   const validate = search._test.isValidIsinIndex;
   const fakeManifest = { parts: [{ file: 'part-0001.json' }, { file: 'part-0002.json' }] };
