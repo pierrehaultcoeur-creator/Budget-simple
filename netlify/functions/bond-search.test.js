@@ -449,6 +449,15 @@ test('invalid ISIN-like input does not claim an exact match', () => {
   assert.deepEqual(search._test.exactIsinSearch('NOT-AN-ISIN'), null);
 });
 
+test('SAINT-GOBAIN name query resolves a matching record from the real catalogue', () => {
+  const results = search._test.shardedCatalogSearch('SAINT-GOBAIN');
+  assert.ok(results.length > 0, 'Expected SAINT-GOBAIN to return catalogue results');
+  assert.ok(results.some(item => search._test.normalize(
+    [item.name, item.shortName, item.issuer].filter(Boolean).join(' ')
+  ).includes('saint gobain')),
+  'Expected at least one result to contain the normalized SAINT-GOBAIN name');
+});
+
 test('catalogue search can find a real record by its name', () => {
   const shardName = manifest.parts[0].file;
   const shard = JSON.parse(fs.readFileSync(path.join(catalogueDir, shardName), 'utf8'));
