@@ -59,7 +59,7 @@ class SplitterIndexTests(unittest.TestCase):
                 module.TARGET_BYTES = old_target
 
 
-    def test_rejects_duplicate_well_formed_isins_instead_of_overwriting_index_entries(self):
+    def test_rejects_duplicate_well_formed_isins_without_destroying_previous_catalogue(self):
         records = [
             {"isin": "FR0000120271", "name": "First record"},
             {"isin": "FR0000120271", "name": "Duplicate record"},
@@ -68,8 +68,20 @@ class SplitterIndexTests(unittest.TestCase):
             old_out = module.OUT
             try:
                 module.OUT = pathlib.Path(tmp) / "catalogue"
+                module.write_shards([{"isin": "US0378331005", "name": "Existing valid record"}])
+                before = {
+                    path.name: path.read_bytes()
+                    for path in module.OUT.iterdir()
+                    if path.is_file()
+                }
                 with self.assertRaisesRegex(ValueError, "Duplicate valid ISIN"):
                     module.write_shards(records)
+                after = {
+                    path.name: path.read_bytes()
+                    for path in module.OUT.iterdir()
+                    if path.is_file()
+                }
+                self.assertEqual(after, before, "A rejected rebuild must preserve the previous valid catalogue")
             finally:
                 module.OUT = old_out
 
