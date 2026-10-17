@@ -908,6 +908,10 @@ test('name index content validation rejects malformed keys and shard lists', () 
   const isValidNameIndex = search._test.isValidNameIndex;
   const allowed = new Set(['part-0001.json', 'part-0002.json']);
   assert.equal(isValidNameIndex({ ban: ['part-0001.json'] }, 'b', allowed), true);
+  assert.equal(isValidNameIndex({ ban: ['part-0001.json'] }, 'b', allowed, 1), true,
+    'Expected the index to validate when its trigram count matches the manifest');
+  assert.equal(isValidNameIndex({ ban: ['part-0001.json'] }, 'b', allowed, 2), false,
+    'An incomplete name index must trigger full-scan fallback');
   assert.equal(isValidNameIndex({ ban: ['part-0001.json'], can: ['part-0002.json'] }, 'b', allowed), false,
     'Expected every trigram to match the index prefix');
   assert.equal(isValidNameIndex({ 'ba-': ['part-0001.json'] }, 'b', allowed), false,
@@ -1224,6 +1228,10 @@ test('ISIN index contents must contain only valid ISINs mapped to declared shard
   const validate = search._test.isValidIsinIndex;
   const fakeManifest = { parts: [{ file: 'part-0001.json' }, { file: 'part-0002.json' }] };
   assert.equal(validate({ FR0000047607: 'part-0001.json' }, 'FR', fakeManifest), true);
+  assert.equal(validate({ FR0000047607: 'part-0001.json' }, 'FR', fakeManifest, 1), true,
+    'Expected the ISIN index to validate when its entry count matches the manifest');
+  assert.equal(validate({ FR0000047607: 'part-0001.json' }, 'FR', fakeManifest, 2), false,
+    'An incomplete ISIN index must trigger shard-scan fallback');
   assert.equal(validate({ FR0000047607: 'missing-shard.json' }, 'FR', fakeManifest), false);
   assert.equal(validate({ DE0000047607: 'part-0001.json' }, 'FR', fakeManifest), false,
     'A country index must not contain identifiers for another prefix');
