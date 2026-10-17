@@ -10,7 +10,7 @@ const manifest = JSON.parse(fs.readFileSync(path.join(catalogueDir, 'manifest.js
 
 test('committed ESMA snapshot has complete shard and search-index metadata', () => {
   assert.equal(manifest.source, 'ESMA FIRDS');
-  assert.match(manifest.sourcePublicationDate, /^\\d{8}$/);
+  assert.match(manifest.sourcePublicationDate, /^\d{8}$/);
   assert.equal(manifest.partCount, manifest.parts.length);
 
   const shardFiles = new Set(manifest.parts.map(part => part.file));
