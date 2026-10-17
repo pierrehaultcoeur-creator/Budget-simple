@@ -1,4 +1,5 @@
 const test = require('node:test');
+const crypto = require('node:crypto');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -7,6 +8,11 @@ const search = require('./bond-search');
 
 const catalogueDir = path.join(__dirname, '..', '..', 'data', 'bonds-catalog');
 const manifest = JSON.parse(fs.readFileSync(path.join(catalogueDir, 'manifest.json'), 'utf8'));
+
+function gitBlobSha(content) {
+  const header = Buffer.from(`blob ${Buffer.byteLength(content, 'utf8')}\0`, 'utf8');
+  return crypto.createHash('sha1').update(header).update(content, 'utf8').digest('hex');
+}
 
 test('committed ESMA snapshot has complete shard and search-index metadata', () => {
   assert.equal(manifest.source, 'ESMA FIRDS');
@@ -40,7 +46,10 @@ test('committed ESMA snapshot has complete shard and search-index metadata', () 
   for (const entry of manifest.isinIndexes) {
     assert.ok(!isinPrefixes.has(entry.prefix), `Duplicate ISIN index prefix ${entry.prefix}`);
     isinPrefixes.add(entry.prefix);
-    const index = JSON.parse(fs.readFileSync(path.join(catalogueDir, entry.file), 'utf8'));
+    const raw = fs.readFileSync(path.join(catalogueDir, entry.file), 'utf8');
+    assert.match(entry.gitBlobSha || '', /^[a-f0-9]{40}$/, `Missing or malformed Git blob fingerprint for ${entry.file}`);
+    assert.equal(gitBlobSha(raw), entry.gitBlobSha, `Git blob fingerprint mismatch for ${entry.file}`);
+    const index = JSON.parse(raw);
     assert.equal(Object.keys(index).length, entry.entries, `ISIN index count mismatch in ${entry.file}`);
     for (const [isin, shard] of Object.entries(index)) {
       assert.match(isin, /^[A-Z]{2}[A-Z0-9]{9}[0-9]$/);
@@ -57,7 +66,10 @@ test('committed ESMA snapshot has complete shard and search-index metadata', () 
   for (const entry of manifest.nameIndexes) {
     assert.ok(!namePrefixes.has(entry.prefix), `Duplicate name index prefix ${entry.prefix}`);
     namePrefixes.add(entry.prefix);
-    const index = JSON.parse(fs.readFileSync(path.join(catalogueDir, entry.file), 'utf8'));
+    const raw = fs.readFileSync(path.join(catalogueDir, entry.file), 'utf8');
+    assert.match(entry.gitBlobSha || '', /^[a-f0-9]{40}$/, `Missing or malformed Git blob fingerprint for ${entry.file}`);
+    assert.equal(gitBlobSha(raw), entry.gitBlobSha, `Git blob fingerprint mismatch for ${entry.file}`);
+    const index = JSON.parse(raw);
     assert.equal(Object.keys(index).length, entry.trigrams, `Trigram count mismatch in ${entry.file}`);
     for (const [gram, shards] of Object.entries(index)) {
       assert.equal(gram[0], entry.prefix, `Trigram ${gram} is in the wrong prefix index`);
@@ -72,7 +84,10 @@ test('committed ESMA snapshot has complete shard and search-index metadata', () 
 
 function firstIndexedIsin() {
   for (const entry of manifest.isinIndexes || []) {
-    const index = JSON.parse(fs.readFileSync(path.join(catalogueDir, entry.file), 'utf8'));
+    const raw = fs.readFileSync(path.join(catalogueDir, entry.file), 'utf8');
+    assert.match(entry.gitBlobSha || '', /^[a-f0-9]{40}$/, `Missing or malformed Git blob fingerprint for ${entry.file}`);
+    assert.equal(gitBlobSha(raw), entry.gitBlobSha, `Git blob fingerprint mismatch for ${entry.file}`);
+    const index = JSON.parse(raw);
     const isin = Object.keys(index).find(value => /^[A-Z]{2}[A-Z0-9]{9}[0-9]$/.test(value));
     if (isin) return isin;
   }
