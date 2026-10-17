@@ -19,6 +19,9 @@ class ParserTests(unittest.TestCase):
     def test_suspicious_coupon_is_withheld_not_rescaled(self):
         self.assertEqual(module.normalized_coupon("3375"), (None, "SUSPICIOUS_SOURCE_VALUE"))
         self.assertEqual(module.normalized_coupon("3.375"), ("3.375", "SOURCE_PERCENTAGE"))
+        self.assertEqual(module.normalized_coupon("NaN"), (None, "INVALID_SOURCE_VALUE"))
+        self.assertEqual(module.normalized_coupon("Infinity"), (None, "INVALID_SOURCE_VALUE"))
+        self.assertEqual(module.normalized_coupon("-Infinity"), (None, "INVALID_SOURCE_VALUE"))
         self.assertEqual(module.normalized_coupon(None), (None, None))
 
     def test_maturity_sentinel_is_not_a_real_maturity(self):
