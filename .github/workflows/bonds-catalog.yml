@@ -69,6 +69,7 @@ jobs:
           assert report["duplicateIsins"] == 0, "Duplicate ISINs found in the ESMA catalogue"
           assert report["invalidIsinChecksumAmongShaped"] == 0, "ISIN checksum failures found in the ESMA catalogue"
           assert report["unclassifiedCfiCount"] == 0, "Unclassified CFI groups found; review classifications before publication"
+          assert report["invalidCfiFormatCount"] == 0, "Malformed CFI codes found in the ESMA catalogue"
           print("## ESMA catalogue quality audit")
           print(f"- Records: **{report['recordCount']:,}**")
           print(f"- Unique ISINs: **{report['uniqueNonEmptyIsins']:,}**; duplicates: **{report['duplicateIsins']:,}**")
