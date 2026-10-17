@@ -478,6 +478,10 @@ function scoreCatalogRecord(item, key) {
   const issuerTokens = issuer.split(' ').filter(Boolean);
   if (queryTokens.length > 1 && queryTokens.every(token => nameTokens.includes(token))) return 550;
   if (queryTokens.length > 1 && queryTokens.every(token => token.length >= 3) && distinctTokenPrefixMatch(queryTokens, nameTokens)) return 525;
+  const shortNameTokens = shortName.split(' ').filter(Boolean);
+  if (queryTokens.length > 1 && queryTokens.every(token => shortNameTokens.includes(token))) return 500;
+  if (queryTokens.length > 1 && queryTokens.every(token => token.length >= 3)
+    && distinctTokenPrefixMatch(queryTokens, shortNameTokens)) return 475;
   if (shortName && shortName.includes(key)) return 375;
   if (issuer && issuer === key) return 500;
   if (issuer && issuer.startsWith(key)) return 450;
