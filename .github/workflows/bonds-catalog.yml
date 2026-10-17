@@ -13,6 +13,7 @@ on:
       - 'tests/test_bonds_catalog.py'
       - 'tests/test_split_bonds_catalog.py'
       - 'tests/test_audit_bonds_catalog.py'
+      - 'tests/test_committed_name_indexes.py'
       - 'data/bonds-catalog/**'
   schedule:
     # Sundays at 10:30 UTC, after ESMA's weekly full-file publication window.
@@ -39,7 +40,7 @@ jobs:
           python-version: "3.12"
 
       - name: Run offline parser regression test
-        run: python -m unittest tests.test_bonds_catalog tests.test_split_bonds_catalog tests.test_audit_bonds_catalog
+        run: python -m unittest tests.test_bonds_catalog tests.test_split_bonds_catalog tests.test_audit_bonds_catalog tests.test_committed_name_indexes
 
       - name: Build catalogue from ESMA
         run: python scripts/bonds_catalog.py
