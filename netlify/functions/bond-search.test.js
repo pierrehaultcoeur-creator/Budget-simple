@@ -1234,7 +1234,7 @@ test('ISIN index content fingerprint mismatch disables cached and fresh index re
 });
 
 test('name index content fingerprint mismatch disables indexed search', () => {
-  const entry = manifest.nameIndexes[0];
+  const entry = manifest.nameIndexes.find(item => item.prefix === 'b');
   assert.ok(entry?.gitBlobSha, 'Expected generated manifest to include a name-index content fingerprint');
   const changed = { ...manifest, nameIndexes: manifest.nameIndexes.map(item =>
     item.file === entry.file ? { ...item, gitBlobSha: '0'.repeat(40) } : item) };
