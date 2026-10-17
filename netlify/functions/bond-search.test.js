@@ -1628,22 +1628,54 @@ function loadInvestmentSearchPage(fetchImpl) {
   const context = {
     document: { getElementById: id => elements[id] },
     elements,
-    fetch: fetchImpl,
+    fetch: async url => {
+      const response = await fetchImpl(url);
+      if (!response || typeof response.json !== 'function' || typeof response.arrayBuffer === 'function') return response;
+      const value = await response.json();
+      let body = JSON.stringify(value);
+      const prefix = './data/bonds-catalog/';
+      if (typeof url === 'string' && url.startsWith(prefix)) {
+        const filename = url.slice(prefix.length);
+        const filePath = path.join(catalogueDir, filename);
+        if (fs.existsSync(filePath)) {
+          const raw = fs.readFileSync(filePath, 'utf8');
+          try { if (JSON.stringify(JSON.parse(raw)) === JSON.stringify(value)) body = raw; } catch {}
+        }
+      }
+      const bytes = Buffer.from(body, 'utf8');
+      return { ...response, json: async () => value, arrayBuffer: async () => bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) };
+    },
     console: { warn() {}, error() {} },
-    Map, Set, Promise
+    crypto: crypto.webcrypto, TextEncoder, TextDecoder, Uint8Array, Map, Set, Promise
   };
   vm.runInNewContext(scripts[scripts.length - 1] + '\nglobalThis.__investmentSearchTest = { getIndex, searchLocal, doSearch, elements };', context);
   return context.__investmentSearchTest;
 }
 
-test('investment page rejects ISIN index references outside declared catalogue shards', async () => {
+test('investment page rejects ISIN indexes without a valid manifest fingerprint', async () => {
   const page = loadInvestmentSearchPage(async () => ({
     ok: true,
-    json: async () => ({ 'FR0000047607': '../manifest.json' })
+    json: async () => ({ 'FR0000047607': 'part-0001.json' })
+  }));
+  const base = {
+    parts: [{ file: 'part-0001.json' }],
+    isinIndexes: [{ prefix: 'FR', file: 'isin-index-FR.json' }]
+  };
+  assert.equal(await page.getIndex('FR', base), null);
+  assert.equal(await page.getIndex('FR', {
+    ...base,
+    isinIndexes: [{ ...base.isinIndexes[0], gitBlobSha: 'not-a-hash' }]
+  }), null);
+});
+
+test('investment page rejects ISIN index content fingerprint mismatches', async () => {
+  const page = loadInvestmentSearchPage(async () => ({
+    ok: true,
+    json: async () => ({ 'FR0000047607': 'part-0001.json' })
   }));
   const manifest = {
     parts: [{ file: 'part-0001.json' }],
-    isinIndexes: [{ prefix: 'FR', file: 'isin-index-FR.json' }]
+    isinIndexes: [{ prefix: 'FR', file: 'isin-index-FR.json', gitBlobSha: '0'.repeat(40) }]
   };
   assert.equal(await page.getIndex('FR', manifest), null);
 });
@@ -1653,13 +1685,15 @@ test('investment page revalidates cached ISIN indexes against the current manife
     ok: true,
     json: async () => ({ 'FR0000047607': 'part-0001.json' })
   }));
+  const fakeIndex = { 'FR0000047607': 'part-0001.json' };
+  const fingerprint = gitBlobSha(JSON.stringify(fakeIndex));
   const firstManifest = {
     parts: [{ file: 'part-0001.json' }],
-    isinIndexes: [{ prefix: 'FR', file: 'isin-index-FR.json' }]
+    isinIndexes: [{ prefix: 'FR', file: 'isin-index-FR.json', gitBlobSha: fingerprint }]
   };
   const changedManifest = {
     parts: [{ file: 'part-0002.json' }],
-    isinIndexes: [{ prefix: 'FR', file: 'isin-index-FR.json' }]
+    isinIndexes: [{ prefix: 'FR', file: 'isin-index-FR.json', gitBlobSha: fingerprint }]
   };
   assert.ok(await page.getIndex('FR', firstManifest));
   assert.equal(await page.getIndex('FR', changedManifest), null);
