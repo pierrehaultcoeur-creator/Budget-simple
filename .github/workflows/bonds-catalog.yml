@@ -6,6 +6,7 @@ on:
     branches:
       - feature/bond-search-index
     paths:
+      - '.github/workflows/bonds-catalog.yml'
       - 'scripts/bonds_catalog.py'
       - 'scripts/split_bonds_catalog.py'
       - 'scripts/audit_bonds_catalog.py'
@@ -65,6 +66,8 @@ jobs:
           python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
           import json
           report = json.load(open("/tmp/bond-catalog-quality-report.json", encoding="utf-8"))
+          assert report["duplicateIsins"] == 0, "Duplicate ISINs found in the ESMA catalogue"
+          assert report["invalidIsinChecksumAmongShaped"] == 0, "ISIN checksum failures found in the ESMA catalogue"
           print("## ESMA catalogue quality audit")
           print(f"- Records: **{report['recordCount']:,}**")
           print(f"- Unique ISINs: **{report['uniqueNonEmptyIsins']:,}**; duplicates: **{report['duplicateIsins']:,}**")
