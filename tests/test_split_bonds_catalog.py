@@ -73,7 +73,7 @@ class SplitterIndexTests(unittest.TestCase):
                 manifest = json.loads((module.OUT / "manifest.json").read_text(encoding="utf-8"))
                 for entry in manifest["isinIndexes"] + manifest["nameIndexes"]:
                     raw = (module.OUT / entry["file"]).read_bytes()
-                    header = b"blob " + str(len(raw)).encode("ascii") + b"\\0"
+                    header = b"blob " + str(len(raw)).encode("ascii") + b"\0"
                     expected = hashlib.sha1(header + raw).hexdigest()
                     self.assertEqual(entry.get("gitBlobSha"), expected,
                         f"Manifest fingerprint must match Git blob framing for {entry['file']}")
