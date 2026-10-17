@@ -122,21 +122,21 @@ function readIsinIndex(prefix, manifest) {
   const shardFiles = new Set((Array.isArray(manifest?.parts) ? manifest.parts : []).map(part => part?.file));
   if (files.some(file => shardFiles.has(file))) return null;
   const entry = entries.find(item => item.prefix === prefix);
-  if (!entry) return null;
+  if (!entry || typeof entry.gitBlobSha !== 'string' || !/^[a-f0-9]{40}$/.test(entry.gitBlobSha)) return null;
   if (ISIN_INDEX_CACHE.has(entry.file)) {
     const cached = ISIN_INDEX_CACHE.get(entry.file);
-    // Cache entries must still satisfy the current manifest, including its
-    // content fingerprint, so a replaced index cannot survive in a warm runtime.
-    if (entry.gitBlobSha && cached.gitBlobSha !== entry.gitBlobSha) return null;
+    // A fingerprint is mandatory: without it neither a cached nor a fresh
+    // index is trusted, so stale or incomplete manifests fall back to shards.
+    if (cached.gitBlobSha !== entry.gitBlobSha) return null;
     const cachedIndex = cached.index;
     return isValidIsinIndex(cachedIndex, prefix, manifest, entry.entries) ? cachedIndex : null;
   }
   try {
     const raw = fs.readFileSync(path.join(SHARDED_DIR, entry.file), 'utf8');
-    if (entry.gitBlobSha && gitBlobSha(raw) !== entry.gitBlobSha) return null;
+    if (gitBlobSha(raw) !== entry.gitBlobSha) return null;
     const index = JSON.parse(raw);
     if (!isValidIsinIndex(index, prefix, manifest, entry.entries)) return null;
-    ISIN_INDEX_CACHE.set(entry.file, { index, gitBlobSha: entry.gitBlobSha || null });
+    ISIN_INDEX_CACHE.set(entry.file, { index, gitBlobSha: entry.gitBlobSha });
     while (ISIN_INDEX_CACHE.size > MAX_ISIN_INDEX_CACHE) {
       ISIN_INDEX_CACHE.delete(ISIN_INDEX_CACHE.keys().next().value);
     }
@@ -344,19 +344,21 @@ function indexedIsinPrefixSearch(query, manifest) {
   return resolveIsinPrefixFromIndex(query, manifest, index);
 }
 function readNameIndex(file, expectedGitBlobSha) {
-  if (!isSafeCatalogFilename(file)) return null;
+  if (!isSafeCatalogFilename(file)
+    || typeof expectedGitBlobSha !== 'string'
+    || !/^[a-f0-9]{40}$/.test(expectedGitBlobSha)) return null;
   if (NAME_INDEX_CACHE.has(file)) {
     const cached = NAME_INDEX_CACHE.get(file);
-    if (expectedGitBlobSha && cached.gitBlobSha !== expectedGitBlobSha) return null;
+    if (cached.gitBlobSha !== expectedGitBlobSha) return null;
     NAME_INDEX_CACHE.delete(file);
     NAME_INDEX_CACHE.set(file, cached);
     return cached.index;
   }
   try {
     const raw = fs.readFileSync(path.join(SHARDED_DIR, file), 'utf8');
-    if (expectedGitBlobSha && gitBlobSha(raw) !== expectedGitBlobSha) return null;
+    if (gitBlobSha(raw) !== expectedGitBlobSha) return null;
     const value = JSON.parse(raw);
-    NAME_INDEX_CACHE.set(file, { index: value, gitBlobSha: expectedGitBlobSha || null });
+    NAME_INDEX_CACHE.set(file, { index: value, gitBlobSha: expectedGitBlobSha });
     while (NAME_INDEX_CACHE.size > MAX_NAME_INDEX_CACHE) NAME_INDEX_CACHE.delete(NAME_INDEX_CACHE.keys().next().value);
     return value;
   } catch { return null; }
