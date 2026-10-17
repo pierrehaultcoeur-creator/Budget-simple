@@ -1692,8 +1692,9 @@ test('investment page searches the real ESMA catalogue locally for the FR00 pref
     const file = url.slice(prefix.length);
     assert.match(file, /^(manifest\.json|isin-index-[A-Z]{2}\.json|part-\d{4,}\.json)$/);
     const fullPath = path.join(catalogueDir, file);
+    assert.ok(fs.existsSync(fullPath), 'Expected the actual local catalogue file to exist: ' + fullPath);
     return {
-      ok: fs.existsSync(fullPath),
+      ok: true,
       json: async () => JSON.parse(fs.readFileSync(fullPath, 'utf8'))
     };
   });
