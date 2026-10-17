@@ -1745,6 +1745,36 @@ test('investment page resolves the exact French ISIN from the real ESMA catalogu
   assert.equal(page.elements.search.disabled, false);
 });
 
+test('investment page normalizes case and whitespace for an exact real ESMA ISIN', async () => {
+  const requests = [];
+  const page = loadInvestmentSearchPage(async url => {
+    requests.push(url);
+    const prefix = './data/bonds-catalog/';
+    assert.ok(url.startsWith(prefix), 'Normalized exact ISIN should use the local catalogue: ' + url);
+    const file = url.slice(prefix.length);
+    assert.match(file, /^(manifest\.json|isin-index-[A-Z]{2}\.json|part-\d{4,}\.json)$/);
+    const fullPath = path.join(catalogueDir, file);
+    assert.ok(fs.existsSync(fullPath), 'Expected the actual local catalogue file to exist: ' + fullPath);
+    return {
+      ok: true,
+      json: async () => JSON.parse(fs.readFileSync(fullPath, 'utf8'))
+    };
+  });
+
+  page.elements.q.value = ' fr 0000047607 ';
+  await page.doSearch();
+
+  assert.match(page.elements.status.textContent, /1 résultat\(s\) dans le catalogue ESMA/);
+  assert.match(page.elements.results.innerHTML, /FR0000047607/);
+  assert.ok(requests.some(url => url.endsWith('isin-index-FR.json')),
+    'Expected normalized query to use the real French ISIN index');
+  assert.ok(requests.some(url => /part-\d{4,}\.json$/.test(url)),
+    'Expected normalized query to load the indexed catalogue shard');
+  assert.ok(!requests.some(url => url.includes('/.netlify/functions/bond-search?')),
+    'A normalized exact ISIN match should not need the remote fallback');
+  assert.equal(page.elements.search.disabled, false);
+});
+
 test('investment page routes ordinary bond-name queries to server search', async () => {
   const requests = [];
   const page = loadInvestmentSearchPage(async url => {
