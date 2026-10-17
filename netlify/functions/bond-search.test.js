@@ -1715,6 +1715,33 @@ test('investment page searches the real ESMA catalogue locally for the FR00 pref
 
 
 
+test('investment page normalizes case and whitespace for a real ESMA ISIN prefix', async () => {
+  const requests = [];
+  const page = loadInvestmentSearchPage(async url => {
+    requests.push(url);
+    const prefix = './data/bonds-catalog/';
+    assert.ok(url.startsWith(prefix), 'Normalized ISIN prefix should use the local catalogue: ' + url);
+    const file = url.slice(prefix.length);
+    assert.match(file, /^(manifest\.json|isin-index-[A-Z]{2}\.json|part-\d{4,}\.json)$/);
+    const fullPath = path.join(catalogueDir, file);
+    assert.ok(fs.existsSync(fullPath), 'Expected the actual local catalogue file to exist: ' + fullPath);
+    return { ok: true, json: async () => JSON.parse(fs.readFileSync(fullPath, 'utf8')) };
+  });
+
+  page.elements.q.value = ' fr 00 ';
+  await page.doSearch();
+
+  assert.match(page.elements.status.textContent, /résultat\(s\) dans le catalogue ESMA/);
+  assert.match(page.elements.results.innerHTML, /FR00/);
+  assert.ok(requests.some(url => url.endsWith('isin-index-FR.json')),
+    'Expected normalized prefix to use the real French ISIN index');
+  assert.ok(requests.some(url => /part-\d{4,}\.json$/.test(url)),
+    'Expected normalized prefix to load a real catalogue shard');
+  assert.ok(!requests.some(url => url.includes('/.netlify/functions/bond-search?')),
+    'A normalized matching prefix should not need server fallback');
+  assert.equal(page.elements.search.disabled, false);
+});
+
 test('investment page resolves the exact French ISIN from the real ESMA catalogue locally', async () => {
   const requests = [];
   const page = loadInvestmentSearchPage(async url => {
