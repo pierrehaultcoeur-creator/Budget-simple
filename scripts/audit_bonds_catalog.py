@@ -111,7 +111,7 @@ def audit_records(records: list[dict]) -> dict:
         if maturity in MATURITY_SENTINELS:
             sentinel_maturities += 1
             name = str(record.get("name") or "")
-            if re.search(r"\\bPERP(?:ETUAL)?\\b", name, re.IGNORECASE):
+            if re.search(r"\bPERP(?:ETUAL)?\b", name, re.IGNORECASE):
                 sentinel_perpetual_name_hints += 1
             if len(sample_sentinels) < 10:
                 sample_sentinels.append({"isin": isin, "maturityDateRaw": maturity, "name": record.get("name")})
