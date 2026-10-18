@@ -2519,9 +2519,10 @@ test('investment page explains when an invalid source maturity is withheld', asy
   page.elements.q.value = 'Example bond';
   await page.doSearch();
 
-  assert.match(page.elements.results.innerHTML, /Échéance/);
-  assert.match(page.elements.results.innerHTML, /Date source invalide — échéance non affichée/,
-    'An invalid source date must be explained when the maturity is withheld');
+  assert.doesNotMatch(page.elements.results.innerHTML, /Date source invalide|Qualité de l’échéance/,
+    'An invalid source maturity must be omitted silently from the user-facing result');
+  assert.doesNotMatch(page.elements.results.innerHTML, /2030-02-31/,
+    'The invalid source date must never be shown as a maturity');
 });
 
 test('investment page category filter narrows visible results and restores all categories without another search', async () => {
