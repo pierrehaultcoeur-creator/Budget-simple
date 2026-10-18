@@ -33,6 +33,9 @@ FILE_RE = re.compile(
 )
 MIN_RECORDS = int(os.environ.get("BONDS_MIN_RECORDS", "1"))
 
+OVERRIDES_PATH = Path(__file__).resolve().parent / "bond_coupon_overrides.json"
+COUPON_OVERRIDES = json.loads(OVERRIDES_PATH.read_text(encoding="utf-8"))
+
 
 def http_get(url: str, timeout: int = 180) -> bytes:
     request = urllib.request.Request(
@@ -175,6 +178,14 @@ def parse_xml(xml_bytes: bytes) -> list[dict]:
                 if debt is not None else None
             )
             coupon, coupon_status = normalized_coupon(coupon_raw)
+            coupon_source = None
+            coupon_source_reason = None
+            override = COUPON_OVERRIDES.get(isin)
+            if override:
+                coupon = str(override["couponRate"])
+                coupon_status = "VERIFIED_OVERRIDE"
+                coupon_source = override["source"]
+                coupon_source_reason = override["reason"]
             cfi_group, instrument_type = classify_cfi(cfi)
             record = {
                 "isin": isin,
@@ -190,6 +201,8 @@ def parse_xml(xml_bytes: bytes) -> list[dict]:
                 "couponRate": coupon,
                 "couponRateRaw": coupon_raw,
                 "couponRateStatus": coupon_status,
+                "couponRateSource": coupon_source,
+                "couponRateSourceReason": coupon_source_reason,
                 "issuerLei": first_descendant_text(node, "Issr"),
                 "marketMic": first_descendant_text(trading, "Id") if trading is not None else None,
             }
