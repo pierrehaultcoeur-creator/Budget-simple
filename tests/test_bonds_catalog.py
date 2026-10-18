@@ -156,5 +156,29 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(records[0]["marketMic"], "XPAR")
 
 
+    def test_verified_netcity_coupon_overrides_keep_raw_esma_values(self):
+        cases = (
+            ("XS3420465927", "5468", "5.468"),
+            ("XS3420466065", "5611", "5.611"),
+        )
+        for isin, raw_coupon, expected_coupon in cases:
+            with self.subTest(isin=isin):
+                xml = f"""<Document>
+                  <FinInstrm>
+                    <FinInstrmGnlAttrbts>
+                      <Id>{isin}</Id>
+                      <FullNm>Netcity Telecom S.A. {expected_coupon} per cent Secured Amortising Bonds</FullNm>
+                      <ClssfctnTp>DBFXFR</ClssfctnTp>
+                      <NtnlCcy>EUR</NtnlCcy>
+                    </FinInstrmGnlAttrbts>
+                    <DebtInstrmAttrbts><Fxd>{raw_coupon}</Fxd><MtrtyDt>2046-06-30</MtrtyDt></DebtInstrmAttrbts>
+                  </FinInstrm>
+                </Document>""".encode()
+                record = module.parse_xml(xml)[0]
+                self.assertEqual(record["couponRate"], expected_coupon)
+                self.assertEqual(record["couponRateRaw"], raw_coupon)
+                self.assertEqual(record["couponRateStatus"], "VERIFIED_OVERRIDE")
+                self.assertEqual(record["couponRateSource"], module.COUPON_OVERRIDES[isin]["source"])
+
 if __name__ == "__main__":
     unittest.main()
