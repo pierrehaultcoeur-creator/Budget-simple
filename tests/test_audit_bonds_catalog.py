@@ -114,6 +114,32 @@ class BondCatalogueAuditTests(unittest.TestCase):
         self.assertEqual(len(report["suspiciousCouponRecords"]), 2)
         self.assertEqual(report["suspiciousCouponCountsByCfiGroup"], {"DB": 1, "DE": 1})
 
+    def test_separates_verified_coupon_overrides_from_unresolved_source_outliers(self):
+        report = module.audit_records([
+            {
+                "isin": "GR0118017657",
+                "cfi": "DBFTGB",
+                "couponRateRaw": "3375",
+                "couponRate": "3.375",
+                "couponRateStatus": "VERIFIED_OVERRIDE",
+                "couponRateSource": "https://example.com/verified-reference",
+            },
+            {
+                "isin": "US5949181045",
+                "cfi": "DAVSGR",
+                "couponRateRaw": "786",
+                "couponRate": None,
+                "couponRateStatus": "SUSPICIOUS_SOURCE_VALUE",
+            },
+        ])
+        self.assertEqual(report["suspiciousCouponCount"], 2)
+        self.assertEqual(report["verifiedCouponOverrideCount"], 1)
+        self.assertEqual(report["unresolvedSuspiciousCouponCount"], 1)
+        self.assertEqual(
+            report["verifiedCouponOverrides"][0]["couponRate"],
+            "3.375",
+        )
+
     def test_detects_duplicate_isins_and_bad_coupon(self):
         report = module.audit_records([
             {"isin": "FR0000047607", "couponRate": "unknown"},
