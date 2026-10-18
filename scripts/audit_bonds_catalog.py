@@ -182,9 +182,9 @@ def audit_records(records: list[dict]) -> dict:
             if maturity in MATURITY_SENTINELS:
                 return False
             try:
-                if re.fullmatch(r"\\d{4}-\\d{2}-\\d{2}", maturity):
+                if re.fullmatch(r"\d{4}-\d{2}-\d{2}", maturity):
                     date.fromisoformat(maturity)
-                elif re.fullmatch(r"\\d{4}-\\d{2}-\\d{2}T.+", maturity):
+                elif re.fullmatch(r"\d{4}-\d{2}-\d{2}T.+", maturity):
                     datetime.fromisoformat(maturity.replace("Z", "+00:00"))
                 else:
                     return False
