@@ -172,10 +172,14 @@ def parse_xml(xml_bytes: bytes) -> list[dict]:
                 continue
 
             maturity, maturity_raw, maturity_status = normalized_maturity(debt)
-            coupon_raw = (
-                first_descendant_text(debt, "Fxd")
-                or first_descendant_text(debt, "IntrstRate")
-                if debt is not None else None
+            fixed_coupon_raw = first_descendant_text(debt, "Fxd") if debt is not None else None
+            interest_rate_raw = first_descendant_text(debt, "IntrstRate") if debt is not None else None
+            floating_rate_raw = first_descendant_text(debt, "Fltg") if debt is not None else None
+            coupon_raw = fixed_coupon_raw or interest_rate_raw
+            coupon_source_field = (
+                "Fxd" if fixed_coupon_raw else
+                "IntrstRate" if interest_rate_raw else
+                None
             )
             coupon, coupon_status = normalized_coupon(coupon_raw)
             coupon_source = None
@@ -201,6 +205,9 @@ def parse_xml(xml_bytes: bytes) -> list[dict]:
                 "couponRate": coupon,
                 "couponRateRaw": coupon_raw,
                 "couponRateStatus": coupon_status,
+                "couponSourceField": coupon_source_field,
+                "floatingRateFieldPresent": floating_rate_raw is not None,
+                "floatingRateRaw": floating_rate_raw,
                 "couponRateSource": coupon_source,
                 "couponRateSourceReason": coupon_source_reason,
                 "issuerLei": first_descendant_text(node, "Issr"),
