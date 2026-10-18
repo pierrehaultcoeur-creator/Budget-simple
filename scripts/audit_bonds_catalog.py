@@ -169,8 +169,22 @@ def audit_records(records: list[dict]) -> dict:
     structured_product_count = sum(count for group, count in cfi_prefixes.items() if group in STRUCTURED_PRODUCT_CFI_GROUPS)
     other_debt_count = sum(count for group, count in cfi_prefixes.items() if group in OTHER_DEBT_CFI_GROUPS)
     unclassified_cfi_count = total - conventional_bond_count - related_debt_count - structured_product_count - other_debt_count
+    # Publish field-level coverage explicitly. These are diagnostics, not a claim
+    # that every field is mandatory for every debt instrument; instrument-specific
+    # rules must be defined before using this report to exclude catalogue entries.
+    coverage_fields = ("isin", "name", "shortName", "cfi", "currency", "maturityDate", "couponRate", "issuerLei", "marketMic")
+    present_counts = {
+        field: sum(isinstance(record, dict) and record.get(field) not in (None, "") for record in records)
+        for field in coverage_fields
+    }
+    coverage_percent = {
+        field: round((count / total * 100), 2) if total else 0.0
+        for field, count in present_counts.items()
+    }
     return {
         "recordCount": total,
+        "fieldPresentCounts": present_counts,
+        "fieldCoveragePercent": coverage_percent,
         "uniqueNonEmptyIsins": len(seen),
         "duplicateIsins": duplicates,
         "validIsinShape": valid_shape,
