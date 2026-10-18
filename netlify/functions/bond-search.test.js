@@ -1223,6 +1223,13 @@ test('four-character word queries fall through when no ISIN prefix matches', () 
 });
 
 
+
+test('sharded catalogue search returns no false positives for an unrelated multi-token query', () => {
+  const results = search._test.shardedCatalogSearch('qzxv unrelatedinstrument 8472');
+  assert.deepEqual(results, [],
+    'An unrelated multi-token query must not return catalogue instruments merely because the catalogue is large');
+});
+
 test('cached ISIN indexes are revalidated against the current manifest', () => {
   const readIndex = search._test.readIsinIndex;
   const realIndex = readIndex('FR', manifest);
