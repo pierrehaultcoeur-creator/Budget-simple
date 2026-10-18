@@ -2392,11 +2392,9 @@ test('name index preserves short-name ranking across catalogue regions', () => {
   // The ESMA catalogue has shortName records, but issuer metadata is not guaranteed
   // to be populated in every catalogue snapshot. Issuer indexing is covered by the
   // synthetic generator regression tests in tests/test_split_bonds_catalog.py.
-  const sampleIndexes = [...new Set([
-    0,
-    Math.floor((manifest.parts.length - 1) / 2),
-    manifest.parts.length - 1
-  ])];
+  // Sample seven evenly spaced regions to extend ranking parity coverage.
+  const sampleIndexes = [...new Set(Array.from({ length: 7 }, (_, index) =>
+    Math.round(index * (manifest.parts.length - 1) / 6)))];
   // Build the exhaustive oracle and exact-short-name lookup once. Re-filtering
   // the entire catalogue from inside records.find() made sample selection O(N²)
   // on real ESMA data and kept the regression job running far longer than needed.
