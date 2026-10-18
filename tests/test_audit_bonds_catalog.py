@@ -90,6 +90,30 @@ class BondCatalogueAuditTests(unittest.TestCase):
         self.assertEqual(report["suspiciousCouponCount"], 1)
         self.assertEqual(report["suspiciousCouponSamples"][0]["couponRateRaw"], "3375")
 
+    def test_reports_all_coupon_outliers_and_distinguishes_perpetual_name_hints(self):
+        report = module.audit_records([
+            {
+                "isin": "FR0000047607",
+                "name": "Example PERP bond",
+                "maturityDateRaw": "9999-12-31",
+                "cfi": "DBVUPN",
+                "couponRateRaw": "125",
+                "couponRateStatus": "SUSPICIOUS_SOURCE_VALUE",
+            },
+            {
+                "isin": "US0378331005",
+                "name": "Example dated bond",
+                "maturityDateRaw": "9999-12-31",
+                "cfi": "DEXXXX",
+                "couponRateRaw": "150",
+                "couponRateStatus": "SUSPICIOUS_SOURCE_VALUE",
+            },
+        ])
+        self.assertEqual(report["sentinelMaturityPerpetualNameHintCount"], 1)
+        self.assertEqual(report["sentinelMaturityOtherNameCount"], 1)
+        self.assertEqual(len(report["suspiciousCouponRecords"]), 2)
+        self.assertEqual(report["suspiciousCouponCountsByCfiGroup"], {"DB": 1, "DE": 1})
+
     def test_detects_duplicate_isins_and_bad_coupon(self):
         report = module.audit_records([
             {"isin": "FR0000047607", "couponRate": "unknown"},
