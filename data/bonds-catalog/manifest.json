@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "generatedAt": "2026-10-18T15:25:09+00:00",
+  "generatedAt": "2026-10-18T18:18:46+00:00",
   "sourcePublicationDate": "20261017",
   "source": "ESMA FIRDS",
   "sourceFileType": "FULINS_D",
@@ -287,21 +287,21 @@
     },
     {
       "file": "part-0047.json",
-      "records": 13589,
-      "bytes": 8388393,
-      "sha256": "2e0924622b777b6d0687df8ffd0f0cb5cf7be9047b62e00179f56c242453977d"
+      "records": 13587,
+      "bytes": 8388127,
+      "sha256": "409fb802e42b2accd25afd53d9cdce823ec09f41ed8e89da83c7a40fd9665914"
     },
     {
       "file": "part-0048.json",
       "records": 13649,
-      "bytes": 8388033,
-      "sha256": "4ca037c5e4aec8d411369b46cbca63987032e7f3f32533f82fb10b083a500693"
+      "bytes": 8388029,
+      "sha256": "c497038d9411d971915c35cfd7456a5898cb1d85252c2285c1b80660498e97da"
     },
     {
       "file": "part-0049.json",
-      "records": 3153,
-      "bytes": 1950235,
-      "sha256": "cbe5423c9d97ce0885da50596ff04a0db52b1186fb3644b4237bb0cdc7bf73df"
+      "records": 3155,
+      "bytes": 1951447,
+      "sha256": "9bfbbb8a85f8debd3e9d594557b4fc61754cca675fe41c45ee7cd65390cf4d4e"
     }
   ],
   "isinIndexes": [
@@ -870,7 +870,7 @@
       "file": "isin-index-XS.json",
       "entries": 165529,
       "bytes": 5296930,
-      "gitBlobSha": "07b3ad9b4ab6367875f8266bbb8a44e5a7c30915"
+      "gitBlobSha": "b40af1455c80156d18340a0c69c1aee3303565dc"
     },
     {
       "prefix": "ZA",
