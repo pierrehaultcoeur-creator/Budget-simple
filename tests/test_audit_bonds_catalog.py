@@ -50,6 +50,17 @@ class BondCatalogueAuditTests(unittest.TestCase):
         self.assertEqual(report["fieldPresentCounts"]["maturityDate"], 1)
         self.assertAlmostEqual(report["fieldCoveragePercent"]["maturityDate"], 100 / 3, places=2)
 
+    def test_missing_coupon_audit_distinguishes_floating_field_presence(self):
+        report = module.audit_records([
+            {"isin": "FR0000047607", "cfi": "DBVUPN", "couponRate": None, "floatingRateFieldPresent": True, "floatingRateRaw": "Y"},
+            {"isin": "US0378331005", "cfi": "DBVUPN", "couponRate": None, "floatingRateFieldPresent": False},
+            {"isin": "GB0002634946", "cfi": "DEXXXX", "couponRate": None, "floatingRateFieldPresent": True},
+        ])
+        self.assertEqual(report["missingCouponCountsByCfiGroup"], {"DB": 2, "DE": 1})
+        self.assertEqual(report["missingCouponWithFloatingFieldByCfiGroup"], {"DB": 1, "DE": 1})
+        self.assertEqual(report["missingCouponWithoutFloatingFieldByCfiGroup"], {"DB": 1})
+        self.assertEqual(report["missingCouponSamples"][0]["floatingRateRaw"], "Y")
+
     def test_cfi_groups_are_not_all_mislabeled_as_conventional_bonds(self):
         report = module.audit_records([
             {"isin": "FR0000047607", "cfi": "DBVUPN"},
