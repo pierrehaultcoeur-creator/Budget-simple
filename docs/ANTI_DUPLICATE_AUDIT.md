@@ -37,4 +37,10 @@ Les contrôles intégrés du commit ci-dessus ont tous réussi : tests Python du
 - Avant modification : le commit `f6e04543d1f3958c64f62a7ef738b8484bb4d9eb` contenait déjà l'audit des 15 coupons DB suspects et le mécanisme de corrections par ISIN ; aucune correction globale ni nouveau test générique n'était nécessaire.
 - Vérification ciblée : le registre officiel des prospectus approuvés de la Central Bank of Ireland confirme les coupons de 5,468 % et 5,611 % des deux émissions Netcity. Les noms d'instruments ESMA associent ces conditions d'émission aux ISIN `XS3420465927` et `XS3420466065`.
 - Modification limitée : deux corrections individuelles sourcées, conservation des valeurs brutes ESMA et test de régression pour les deux ISIN. Aucun changement au moteur de normalisation, aucun déploiement, aucune modification de `main`.
-- Validation à suivre : CI et reconstruction du catalogue sur le nouveau commit ; ne pas compter cette tâche comme validée avant succès des runs exacts.
+- Validation : [Build ESMA #367](https://github.com/pierrehaultcoeur-creator/Budget-simple/actions/runs/39153358094) a réussi sur le commit de code `6e5e2388953ad06301d64e8a6d17f88bad905dd8` ; le catalogue généré a été commité automatiquement en `8be1f0ee91cb0f853003dd8b68221f9ce1fb812a`. Le premier affichage CI #169 indiquait `action_required`, mais l'inspection de la tentative la plus récente confirme le succès de toutes les étapes : [CI #169](https://github.com/pierrehaultcoeur-creator/Budget-simple/actions/runs/39154209789).
+
+
+## Contrôle de la branche avant toute fusion
+- État au 18 octobre 2026 : PR #2 toujours ouverte en brouillon, non fusionnée ; branche à 529 commits d'avance sur `main`, 0 en retard, 185 fichiers modifiés.
+- Risque bloquant de revue : cette taille rend une fusion globale inadaptée sans audit de portée et de provenance des commits. Ne pas fusionner ni déclarer la phase obligations terminée tant que les commits et les fichiers de la PR n'ont pas été réconciliés avec l'objectif limité de recherche des obligations.
+- Aucun nouveau workflow n'a été lancé pour cette mise à jour documentaire ; les tests validés sur le commit concerné ne sont pas relancés sans changement de code.
