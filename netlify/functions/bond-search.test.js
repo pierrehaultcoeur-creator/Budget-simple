@@ -1621,9 +1621,9 @@ test('catalogue manifest accepts only unique declared shard filenames', () => {
 function loadInvestmentSearchPage(fetchImpl) {
   const html = fs.readFileSync(path.join(__dirname, '..', '..', 'investissement.html'), 'utf8');
   const scripts = [...html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)].map(match => match[1]).filter(script => script.trim());
-  const elements = Object.fromEntries(['status', 'results', 'q', 'search'].map(id => [id, {
-    value: '', disabled: false, innerHTML: '', textContent: '',
-    addEventListener() {}
+  const elements = Object.fromEntries(['status', 'results', 'q', 'search', 'category-filter'].map(id => [id, {
+    value: '', disabled: false, innerHTML: '', textContent: '', listeners: {},
+    addEventListener(type, callback) { this.listeners[type] = callback; }
   }]));
   const context = {
     document: { getElementById: id => elements[id] },
@@ -2493,3 +2493,41 @@ test('investment page visibly distinguishes conventional bonds, structured produ
     'Records without a name must use a neutral debt-instrument title');
 });
 
+
+test('investment page category filter narrows visible results and restores all categories without another search', async () => {
+  let requests = 0;
+  const page = loadInvestmentSearchPage(async url => {
+    requests += 1;
+    if (!url.includes('/.netlify/functions/bond-search?')) throw new Error('Unexpected URL: ' + url);
+    return { ok: true, json: async () => ({
+      source: 'bond-master',
+      results: [
+        { isin: 'FR0000000011', name: 'Classic example', instrumentCategory: 'conventional-bond' },
+        { isin: 'FR0000000012', name: 'Structured example', instrumentCategory: 'structured-product' },
+        { isin: 'FR0000000013', name: 'Related debt example', instrumentCategory: 'related-debt-instrument' },
+        { isin: 'FR0000000014', name: 'Unknown category example', instrumentCategory: 'unclassified-debt-instrument' }
+      ]
+    }) };
+  });
+  page.elements.q.value = 'example';
+  await page.doSearch();
+  assert.match(page.elements.results.innerHTML, /Classic example/);
+  assert.match(page.elements.results.innerHTML, /Structured example/);
+  assert.match(page.elements.results.innerHTML, /Related debt example/);
+  assert.match(page.elements.results.innerHTML, /Unknown category example/);
+  page.elements['category-filter'].value = 'conventional-bond';
+  page.elements['category-filter'].listeners.change();
+  assert.match(page.elements.results.innerHTML, /Classic example/);
+  assert.doesNotMatch(page.elements.results.innerHTML, /Structured example|Related debt example|Unknown category example/);
+  page.elements['category-filter'].value = 'other-debt';
+  page.elements['category-filter'].listeners.change();
+  assert.match(page.elements.results.innerHTML, /Related debt example/);
+  assert.doesNotMatch(page.elements.results.innerHTML, /Classic example|Structured example|Unknown category example/);
+  page.elements['category-filter'].value = 'all';
+  page.elements['category-filter'].listeners.change();
+  assert.match(page.elements.results.innerHTML, /Classic example/);
+  assert.match(page.elements.results.innerHTML, /Structured example/);
+  assert.match(page.elements.results.innerHTML, /Related debt example/);
+  assert.match(page.elements.results.innerHTML, /Unknown category example/);
+  assert.equal(requests, 1, 'Changing the filter must not issue another network search');
+});
