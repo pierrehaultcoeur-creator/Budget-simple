@@ -24,6 +24,33 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(module.normalized_coupon("-Infinity"), (None, "INVALID_SOURCE_VALUE"))
         self.assertEqual(module.normalized_coupon(None), (None, None))
 
+    def test_verified_coupon_override_corrects_display_value_and_preserves_source(self):
+        xml = b"""<Document>
+          <FinInstrm>
+            <FinInstrmGnlAttrbts>
+              <Id>GR0118017657</Id>
+              <FullNm>GGB 3.375 2/25 GREECE</FullNm>
+              <ClssfctnTp>DBFTGB</ClssfctnTp>
+              <NtnlCcy>EUR</NtnlCcy>
+            </FinInstrmGnlAttrbts>
+            <DebtInstrmAttrbts>
+              <MtrtyDt>2025-02-15</MtrtyDt>
+              <Fxd>3375</Fxd>
+            </DebtInstrmAttrbts>
+          </FinInstrm>
+        </Document>"""
+        records = module.parse_xml(xml)
+        self.assertEqual(len(records), 1)
+        record = records[0]
+        self.assertEqual(record["couponRate"], "3.375")
+        self.assertEqual(record["couponRateRaw"], "3375")
+        self.assertEqual(record["couponRateStatus"], "VERIFIED_OVERRIDE")
+        self.assertEqual(
+            record["couponRateSource"],
+            module.COUPON_OVERRIDES["GR0118017657"]["source"],
+        )
+        self.assertTrue(record["couponRateSourceReason"])
+
     def test_maturity_sentinel_is_not_a_real_maturity(self):
         sentinel = module.ET.fromstring(
             "<DebtInstrmAttrbts><MtrtyDt>9999-12-31</MtrtyDt></DebtInstrmAttrbts>"
