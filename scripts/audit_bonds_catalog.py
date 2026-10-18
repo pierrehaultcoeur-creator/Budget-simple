@@ -83,6 +83,10 @@ def audit_records(records: list[dict]) -> dict:
     non_numeric_coupon_samples = []
     suspicious_coupon_records = []
     suspicious_coupon_by_cfi_group = Counter()
+    missing_coupon_by_cfi_group = Counter()
+    missing_coupon_with_floating_field_by_cfi_group = Counter()
+    missing_coupon_without_floating_field_by_cfi_group = Counter()
+    missing_coupon_samples = []
     sentinel_perpetual_name_hints = 0
 
     fields = ("name", "shortName", "currency", "maturityDate", "couponRate", "issuerLei", "marketMic")
@@ -108,6 +112,27 @@ def audit_records(records: list[dict]) -> dict:
         for field in fields:
             if record.get(field) in (None, ""):
                 missing[field] += 1
+
+        # Diagnose missing coupons instead of assuming every missing rate is
+        # extractable: preserve whether ESMA supplied a floating-rate field.
+        if record.get("couponRate") in (None, ""):
+            group = cfi[:2] if CFI_RE.fullmatch(cfi) else "UNKNOWN"
+            missing_coupon_by_cfi_group[group] += 1
+            floating_present = bool(record.get("floatingRateFieldPresent"))
+            if floating_present:
+                missing_coupon_with_floating_field_by_cfi_group[group] += 1
+            else:
+                missing_coupon_without_floating_field_by_cfi_group[group] += 1
+            if len(missing_coupon_samples) < 30:
+                missing_coupon_samples.append({
+                    "isin": isin,
+                    "cfi": cfi or None,
+                    "name": record.get("name"),
+                    "couponRateRaw": record.get("couponRateRaw"),
+                    "couponSourceField": record.get("couponSourceField"),
+                    "floatingRateFieldPresent": floating_present,
+                    "floatingRateRaw": record.get("floatingRateRaw"),
+                })
 
         # Inspect raw source values too: normalized maturityDate may be null for a sentinel.
         maturity = str(record.get("maturityDateRaw") or record.get("maturityDate") or "").strip()
@@ -284,6 +309,10 @@ def audit_records(records: list[dict]) -> dict:
         "suspiciousCouponSamples": suspicious_coupon_samples,
         "suspiciousCouponRecords": suspicious_coupon_records,
         "suspiciousCouponCountsByCfiGroup": dict(sorted(suspicious_coupon_by_cfi_group.items())),
+        "missingCouponCountsByCfiGroup": dict(sorted(missing_coupon_by_cfi_group.items())),
+        "missingCouponWithFloatingFieldByCfiGroup": dict(sorted(missing_coupon_with_floating_field_by_cfi_group.items())),
+        "missingCouponWithoutFloatingFieldByCfiGroup": dict(sorted(missing_coupon_without_floating_field_by_cfi_group.items())),
+        "missingCouponSamples": missing_coupon_samples,
         "sentinelMaturityPerpetualNameHintCount": sentinel_perpetual_name_hints,
         "sentinelMaturityOtherNameCount": sentinel_maturities - sentinel_perpetual_name_hints,
         "nonNumericCouponSamples": non_numeric_coupon_samples,
