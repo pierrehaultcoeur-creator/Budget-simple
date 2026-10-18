@@ -151,6 +151,17 @@ test('canonical bond preserves missing maturity semantics and flags source senti
   assert.equal(bond.maturitySourceValue, '9999-12-31');
 });
 
+test('canonical bond preserves valid ISO datetime maturities', () => {
+  const bond = search._test.canonicalBond({
+    isin: 'FR0000047607',
+    name: 'Example bond with timestamp maturity',
+    maturityDate: '2030-12-31T00:00:00Z'
+  });
+  assert.equal(bond.maturity, '2030-12-31T00:00:00Z');
+  assert.equal(bond.maturityStatus, null);
+  assert.equal(bond.maturitySourceValue, null);
+});
+
 test('canonical bond never exposes sentinel maturity dates as real maturities', () => {
   const fromRawValue = search._test.canonicalBond({
     isin: 'FR0000047607',
