@@ -500,6 +500,20 @@ test('local investment-page canonicalization withholds invalid coupon and maturi
   assert.equal(valid.couponStatus, null);
   assert.equal(valid.maturity, '2032-02-29');
   assert.equal(valid.maturityStatus, null);
+
+  const floating = canonical({
+    isin: 'FR0000047616',
+    name: 'Local floating-rate example',
+    floatingRateFieldPresent: true,
+    floatingRateRaw: 'EURIBOR',
+    floatingRateTerm: '3M',
+    floatingRateSpreadBps: 125
+  });
+  assert.equal(floating.coupon, null, 'A reference index must not be treated as the current coupon');
+  assert.equal(floating.floatingRateFieldPresent, true);
+  assert.equal(floating.floatingRateRaw, 'EURIBOR');
+  assert.equal(floating.floatingRateTerm, '3M');
+  assert.equal(floating.floatingRateSpreadBps, 125);
 });
 
 test('server and investment page classify every supported CFI debt group consistently', () => {
