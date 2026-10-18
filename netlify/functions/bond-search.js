@@ -178,7 +178,7 @@ function cfiGroupLabel(group) {
 function isValidIsoDate(value) {
   const text = String(value || '').trim();
   if (!text) return null;
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(text);
+  const match = /^(\d{4})-(\d{2})-(\d{2})(.*)$/.exec(text);
   if (!match) return false;
   const year = Number(match[1]);
   const month = Number(match[2]);
@@ -186,7 +186,11 @@ function isValidIsoDate(value) {
   if (year < 1 || month < 1 || month > 12 || day < 1) return false;
   const leap = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
   const days = [31, leap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-  return day <= days[month - 1];
+  if (day > days[month - 1]) return false;
+  // ESMA parsing accepts ISO datetimes as well as dates. Preserve valid
+  // timestamps across the public API instead of misclassifying them as invalid.
+  if (match[4] && (!match[4].startsWith('T') || !Number.isFinite(Date.parse(text)))) return false;
+  return true;
 }
 
 function canonicalBond(record) {
