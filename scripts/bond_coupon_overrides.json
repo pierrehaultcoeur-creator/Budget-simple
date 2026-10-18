@@ -2,21 +2,26 @@
   "GR0118017657": {
     "couponRate": "3.375",
     "reason": "The ESMA raw value is 3375, but the issuer's issuance announcement states a 3.375% coupon.",
-    "source": "https://www.pdma.gr/en/announcements/t-bills-2/test"
+    "source": "https://www.athexgroup.gr/documents/10180/4973956/180209%2BHellenic%2BRepublic%2B-%2BPricing%2BPress%2BRelease%2B-%2BFinal.pdf/93789dad-9382-457f-b4ba-df2591582656"
   },
   "GR0118019679": {
     "couponRate": "1.875",
     "reason": "The ESMA raw value is 1875, but the issuer's issuance announcement and Borsa Italiana identify a 1.875% fixed coupon.",
-    "source": "https://www.pdma.gr/en/announcements/t-bills-2/test"
+    "source": "https://www.borsaitaliana.it/borsa/search/scheda.html?code=GR0118019679"
   },
   "XS1722899918": {
     "couponRate": "1.125",
     "reason": "The ESMA raw value is 1125, while bond reference data identifies Fingrid's fixed coupon as 1.125%.",
-    "source": "https://terrapinfinance.com/screener/XS1722899918"
+    "source": "https://live.euronext.com/sites/default/files/statistics/dol/DOL2025-04-15.pdf"
   },
   "XS3262577961": {
     "couponRate": "4.375",
     "reason": "The ESMA raw value is 4375, while bond reference data identifies the Development Bank of Japan coupon as 4.375%.",
-    "source": "https://www.finanzen.net/anleihen/a4engx-development-bank-of-japan-anleihe"
+    "source": "https://www.dbj.jp/en/news/20260114_206307.html"
+  },
+  "GR0114031561": {
+    "couponRate": "3.45",
+    "reason": "The ESMA raw value is 345; an Erste Group fixed-income research table lists this ISIN with a 3.450% coupon.",
+    "source": "https://research.erste-group.com/ERSTE/external/download?q=15e7b7893a03cdf711efaab96f2e5c33a855e97f3YWJjZGVmMDEyMzQ1Njc4OYRI7I%2BStdrpYLidZNhCrXeCGEoxGevgcNyyllqzES3TxQ1Q%2BIE8mCkm05%2Fff7IQxAJYF68wz0cuEYvMbHR65mDqFce92J%2F%2BWyFEwnd4FVj9JjNOIs9OTmEfnvcqQw75wfBNRIm4JAEpdstBRMPGAy%2FBiXCcMYIcKD7W6%2B3YxEW8oaFSoUdQexZBBFVPpkydivvpjZicyGzliwNGVjkMIiUamVPOVRu1ljFfWjzZqWxpFgzOnwltk5qS69YtYB%2F3a8VGvNKSBuzRZWlRwTn%2Bqf%2FYBFRiL5OfXlS26%2FSD5Hn%2B"
   }
 }
