@@ -2497,8 +2497,11 @@ test('investment page visibly distinguishes conventional bonds, structured produ
 test('investment page category filter narrows visible results and restores all categories without another search', async () => {
   let requests = 0;
   const page = loadInvestmentSearchPage(async url => {
-    requests += 1;
-    if (!url.includes('/.netlify/functions/bond-search?')) throw new Error('Unexpected URL: ' + url);
+    if (url.includes('/.netlify/functions/bond-search?')) requests += 1;
+    if (!url.includes('/.netlify/functions/bond-search?')) {
+      if (url.endsWith('manifest.json')) throw new Error('Name search should fall back to the server without loading the local catalogue');
+      throw new Error('Unexpected URL: ' + url);
+    }
     return { ok: true, json: async () => ({
       source: 'bond-master',
       results: [
