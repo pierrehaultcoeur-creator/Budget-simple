@@ -127,6 +127,20 @@ class ParserTests(unittest.TestCase):
         self.assertTrue(records[1]["floatingRateFieldPresent"])
         self.assertEqual(records[1]["floatingRateRaw"], "Y")
 
+    def test_nested_floating_rate_fields_are_detected_without_faking_coupon(self):
+        xml = b"""<Document>
+          <FinInstrm>
+            <FinInstrmGnlAttrbts><Id>US0378331005</Id><FullNm>Floating rate note</FullNm><ClssfctnTp>DBVUFR</ClssfctnTp></FinInstrmGnlAttrbts>
+            <DebtInstrmAttrbts><IntrstRate><Fltg><RefRate><Indx>EURIBOR</Indx></RefRate><Term>3M</Term><BsisPtSprd>125</BsisPtSprd></Fltg></IntrstRate></DebtInstrmAttrbts>
+          </FinInstrm>
+        </Document>"""
+        record = module.parse_xml(xml)[0]
+        self.assertIsNone(record["couponRate"])
+        self.assertTrue(record["floatingRateFieldPresent"])
+        self.assertEqual(record["floatingRateRaw"], "EURIBOR")
+        self.assertEqual(record["floatingRateTerm"], "3M")
+        self.assertEqual(record["floatingRateSpreadBps"], "125")
+
     def test_debt_filter_and_fields(self):
         xml = (ROOT / "tests" / "sample_fulins.xml").read_bytes()
         records = module.parse_xml(xml)
