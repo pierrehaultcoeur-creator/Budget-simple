@@ -33,5 +33,30 @@
     "couponRate": "5.611",
     "reason": "The ESMA instrument name identifies this exact issue as Netcity Telecom S.A. €45,000,000 5.611% secured amortising bonds due December 2052; the Central Bank of Ireland's approved-prospectus register independently confirms the issue title and stated coupon.",
     "source": "https://www.centralbank.ie/regulation/industry-market-sectors/securities-markets/prospectus-regulation/prospectuses/netcity-telecom-s.a.----45-000-000-5.611-per-cent.-secured-amortising-bonds-due-december-2052---20-july-2026"
+  },
+  "GR0128010676": {
+    "couponRate": "2.000",
+    "reason": "The ESMA raw coupon value (365) conflicts with the exact-ISIN issue identification. The Greek Public Debt Management Agency lists this ISIN in the 2012 new-bond series at 2.000%, and Euronext Athens' official forced-sale table identifies the same ISIN and 2.000% coupon.",
+    "source": "https://athens.euronext.com/en/documents/10180/6544045/TABLE%20-%20GREEK%20GOV.%20BONDS%27%20FORCED%20SALE%2006%20-%2006%20-%202022/5c3ceb9a-bb3e-48c4-a705-3840dda842aa"
+  },
+  "GR0128011682": {
+    "couponRate": "2.000",
+    "reason": "The ESMA raw coupon value (365) conflicts with the exact-ISIN issue identification. The Greek Public Debt Management Agency lists this ISIN in the 2012 new-bond series at 2.000%, and Euronext Athens' official forced-sale table identifies the same ISIN and 2.000% coupon.",
+    "source": "https://athens.euronext.com/en/documents/10180/6544045/TABLE%20-%20GREEK%20GOV.%20BONDS%27%20FORCED%20SALE%2006%20-%2006%20-%202022/5c3ceb9a-bb3e-48c4-a705-3840dda842aa"
+  },
+  "GR0128012698": {
+    "couponRate": "2.000",
+    "reason": "The ESMA raw coupon value (365) conflicts with the exact-ISIN issue identification. The Greek Public Debt Management Agency lists this ISIN in the 2012 new-bond series at 2.000%, and Euronext Athens' official forced-sale table identifies the same ISIN and 2.000% coupon.",
+    "source": "https://athens.euronext.com/en/documents/10180/6544045/TABLE%20-%20GREEK%20GOV.%20BONDS%27%20FORCED%20SALE%2006%20-%2006%20-%202022/5c3ceb9a-bb3e-48c4-a705-3840dda842aa"
+  },
+  "GR0128013704": {
+    "couponRate": "2.000",
+    "reason": "The ESMA raw coupon value (365) conflicts with the exact-ISIN issue identification. The Greek Public Debt Management Agency lists this ISIN in the 2012 new-bond series at 2.000%, and Euronext Athens' official forced-sale table identifies the same ISIN and 2.000% coupon.",
+    "source": "https://athens.euronext.com/en/documents/10180/6544045/TABLE%20-%20GREEK%20GOV.%20BONDS%27%20FORCED%20SALE%2006%20-%2006%20-%202022/5c3ceb9a-bb3e-48c4-a705-3840dda842aa"
+  },
+  "GR0128014710": {
+    "couponRate": "2.000",
+    "reason": "The ESMA raw coupon value (365) conflicts with the exact-ISIN issue identification. The Greek Public Debt Management Agency lists this ISIN in the 2012 new-bond series at 2.000%, and Euronext Athens' official forced-sale table identifies the same ISIN and 2.000% coupon.",
+    "source": "https://athens.euronext.com/en/documents/10180/6544045/TABLE%20-%20GREEK%20GOV.%20BONDS%27%20FORCED%20SALE%2006%20-%2006%20-%202022/5c3ceb9a-bb3e-48c4-a705-3840dda842aa"
   }
 }
