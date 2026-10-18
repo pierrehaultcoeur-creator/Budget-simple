@@ -41,6 +41,15 @@ class BondCatalogueAuditTests(unittest.TestCase):
         self.assertEqual(report["relatedDebtCount"], 0)
         self.assertEqual(report["structuredProductCount"], 0)
 
+    def test_counts_valid_maturity_dates_as_usable_coverage(self):
+        report = module.audit_records([
+            {"isin": "FR0000047607", "maturityDate": "2030-06-15"},
+            {"isin": "US0378331005", "maturityDate": "2026-02-31"},
+            {"isin": "GB0002634946", "maturityDate": "9999-12-31"},
+        ])
+        self.assertEqual(report["fieldPresentCounts"]["maturityDate"], 1)
+        self.assertAlmostEqual(report["fieldCoveragePercent"]["maturityDate"], 100 / 3, places=2)
+
     def test_cfi_groups_are_not_all_mislabeled_as_conventional_bonds(self):
         report = module.audit_records([
             {"isin": "FR0000047607", "cfi": "DBVUPN"},
