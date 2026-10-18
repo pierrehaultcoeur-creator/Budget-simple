@@ -106,6 +106,27 @@ class ParserTests(unittest.TestCase):
         }
         self.assertGreater(module.completeness(real), module.completeness(sentinel))
 
+    def test_coupon_provenance_distinguishes_fixed_interest_and_floating_fields(self):
+        xml = b"""<Document>
+          <FinInstrm>
+            <FinInstrmGnlAttrbts><Id>FR0000120271</Id><FullNm>Fixed coupon</FullNm><ClssfctnTp>DBFTFR</ClssfctnTp></FinInstrmGnlAttrbts>
+            <DebtInstrmAttrbts><Fxd>3.25</Fxd></DebtInstrmAttrbts>
+          </FinInstrm>
+          <FinInstrm>
+            <FinInstrmGnlAttrbts><Id>US0378331005</Id><FullNm>Floating rate</FullNm><ClssfctnTp>DBFTFR</ClssfctnTp></FinInstrmGnlAttrbts>
+            <DebtInstrmAttrbts><Fltg>Y</Fltg></DebtInstrmAttrbts>
+          </FinInstrm>
+        </Document>"""
+        records = module.parse_xml(xml)
+        self.assertEqual(len(records), 2)
+        self.assertEqual(records[0]["couponRate"], "3.25")
+        self.assertEqual(records[0]["couponSourceField"], "Fxd")
+        self.assertFalse(records[0]["floatingRateFieldPresent"])
+        self.assertIsNone(records[1]["couponRate"])
+        self.assertIsNone(records[1]["couponSourceField"])
+        self.assertTrue(records[1]["floatingRateFieldPresent"])
+        self.assertEqual(records[1]["floatingRateRaw"], "Y")
+
     def test_debt_filter_and_fields(self):
         xml = (ROOT / "tests" / "sample_fulins.xml").read_bytes()
         records = module.parse_xml(xml)
