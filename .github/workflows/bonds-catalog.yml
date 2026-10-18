@@ -8,6 +8,7 @@ on:
     paths:
       - '.github/workflows/bonds-catalog.yml'
       - 'scripts/bonds_catalog.py'
+      - 'scripts/bond_coupon_overrides.json'
       - 'scripts/split_bonds_catalog.py'
       - 'scripts/audit_bonds_catalog.py'
       - 'tests/test_bonds_catalog.py'
@@ -21,6 +22,7 @@ on:
     paths:
       - '.github/workflows/bonds-catalog.yml'
       - 'scripts/bonds_catalog.py'
+      - 'scripts/bond_coupon_overrides.json'
       - 'scripts/split_bonds_catalog.py'
       - 'scripts/audit_bonds_catalog.py'
       - 'tests/test_bonds_catalog.py'
