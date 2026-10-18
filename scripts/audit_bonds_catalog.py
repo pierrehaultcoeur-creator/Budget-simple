@@ -78,6 +78,9 @@ def audit_records(records: list[dict]) -> dict:
     sample_sentinels = []
     suspicious_coupon_samples = []
     non_numeric_coupon_samples = []
+    suspicious_coupon_records = []
+    suspicious_coupon_by_cfi_group = Counter()
+    sentinel_perpetual_name_hints = 0
 
     fields = ("name", "shortName", "currency", "maturityDate", "couponRate", "issuerLei", "marketMic")
     for record in records:
@@ -107,6 +110,9 @@ def audit_records(records: list[dict]) -> dict:
         maturity = str(record.get("maturityDateRaw") or record.get("maturityDate") or "").strip()
         if maturity in MATURITY_SENTINELS:
             sentinel_maturities += 1
+            name = str(record.get("name") or "")
+            if re.search(r"\\bPERP(?:ETUAL)?\\b", name, re.IGNORECASE):
+                sentinel_perpetual_name_hints += 1
             if len(sample_sentinels) < 10:
                 sample_sentinels.append({"isin": isin, "maturityDateRaw": maturity, "name": record.get("name")})
         elif maturity:
@@ -130,8 +136,12 @@ def audit_records(records: list[dict]) -> dict:
                     raise ValueError("coupon must be finite")
                 if not (-100 <= number <= 100):
                     suspicious_coupon += 1
+                    group = str(record.get("cfi") or "")[:2].upper() or "UNKNOWN"
+                    suspicious_coupon_by_cfi_group[group] += 1
+                    detail = {"isin": isin, "couponRateRaw": coupon, "couponRateStatus": record.get("couponRateStatus"), "cfi": record.get("cfi"), "name": record.get("name")}
+                    suspicious_coupon_records.append(detail)
                     if len(suspicious_coupon_samples) < 10:
-                        suspicious_coupon_samples.append({"isin": isin, "couponRateRaw": coupon, "couponRateStatus": record.get("couponRateStatus"), "name": record.get("name")})
+                        suspicious_coupon_samples.append(detail)
             except (TypeError, ValueError):
                 coupon_non_numeric += 1
                 if len(non_numeric_coupon_samples) < 10:
@@ -167,6 +177,10 @@ def audit_records(records: list[dict]) -> dict:
         "nonNumericCouponCount": coupon_non_numeric,
         "suspiciousCouponCount": suspicious_coupon,
         "suspiciousCouponSamples": suspicious_coupon_samples,
+        "suspiciousCouponRecords": suspicious_coupon_records,
+        "suspiciousCouponCountsByCfiGroup": dict(sorted(suspicious_coupon_by_cfi_group.items())),
+        "sentinelMaturityPerpetualNameHintCount": sentinel_perpetual_name_hints,
+        "sentinelMaturityOtherNameCount": sentinel_maturities - sentinel_perpetual_name_hints,
         "nonNumericCouponSamples": non_numeric_coupon_samples,
         "sentinelMaturitySamples": sample_sentinels,
     }
