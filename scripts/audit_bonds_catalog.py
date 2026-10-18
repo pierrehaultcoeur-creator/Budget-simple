@@ -173,8 +173,37 @@ def audit_records(records: list[dict]) -> dict:
     # that every field is mandatory for every debt instrument; instrument-specific
     # rules must be defined before using this report to exclude catalogue entries.
     coverage_fields = ("isin", "name", "shortName", "cfi", "currency", "maturityDate", "couponRate", "issuerLei", "marketMic")
+    def usable_field_value(record: dict, field: str) -> bool:
+        value = record.get(field)
+        if value in (None, ""):
+            return False
+        if field == "maturityDate":
+            maturity = str(value).strip()
+            if maturity in MATURITY_SENTINELS:
+                return False
+            try:
+                if re.fullmatch(r"\\d{4}-\\d{2}-\\d{2}", maturity):
+                    date.fromisoformat(maturity)
+                elif re.fullmatch(r"\\d{4}-\\d{2}-\\d{2}T.+", maturity):
+                    datetime.fromisoformat(maturity.replace("Z", "+00:00"))
+                else:
+                    return False
+            except ValueError:
+                return False
+        elif field == "couponRate":
+            try:
+                number = float(str(value).replace(",", "."))
+            except (TypeError, ValueError):
+                return False
+            if not math.isfinite(number) or not (-100 <= number <= 100):
+                return False
+        return True
+
     present_counts = {
-        field: sum(isinstance(record, dict) and record.get(field) not in (None, "") for record in records)
+        field: sum(
+            isinstance(record, dict) and usable_field_value(record, field)
+            for record in records
+        )
         for field in coverage_fields
     }
     coverage_percent = {
