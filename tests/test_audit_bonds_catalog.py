@@ -50,6 +50,15 @@ class BondCatalogueAuditTests(unittest.TestCase):
         self.assertEqual(report["fieldPresentCounts"]["maturityDate"], 1)
         self.assertAlmostEqual(report["fieldCoveragePercent"]["maturityDate"], 100 / 3, places=2)
 
+    def test_missing_coupon_audit_reports_source_field_provenance(self):
+        report = module.audit_records([
+            {"isin": "FR0000047607", "cfi": "DBVUPN", "couponRate": "3.25", "couponSourceField": "Fxd"},
+            {"isin": "US0378331005", "cfi": "DBVUPN", "couponRate": None, "couponSourceField": None},
+            {"isin": "GB0002634946", "cfi": "DEXXXX", "couponRate": None, "couponSourceField": "IntrstRate"},
+        ])
+        self.assertEqual(report["couponSourceFieldCounts"], {"FIXD": 0} if False else {"FXD": 1, "INTRSTRATE": 1, "NONE": 1})
+        self.assertEqual(report["missingCouponSourceFieldCountsByCfi"], {"DB:NONE": 1, "DE:INTRSTRATE": 1})
+
     def test_missing_coupon_audit_distinguishes_floating_field_presence(self):
         report = module.audit_records([
             {"isin": "FR0000047607", "cfi": "DBVUPN", "couponRate": None, "floatingRateFieldPresent": True, "floatingRateRaw": "Y"},
