@@ -1,23 +1,23 @@
 {
   "GR0118017657": {
     "couponRate": "3.375",
-    "reason": "The ESMA raw value is 3375, but the issuer's issuance announcement states a 3.375% coupon.",
-    "source": "https://www.athexgroup.gr/documents/10180/4973956/180209%2BHellenic%2BRepublic%2B-%2BPricing%2BPress%2BRelease%2B-%2BFinal.pdf/93789dad-9382-457f-b4ba-df2591582656"
+    "reason": "Bondfish identifies this exact ISIN as a fixed-rate Greek government bond with a 3.375% coupon.",
+    "source": "https://bondfish.com/bonds/GR0118017657"
   },
   "GR0118019679": {
     "couponRate": "1.875",
-    "reason": "The ESMA raw value is 1875, but the issuer's issuance announcement and Borsa Italiana identify a 1.875% fixed coupon.",
-    "source": "https://www.borsaitaliana.it/borsa/search/scheda.html?code=GR0118019679"
+    "reason": "Borsa Italiana identifies this exact ISIN and reports periodic and annual coupon rates of 1.875%.",
+    "source": "https://www.borsaitaliana.it/borsa/obbligazioni/mot/euro-obbligazioni/dati-completi.html?isin=GR0118019679&lang=en"
   },
   "XS1722899918": {
     "couponRate": "1.125",
-    "reason": "The ESMA raw value is 1125, while bond reference data identifies Fingrid's fixed coupon as 1.125%.",
-    "source": "https://live.euronext.com/sites/default/files/statistics/dol/DOL2025-04-15.pdf"
+    "reason": "Börse Stuttgart identifies this exact ISIN and reports an interest rate of 1.125%.",
+    "source": "https://www.boerse-stuttgart.de/en/products/bonds/stuttgart/a19snf-fingrid-oyj-eo-medium-term-notes-2017-27"
   },
   "XS3262577961": {
     "couponRate": "4.375",
-    "reason": "The ESMA raw value is 4375, while bond reference data identifies the Development Bank of Japan coupon as 4.375%.",
-    "source": "https://www.dbj.jp/en/news/20260114_206307.html"
+    "reason": "Cbonds identifies this exact ISIN and the Development Bank of Japan issue with a 4.375% coupon.",
+    "source": "https://cbonds.com/bonds/2049953/"
   },
   "GR0114031561": {
     "couponRate": "3.45",
