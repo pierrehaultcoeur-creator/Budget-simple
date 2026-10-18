@@ -87,6 +87,8 @@ def audit_records(records: list[dict]) -> dict:
     missing_coupon_with_floating_field_by_cfi_group = Counter()
     missing_coupon_without_floating_field_by_cfi_group = Counter()
     missing_coupon_samples = []
+    coupon_source_field_counts = Counter()
+    missing_coupon_source_field_counts_by_cfi = Counter()
     sentinel_perpetual_name_hints = 0
 
     fields = ("name", "shortName", "currency", "maturityDate", "couponRate", "issuerLei", "marketMic")
@@ -113,11 +115,15 @@ def audit_records(records: list[dict]) -> dict:
             if record.get(field) in (None, ""):
                 missing[field] += 1
 
+        source_field = str(record.get("couponSourceField") or "NONE").strip().upper()
+        coupon_source_field_counts[source_field] += 1
+
         # Diagnose missing coupons instead of assuming every missing rate is
-        # extractable: preserve whether ESMA supplied a floating-rate field.
+        # extractable: preserve source-field provenance and floating-rate signals.
         if record.get("couponRate") in (None, ""):
             group = cfi[:2] if CFI_RE.fullmatch(cfi) else "UNKNOWN"
             missing_coupon_by_cfi_group[group] += 1
+            missing_coupon_source_field_counts_by_cfi[f"{group}:{source_field}"] += 1
             floating_present = bool(record.get("floatingRateFieldPresent"))
             if floating_present:
                 missing_coupon_with_floating_field_by_cfi_group[group] += 1
@@ -309,7 +315,9 @@ def audit_records(records: list[dict]) -> dict:
         "suspiciousCouponSamples": suspicious_coupon_samples,
         "suspiciousCouponRecords": suspicious_coupon_records,
         "suspiciousCouponCountsByCfiGroup": dict(sorted(suspicious_coupon_by_cfi_group.items())),
+        "couponSourceFieldCounts": dict(sorted(coupon_source_field_counts.items())),
         "missingCouponCountsByCfiGroup": dict(sorted(missing_coupon_by_cfi_group.items())),
+        "missingCouponSourceFieldCountsByCfi": dict(sorted(missing_coupon_source_field_counts_by_cfi.items())),
         "missingCouponWithFloatingFieldByCfiGroup": dict(sorted(missing_coupon_with_floating_field_by_cfi_group.items())),
         "missingCouponWithoutFloatingFieldByCfiGroup": dict(sorted(missing_coupon_without_floating_field_by_cfi_group.items())),
         "missingCouponSamples": missing_coupon_samples,
