@@ -2466,3 +2466,30 @@ test('name index preserves short-name ranking across catalogue regions', () => {
     }
   }
 });
+
+test('investment page visibly distinguishes conventional bonds, structured products, and unknown debt categories', async () => {
+  const payload = {
+    source: 'bond-master',
+    results: [
+      { isin: 'FR0000000001', name: 'Example conventional bond', instrumentCategory: 'conventional-bond' },
+      { isin: 'FR0000000002', name: 'Example structured product', instrumentCategory: 'structured-product' },
+      { isin: 'FR0000000003', instrumentCategory: 'unclassified-debt-instrument' }
+    ]
+  };
+  const page = loadInvestmentSearchPage(async url => {
+    if (!url.includes('/.netlify/functions/bond-search?')) {
+      throw new Error('Ordinary name search should call the public handler only: ' + url);
+    }
+    return { ok: true, json: async () => payload };
+  });
+
+  page.elements.q.value = 'Example';
+  await page.doSearch();
+
+  assert.match(page.elements.results.innerHTML, /Obligation classique/);
+  assert.match(page.elements.results.innerHTML, /Produit structuré/);
+  assert.match(page.elements.results.innerHTML, /Catégorie à vérifier/);
+  assert.match(page.elements.results.innerHTML, /Instrument de dette — FR0000000003/,
+    'Records without a name must use a neutral debt-instrument title');
+});
+
