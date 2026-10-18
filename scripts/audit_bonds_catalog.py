@@ -210,10 +210,52 @@ def audit_records(records: list[dict]) -> dict:
         field: round((count / total * 100), 2) if total else 0.0
         for field, count in present_counts.items()
     }
+
+    # Coverage by CFI group lets us prioritize conventional bonds without
+    # assuming structured debt and other products share the same required fields.
+    cfi_group_coverage: dict[str, dict] = {}
+    for record in records:
+        if not isinstance(record, dict):
+            continue
+        cfi = str(record.get("cfi") or "").strip().upper()
+        group = cfi[:2] if CFI_RE.fullmatch(cfi) else "UNKNOWN"
+        bucket = cfi_group_coverage.setdefault(group, {
+            "records": 0,
+            "usableMaturity": 0,
+            "usableCoupon": 0,
+            "usableMaturityAndCoupon": 0,
+            "missingCoupon": 0,
+            "sentinelMaturity": 0,
+        })
+        bucket["records"] += 1
+        maturity_raw = str(record.get("maturityDateRaw") or record.get("maturityDate") or "").strip()
+        if maturity_raw in MATURITY_SENTINELS:
+            bucket["sentinelMaturity"] += 1
+        has_maturity = usable_field_value(record, "maturityDate")
+        has_coupon = usable_field_value(record, "couponRate")
+        bucket["usableMaturity"] += int(has_maturity)
+        bucket["usableCoupon"] += int(has_coupon)
+        bucket["usableMaturityAndCoupon"] += int(has_maturity and has_coupon)
+        bucket["missingCoupon"] += int(record.get("couponRate") in (None, ""))
+
+    for bucket in cfi_group_coverage.values():
+        count = bucket["records"]
+        bucket["usableMaturityPercent"] = round(bucket["usableMaturity"] / count * 100, 2) if count else 0.0
+        bucket["usableCouponPercent"] = round(bucket["usableCoupon"] / count * 100, 2) if count else 0.0
+        bucket["usableMaturityAndCouponPercent"] = round(bucket["usableMaturityAndCoupon"] / count * 100, 2) if count else 0.0
+
+    conventional_bonds = cfi_group_coverage.get("DB", {
+        "records": 0, "usableMaturity": 0, "usableCoupon": 0,
+        "usableMaturityAndCoupon": 0, "missingCoupon": 0, "sentinelMaturity": 0,
+        "usableMaturityPercent": 0.0, "usableCouponPercent": 0.0,
+        "usableMaturityAndCouponPercent": 0.0,
+    })
     return {
         "recordCount": total,
         "fieldPresentCounts": present_counts,
         "fieldCoveragePercent": coverage_percent,
+        "cfiGroupCoverage": dict(sorted(cfi_group_coverage.items())),
+        "conventionalBondCoverage": conventional_bonds,
         "uniqueNonEmptyIsins": len(seen),
         "duplicateIsins": duplicates,
         "validIsinShape": valid_shape,
