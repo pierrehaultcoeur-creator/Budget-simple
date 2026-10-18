@@ -87,6 +87,8 @@ def audit_records(records: list[dict]) -> dict:
     missing_coupon_with_floating_field_by_cfi_group = Counter()
     missing_coupon_without_floating_field_by_cfi_group = Counter()
     missing_coupon_samples = []
+    # Inspectable sample for conventional bonds missing coupon and floating-rate data.
+    missing_coupon_without_floating_field_samples = []
     coupon_source_field_counts = Counter()
     missing_coupon_source_field_counts_by_cfi = Counter()
     sentinel_perpetual_name_hints = 0
@@ -138,6 +140,21 @@ def audit_records(records: list[dict]) -> dict:
                     "couponSourceField": record.get("couponSourceField"),
                     "floatingRateFieldPresent": floating_present,
                     "floatingRateRaw": record.get("floatingRateRaw"),
+                })
+            if group == "DB" and not floating_present and len(missing_coupon_without_floating_field_samples) < 100:
+                missing_coupon_without_floating_field_samples.append({
+                    "isin": isin,
+                    "cfi": cfi or None,
+                    "name": record.get("name"),
+                    "currency": record.get("currency"),
+                    "maturityDate": record.get("maturityDate"),
+                    "maturityDateRaw": record.get("maturityDateRaw"),
+                    "couponRateRaw": record.get("couponRateRaw"),
+                    "couponSourceField": record.get("couponSourceField"),
+                    "floatingRateFieldPresent": floating_present,
+                    "floatingRateRaw": record.get("floatingRateRaw"),
+                    "floatingRateTerm": record.get("floatingRateTerm"),
+                    "floatingRateSpreadBps": record.get("floatingRateSpreadBps"),
                 })
 
         # Inspect raw source values too: normalized maturityDate may be null for a sentinel.
@@ -321,6 +338,7 @@ def audit_records(records: list[dict]) -> dict:
         "missingCouponWithFloatingFieldByCfiGroup": dict(sorted(missing_coupon_with_floating_field_by_cfi_group.items())),
         "missingCouponWithoutFloatingFieldByCfiGroup": dict(sorted(missing_coupon_without_floating_field_by_cfi_group.items())),
         "missingCouponSamples": missing_coupon_samples,
+        "missingCouponWithoutFloatingFieldSamples": missing_coupon_without_floating_field_samples,
         "sentinelMaturityPerpetualNameHintCount": sentinel_perpetual_name_hints,
         "sentinelMaturityOtherNameCount": sentinel_maturities - sentinel_perpetual_name_hints,
         "nonNumericCouponSamples": non_numeric_coupon_samples,

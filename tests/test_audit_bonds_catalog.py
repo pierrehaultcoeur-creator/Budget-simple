@@ -183,5 +183,39 @@ class BondCatalogueAuditTests(unittest.TestCase):
         self.assertEqual(report["suspiciousCouponCount"], 1)
 
 
+    def test_reports_conventional_bonds_missing_coupon_and_floating_metadata(self):
+        report = module.audit_records([
+            {
+                "isin": "FR0000047607",
+                "cfi": "DBVUPN",
+                "name": "No rate metadata",
+                "currency": "EUR",
+                "maturityDate": "2030-01-01",
+                "couponRate": None,
+                "couponSourceField": None,
+                "floatingRateFieldPresent": False,
+            },
+            {
+                "isin": "US0378331005",
+                "cfi": "DBVUPN",
+                "couponRate": None,
+                "floatingRateFieldPresent": True,
+                "floatingRateRaw": "Y",
+            },
+            {
+                "isin": "GB0002634946",
+                "cfi": "DEXXXX",
+                "couponRate": None,
+                "floatingRateFieldPresent": False,
+            },
+        ])
+        samples = report["missingCouponWithoutFloatingFieldSamples"]
+        self.assertEqual(len(samples), 1)
+        self.assertEqual(samples[0]["isin"], "FR0000047607")
+        self.assertEqual(samples[0]["cfi"], "DBVUPN")
+        self.assertIsNone(samples[0]["couponSourceField"])
+        self.assertFalse(samples[0]["floatingRateFieldPresent"])
+
+
 if __name__ == "__main__":
     unittest.main()
