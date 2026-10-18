@@ -75,6 +75,9 @@ def audit_records(records: list[dict]) -> dict:
     malformed_maturities = 0
     coupon_non_numeric = 0
     suspicious_coupon = 0
+    verified_coupon_override_count = 0
+    verified_coupon_overrides = []
+    unresolved_suspicious_coupon_count = 0
     sample_sentinels = []
     suspicious_coupon_samples = []
     non_numeric_coupon_samples = []
@@ -138,8 +141,22 @@ def audit_records(records: list[dict]) -> dict:
                     suspicious_coupon += 1
                     group = str(record.get("cfi") or "")[:2].upper() or "UNKNOWN"
                     suspicious_coupon_by_cfi_group[group] += 1
-                    detail = {"isin": isin, "couponRateRaw": coupon, "couponRateStatus": record.get("couponRateStatus"), "cfi": record.get("cfi"), "name": record.get("name")}
+                    status = record.get("couponRateStatus")
+                    detail = {
+                        "isin": isin,
+                        "couponRateRaw": coupon,
+                        "couponRate": record.get("couponRate"),
+                        "couponRateStatus": status,
+                        "couponRateSource": record.get("couponRateSource"),
+                        "cfi": record.get("cfi"),
+                        "name": record.get("name"),
+                    }
                     suspicious_coupon_records.append(detail)
+                    if status == "VERIFIED_OVERRIDE":
+                        verified_coupon_override_count += 1
+                        verified_coupon_overrides.append(detail)
+                    else:
+                        unresolved_suspicious_coupon_count += 1
                     if len(suspicious_coupon_samples) < 10:
                         suspicious_coupon_samples.append(detail)
             except (TypeError, ValueError):
@@ -176,6 +193,9 @@ def audit_records(records: list[dict]) -> dict:
         "malformedMaturityCount": malformed_maturities,
         "nonNumericCouponCount": coupon_non_numeric,
         "suspiciousCouponCount": suspicious_coupon,
+        "verifiedCouponOverrideCount": verified_coupon_override_count,
+        "verifiedCouponOverrides": verified_coupon_overrides,
+        "unresolvedSuspiciousCouponCount": unresolved_suspicious_coupon_count,
         "suspiciousCouponSamples": suspicious_coupon_samples,
         "suspiciousCouponRecords": suspicious_coupon_records,
         "suspiciousCouponCountsByCfiGroup": dict(sorted(suspicious_coupon_by_cfi_group.items())),
