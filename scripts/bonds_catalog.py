@@ -179,9 +179,12 @@ def parse_xml(xml_bytes: bytes) -> list[dict]:
                 None,
             ) if debt is not None else None
             floating_rate_raw = (
-                first_descendant_text(floating_rate_element, "ISIN")
-                or first_descendant_text(floating_rate_element, "Indx")
-                or first_descendant_text(floating_rate_element, "Nm")
+                (
+                    first_descendant_text(floating_rate_element, "ISIN")
+                    or first_descendant_text(floating_rate_element, "Indx")
+                    or first_descendant_text(floating_rate_element, "Nm")
+                    or (floating_rate_element.text or "").strip() or None
+                )
                 if floating_rate_element is not None else None
             )
             floating_rate_term = first_descendant_text(floating_rate_element, "Term") if floating_rate_element is not None else None
