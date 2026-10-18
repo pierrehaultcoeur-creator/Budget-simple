@@ -2496,6 +2496,34 @@ test('investment page visibly distinguishes conventional bonds, structured produ
 });
 
 
+
+test('investment page explains when an invalid source maturity is withheld', async () => {
+  const payload = {
+    source: 'bond-master',
+    results: [{
+      isin: 'FR0000000001',
+      name: 'Example bond with invalid maturity',
+      instrumentCategory: 'conventional-bond',
+      maturity: null,
+      maturityStatus: 'INVALID_SOURCE_VALUE',
+      maturitySourceValue: '2030-02-31'
+    }]
+  };
+  const page = loadInvestmentSearchPage(async url => {
+    if (!url.includes('/.netlify/functions/bond-search?')) {
+      throw new Error('Ordinary name search should call the public handler only: ' + url);
+    }
+    return { ok: true, json: async () => payload };
+  });
+
+  page.elements.q.value = 'Example bond';
+  await page.doSearch();
+
+  assert.match(page.elements.results.innerHTML, /Échéance/);
+  assert.match(page.elements.results.innerHTML, /Date source invalide — échéance non affichée/,
+    'An invalid source date must be explained when the maturity is withheld');
+});
+
 test('investment page category filter narrows visible results and restores all categories without another search', async () => {
   let requests = 0;
   const page = loadInvestmentSearchPage(async url => {
