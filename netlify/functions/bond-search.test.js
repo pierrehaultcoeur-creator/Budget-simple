@@ -2333,14 +2333,11 @@ test('name index retains matching records across every catalogue shard', () => {
 });
 
 test('indexed name search returns the same ranked results as full scans across catalogue regions', () => {
-  // Compare the fast path with a full-scan oracle for records from the first,
-  // middle, and last shards. This catches missing trigram-to-shard entries
-  // that a single representative query could miss.
-  const sampleIndexes = [...new Set([
-    0,
-    Math.floor((manifest.parts.length - 1) / 2),
-    manifest.parts.length - 1
-  ])];
+  // Compare the fast path with a full-scan oracle across seven evenly spaced
+  // catalogue regions. This broadens false-negative coverage beyond only the
+  // first, middle, and last shards without rescanning the catalogue per query.
+  const sampleIndexes = [...new Set(Array.from({ length: 7 }, (_, index) =>
+    Math.round(index * (manifest.parts.length - 1) / 6)))];
   // Load the full-scan oracle once. Re-reading every catalogue shard for each
   // regional sample made this correctness test needlessly slow without adding coverage.
   const fullScanRecords = manifest.parts.flatMap(cataloguePart => {
