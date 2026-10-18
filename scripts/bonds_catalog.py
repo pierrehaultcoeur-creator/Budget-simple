@@ -174,7 +174,18 @@ def parse_xml(xml_bytes: bytes) -> list[dict]:
             maturity, maturity_raw, maturity_status = normalized_maturity(debt)
             fixed_coupon_raw = first_descendant_text(debt, "Fxd") if debt is not None else None
             interest_rate_raw = first_descendant_text(debt, "IntrstRate") if debt is not None else None
-            floating_rate_raw = first_descendant_text(debt, "Fltg") if debt is not None else None
+            floating_rate_element = next(
+                (element for element in debt.iter() if xml_local_name(element.tag) == "Fltg"),
+                None,
+            ) if debt is not None else None
+            floating_rate_raw = (
+                first_descendant_text(floating_rate_element, "ISIN")
+                or first_descendant_text(floating_rate_element, "Indx")
+                or first_descendant_text(floating_rate_element, "Nm")
+                if floating_rate_element is not None else None
+            )
+            floating_rate_term = first_descendant_text(floating_rate_element, "Term") if floating_rate_element is not None else None
+            floating_rate_spread = first_descendant_text(floating_rate_element, "BsisPtSprd") if floating_rate_element is not None else None
             coupon_raw = fixed_coupon_raw or interest_rate_raw
             coupon_source_field = (
                 "Fxd" if fixed_coupon_raw else
@@ -206,8 +217,10 @@ def parse_xml(xml_bytes: bytes) -> list[dict]:
                 "couponRateRaw": coupon_raw,
                 "couponRateStatus": coupon_status,
                 "couponSourceField": coupon_source_field,
-                "floatingRateFieldPresent": floating_rate_raw is not None,
+                "floatingRateFieldPresent": floating_rate_element is not None,
                 "floatingRateRaw": floating_rate_raw,
+                "floatingRateTerm": floating_rate_term,
+                "floatingRateSpreadBps": floating_rate_spread,
                 "couponRateSource": coupon_source,
                 "couponRateSourceReason": coupon_source_reason,
                 "issuerLei": first_descendant_text(node, "Issr"),
