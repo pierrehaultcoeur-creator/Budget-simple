@@ -34,10 +34,8 @@ class BondCatalogueAuditTests(unittest.TestCase):
         self.assertEqual(report["missingFieldCounts"]["couponRate"], 1)
         self.assertEqual(report["fieldPresentCounts"]["isin"], 1)
         self.assertEqual(report["fieldPresentCounts"]["name"], 1)
-        # The raw sentinel is counted as present in this simple coverage metric;
-        # a separate validity metric must exclude it from usable maturity coverage.
-        self.assertEqual(report["fieldPresentCounts"]["maturityDate"], 1)
-        self.assertEqual(report["fieldCoveragePercent"]["maturityDate"], 100.0)
+        self.assertEqual(report["fieldPresentCounts"]["maturityDate"], 0)
+        self.assertEqual(report["fieldCoveragePercent"]["maturityDate"], 0.0)
         self.assertEqual(report["cfiPrefixCounts"]["DB"], 1)
         self.assertEqual(report["conventionalBondCount"], 1)
         self.assertEqual(report["relatedDebtCount"], 0)
