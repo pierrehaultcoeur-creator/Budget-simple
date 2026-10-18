@@ -15,21 +15,6 @@ on:
       - 'tests/test_split_bonds_catalog.py'
       - 'tests/test_audit_bonds_catalog.py'
       - 'tests/test_committed_name_indexes.py'
-      - 'data/bonds-catalog/**'
-  pull_request:
-    branches:
-      - main
-    paths:
-      - '.github/workflows/bonds-catalog.yml'
-      - 'scripts/bonds_catalog.py'
-      - 'scripts/bond_coupon_overrides.json'
-      - 'scripts/split_bonds_catalog.py'
-      - 'scripts/audit_bonds_catalog.py'
-      - 'tests/test_bonds_catalog.py'
-      - 'tests/test_split_bonds_catalog.py'
-      - 'tests/test_audit_bonds_catalog.py'
-      - 'tests/test_committed_name_indexes.py'
-      - 'data/bonds-catalog/**'
   schedule:
     # Sundays at 10:30 UTC, after ESMA's weekly full-file publication window.
     - cron: "30 10 * * 0"
