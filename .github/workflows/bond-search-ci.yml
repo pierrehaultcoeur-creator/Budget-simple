@@ -3,7 +3,7 @@ name: Bond search CI
 on:
   push:
     branches:
-      - feature/bond-search-index
+      - main
     paths:
       - 'netlify/functions/**'
       - 'scripts/**'
