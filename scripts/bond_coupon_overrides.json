@@ -1,0 +1,22 @@
+{
+  "GR0118017657": {
+    "couponRate": "3.375",
+    "reason": "The ESMA raw value is 3375, but the issuer's issuance announcement states a 3.375% coupon.",
+    "source": "https://www.pdma.gr/en/announcements/t-bills-2/test"
+  },
+  "GR0118019679": {
+    "couponRate": "1.875",
+    "reason": "The ESMA raw value is 1875, but the issuer's issuance announcement and Borsa Italiana identify a 1.875% fixed coupon.",
+    "source": "https://www.pdma.gr/en/announcements/t-bills-2/test"
+  },
+  "XS1722899918": {
+    "couponRate": "1.125",
+    "reason": "The ESMA raw value is 1125, while bond reference data identifies Fingrid's fixed coupon as 1.125%.",
+    "source": "https://terrapinfinance.com/screener/XS1722899918"
+  },
+  "XS3262577961": {
+    "couponRate": "4.375",
+    "reason": "The ESMA raw value is 4375, while bond reference data identifies the Development Bank of Japan coupon as 4.375%.",
+    "source": "https://www.finanzen.net/anleihen/a4engx-development-bank-of-japan-anleihe"
+  }
+}
