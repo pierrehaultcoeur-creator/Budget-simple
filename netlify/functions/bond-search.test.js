@@ -219,6 +219,38 @@ test('public bond master records expose normalized CFI instrument categories', (
   assert.equal(structured.instrumentLabel, 'Produit structuré sans protection du capital');
 });
 
+test('floating-rate metadata survives canonicalization and public response without inventing a coupon', () => {
+  const source = {
+    isin: 'FR0000047607',
+    name: 'Example floating-rate bond',
+    cfi: 'DBXXXX',
+    couponRate: null,
+    couponRateStatus: 'MISSING',
+    floatingRateFieldPresent: true,
+    floatingRateRaw: 'EURIBOR',
+    floatingRateTerm: '3M',
+    floatingRateSpreadBps: 125
+  };
+
+  const canonical = search._test.canonicalBond(source);
+  assert.equal(canonical.coupon, null);
+  assert.equal(canonical.floatingRateFieldPresent, true);
+  assert.equal(canonical.floatingRateRaw, 'EURIBOR');
+  assert.equal(canonical.floatingRateTerm, '3M');
+  assert.equal(canonical.floatingRateSpreadBps, 125);
+
+  const publicRecord = search._test.publicBond({
+    ...canonical,
+    figi: 'BBG000TEST03',
+    provenance: { source: 'ESMA test fixture' }
+  });
+  assert.equal(publicRecord.coupon, null);
+  assert.equal(publicRecord.floatingRateFieldPresent, true);
+  assert.equal(publicRecord.floatingRateRaw, 'EURIBOR');
+  assert.equal(publicRecord.floatingRateTerm, '3M');
+  assert.equal(publicRecord.floatingRateSpreadBps, 125);
+});
+
 test('canonical bond preserves ESMA short name, issuer LEI and market MIC fields', () => {
   const bond = search._test.canonicalBond({
     isin: 'FR0000047607',
