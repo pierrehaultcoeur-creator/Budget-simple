@@ -56,7 +56,7 @@ class BondCatalogueAuditTests(unittest.TestCase):
             {"isin": "US0378331005", "cfi": "DBVUPN", "couponRate": None, "couponSourceField": None},
             {"isin": "GB0002634946", "cfi": "DEXXXX", "couponRate": None, "couponSourceField": "IntrstRate"},
         ])
-        self.assertEqual(report["couponSourceFieldCounts"], {"FIXD": 0} if False else {"FXD": 1, "INTRSTRATE": 1, "NONE": 1})
+        self.assertEqual(report["couponSourceFieldCounts"], {"FXD": 1, "INTRSTRATE": 1, "NONE": 1})
         self.assertEqual(report["missingCouponSourceFieldCountsByCfi"], {"DB:NONE": 1, "DE:INTRSTRATE": 1})
 
     def test_missing_coupon_audit_distinguishes_floating_field_presence(self):
