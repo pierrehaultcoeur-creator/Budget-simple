@@ -127,7 +127,8 @@ class BondCatalogueAuditTests(unittest.TestCase):
         report = module.audit_records([
             {
                 "isin": "FR0000047607",
-                "name": "Example PERP bond",
+                "name": "Example dated bond",
+                "shortName": "PERPETUITY",
                 "maturityDateRaw": "9999-12-31",
                 "cfi": "DBVUPN",
                 "couponRateRaw": "125",
@@ -144,6 +145,17 @@ class BondCatalogueAuditTests(unittest.TestCase):
         ])
         self.assertEqual(report["sentinelMaturityPerpetualNameHintCount"], 1)
         self.assertEqual(report["sentinelMaturityOtherNameCount"], 1)
+        self.assertEqual(report["sentinelMaturityValueCounts"], {"9999-12-31": 2})
+        self.assertEqual(
+            report["sentinelMaturityByCfiGroup"]["DB"]["perpetualNameHintCount"], 1
+        )
+        self.assertEqual(
+            report["sentinelMaturityByCfiGroup"]["DB"]["perpetualNameHintSamples"][0]["shortName"],
+            "PERPETUITY",
+        )
+        self.assertEqual(
+            report["sentinelMaturityByCfiGroup"]["DE"]["otherNameCount"], 1
+        )
         self.assertEqual(len(report["suspiciousCouponRecords"]), 2)
         self.assertEqual(report["suspiciousCouponCountsByCfiGroup"], {"DB": 1, "DE": 1})
 

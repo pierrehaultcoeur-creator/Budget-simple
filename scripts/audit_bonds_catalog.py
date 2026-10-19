@@ -92,6 +92,8 @@ def audit_records(records: list[dict]) -> dict:
     coupon_source_field_counts = Counter()
     missing_coupon_source_field_counts_by_cfi = Counter()
     sentinel_perpetual_name_hints = 0
+    sentinel_by_cfi_group: dict[str, dict] = {}
+    sentinel_value_counts = Counter()
 
     fields = ("name", "shortName", "currency", "maturityDate", "couponRate", "issuerLei", "marketMic")
     for record in records:
@@ -161,9 +163,38 @@ def audit_records(records: list[dict]) -> dict:
         maturity = str(record.get("maturityDateRaw") or record.get("maturityDate") or "").strip()
         if maturity in MATURITY_SENTINELS:
             sentinel_maturities += 1
-            name = str(record.get("name") or "")
-            if re.search(r"\bPERP(?:ETUAL)?\b", name, re.IGNORECASE):
+            sentinel_value_counts[maturity] += 1
+            group = cfi[:2] if CFI_RE.fullmatch(cfi) else "UNKNOWN"
+            bucket = sentinel_by_cfi_group.setdefault(group, {
+                "records": 0,
+                "perpetualNameHintCount": 0,
+                "otherNameCount": 0,
+                "sentinelValueCounts": Counter(),
+                "perpetualNameHintSamples": [],
+                "otherNameSamples": [],
+            })
+            bucket["records"] += 1
+            bucket["sentinelValueCounts"][maturity] += 1
+            # Search both full and short names, counting each record only once.
+            # These are diagnostic hints, not proof that an instrument is perpetual.
+            name = " ".join(str(record.get(field) or "") for field in ("name", "shortName"))
+            perpetual_hint = bool(re.search(r"\b(?:PERP|PERPETUAL|PERPETUITY)\b", name, re.IGNORECASE))
+            sample = {
+                "isin": isin,
+                "maturityDateRaw": maturity,
+                "cfi": cfi or None,
+                "name": record.get("name"),
+                "shortName": record.get("shortName"),
+            }
+            if perpetual_hint:
                 sentinel_perpetual_name_hints += 1
+                bucket["perpetualNameHintCount"] += 1
+                if len(bucket["perpetualNameHintSamples"]) < 5:
+                    bucket["perpetualNameHintSamples"].append(sample)
+            else:
+                bucket["otherNameCount"] += 1
+                if len(bucket["otherNameSamples"]) < 5:
+                    bucket["otherNameSamples"].append(sample)
             if len(sample_sentinels) < 10:
                 sample_sentinels.append({"isin": isin, "maturityDateRaw": maturity, "name": record.get("name")})
         elif maturity:
@@ -341,6 +372,14 @@ def audit_records(records: list[dict]) -> dict:
         "missingCouponWithoutFloatingFieldSamples": missing_coupon_without_floating_field_samples,
         "sentinelMaturityPerpetualNameHintCount": sentinel_perpetual_name_hints,
         "sentinelMaturityOtherNameCount": sentinel_maturities - sentinel_perpetual_name_hints,
+        "sentinelMaturityValueCounts": dict(sorted(sentinel_value_counts.items())),
+        "sentinelMaturityByCfiGroup": {
+            group: {
+                **{key: value for key, value in bucket.items() if key not in {"sentinelValueCounts"}},
+                "sentinelValueCounts": dict(sorted(bucket["sentinelValueCounts"].items())),
+            }
+            for group, bucket in sorted(sentinel_by_cfi_group.items())
+        },
         "nonNumericCouponSamples": non_numeric_coupon_samples,
         "sentinelMaturitySamples": sample_sentinels,
     }
