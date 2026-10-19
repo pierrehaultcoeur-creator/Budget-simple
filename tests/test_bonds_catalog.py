@@ -51,6 +51,27 @@ class ParserTests(unittest.TestCase):
         )
         self.assertTrue(record["couponRateSourceReason"])
 
+    def test_floating_rate_metadata_blocks_fixed_coupon_override(self):
+        xml = b"""<Document>
+          <FinInstrm>
+            <FinInstrmGnlAttrbts>
+              <Id>GR0118017657</Id>
+              <FullNm>Ambiguous floating-rate instrument</FullNm>
+              <ClssfctnTp>DBFTGB</ClssfctnTp>
+            </FinInstrmGnlAttrbts>
+            <DebtInstrmAttrbts>
+              <Fxd>3375</Fxd>
+              <IntrstRate><Fltg>Y</Fltg></IntrstRate>
+            </DebtInstrmAttrbts>
+          </FinInstrm>
+        </Document>"""
+        record = module.parse_xml(xml)[0]
+        self.assertIsNone(record["couponRate"])
+        self.assertEqual(record["couponRateRaw"], "3375")
+        self.assertEqual(record["couponRateStatus"], "FLOATING_RATE_REFERENCE")
+        self.assertIsNone(record["couponRateSource"])
+        self.assertTrue(record["floatingRateFieldPresent"])
+
     def test_maturity_sentinel_is_not_a_real_maturity(self):
         sentinel = module.ET.fromstring(
             "<DebtInstrmAttrbts><MtrtyDt>9999-12-31</MtrtyDt></DebtInstrmAttrbts>"
