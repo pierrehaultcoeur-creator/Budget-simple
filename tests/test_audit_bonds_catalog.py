@@ -136,7 +136,7 @@ class BondCatalogueAuditTests(unittest.TestCase):
             },
             {
                 "isin": "US0378331005",
-                "name": "Example dated bond",
+                "name": "Example 07/01/15 bond",
                 "maturityDateRaw": "9999-12-31",
                 "cfi": "DEXXXX",
                 "couponRateRaw": "150",
@@ -155,6 +155,14 @@ class BondCatalogueAuditTests(unittest.TestCase):
         )
         self.assertEqual(
             report["sentinelMaturityByCfiGroup"]["DE"]["otherNameCount"], 1
+        )
+        self.assertEqual(report["sentinelMaturityDateNameHintCount"], 1)
+        self.assertEqual(
+            report["sentinelMaturityByCfiGroup"]["DE"]["dateNameHintCount"], 1
+        )
+        self.assertEqual(
+            report["sentinelMaturityByCfiGroup"]["DE"]["dateNameHintSamples"][0]["name"],
+            "Example 07/01/15 bond",
         )
         self.assertEqual(len(report["suspiciousCouponRecords"]), 2)
         self.assertEqual(report["suspiciousCouponCountsByCfiGroup"], {"DB": 1, "DE": 1})
