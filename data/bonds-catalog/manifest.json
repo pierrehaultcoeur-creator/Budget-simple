@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "generatedAt": "2026-10-19T03:38:46+00:00",
+  "generatedAt": "2026-10-19T04:38:56+00:00",
   "sourcePublicationDate": "20261017",
   "source": "ESMA FIRDS",
   "sourceFileType": "FULINS_D",
@@ -11,297 +11,297 @@
   "parts": [
     {
       "file": "part-0001.json",
-      "records": 13517,
-      "bytes": 8388628,
-      "sha256": "01668ce6e830d8de27c080dc5ac139e7dc135987d0e0be75d4e03ac2ae05dbd1"
+      "records": 13516,
+      "bytes": 8388224,
+      "sha256": "3fc9769ad65298a0d0f5b21e8b98789479abd5fcd615570b0f75b51c3b2cbb73"
     },
     {
       "file": "part-0002.json",
       "records": 13052,
-      "bytes": 8388177,
-      "sha256": "ad69032bc455f6d3b18c3e057e799d0d0deaa079b58cac3001b28daa614fa594"
+      "bytes": 8388198,
+      "sha256": "4ec95256c1384ce02765afd8604e9b219976b2756772640b1fc94de5a45a4031"
     },
     {
       "file": "part-0003.json",
       "records": 13028,
-      "bytes": 8388105,
-      "sha256": "c1495b3aca5048eeaec14d9cd12b049a6e6997de129d1b0f4a8702d5b6fbcdb3"
+      "bytes": 8388103,
+      "sha256": "9b3a0846b469baade3204fab15325c19f3d2789bdfbf3f95d5a6cf2f3433d743"
     },
     {
       "file": "part-0004.json",
       "records": 13017,
-      "bytes": 8388484,
-      "sha256": "a6f2cc380bd324511e7247df4975b2f53d253c1cffb4609e7d7319053cef3957"
+      "bytes": 8388501,
+      "sha256": "3de897488ab06e5946594fee4921d369965b42563e17bef18d5940498e50ce97"
     },
     {
       "file": "part-0005.json",
       "records": 12923,
-      "bytes": 8388418,
-      "sha256": "a2b9651602df4060688a74990b99f58dc579cd639e6d845b48dfd45d44b31f83"
+      "bytes": 8388452,
+      "sha256": "f41d57b7825e27b17bba53dbf832017c626f0f2d38b09a48fcf5bcdc60b4a7b1"
     },
     {
       "file": "part-0006.json",
       "records": 12923,
-      "bytes": 8388316,
-      "sha256": "ccf0479142d1ed9542bfec6b6fde47f48654e6f921b4ab20a1007ec2ade9c516"
+      "bytes": 8388432,
+      "sha256": "6910b54542eacb497cec1378d4045086a36933fe32a61fd42d1c954cb0a96b25"
     },
     {
       "file": "part-0007.json",
       "records": 12787,
-      "bytes": 8388233,
-      "sha256": "f32c1579f63cd7a5728ec18ccba21638b8c97860c2d093a3358efbd2e0e316b8"
+      "bytes": 8388237,
+      "sha256": "11bfe246afa6862e7042ee034ec965aede3148092cb5b2cdd0c178de80f1b2f0"
     },
     {
       "file": "part-0008.json",
       "records": 12804,
-      "bytes": 8388555,
-      "sha256": "a915506ca83bbfd125057ef3b85a3d5c5bead6f8ad62389a4952cad6cc819358"
+      "bytes": 8388597,
+      "sha256": "c23e5530f434c50f334bec4c0c2ce8aeece8a5ec4a4a2f04a98f226d5293250a"
     },
     {
       "file": "part-0009.json",
       "records": 12763,
-      "bytes": 8388582,
-      "sha256": "b8a3216d03233f83c41b225ba8ad8cf323d2bf0beed44773a8f869ea57163ed8"
+      "bytes": 8388578,
+      "sha256": "f9b871b44f014262b73ee796f42a1a9bd9a6e76c91c1fef39f4ef0b7fb58f1dd"
     },
     {
       "file": "part-0010.json",
       "records": 12733,
-      "bytes": 8388321,
-      "sha256": "145914ad59025867b0effce30e75d59d2732910bea585ee21a6d2e551a3d7421"
+      "bytes": 8388317,
+      "sha256": "48a9c61d1f4e21b7d1f0a01dfab170c5b1e6e99db54b62a0a51e25510a1d8ed1"
     },
     {
       "file": "part-0011.json",
       "records": 12635,
-      "bytes": 8388578,
-      "sha256": "f00b95ec22255d87d1f1f542534ec4482d99b63098ea7bcbf52715c19092bd84"
+      "bytes": 8388577,
+      "sha256": "f98fe69d2128bbd06c4307ddfa6094439bbaf75865c9ffc2d2d515c7a0de1da2"
     },
     {
       "file": "part-0012.json",
-      "records": 12864,
-      "bytes": 8388630,
-      "sha256": "ec7a9a1c73e4729c646547f1acaf64d3f8897efd43b2b5098c640558147e1b97"
+      "records": 12862,
+      "bytes": 8388304,
+      "sha256": "7366f4d512c4c0e43ac462766de5eed160be4cb9e2a5df27f5f2c2277ce951a5"
     },
     {
       "file": "part-0013.json",
-      "records": 13336,
-      "bytes": 8388277,
-      "sha256": "683d98f95c120c6188d8f7372fe8cf4bb1120e73fbc9de49fdeb11e6346d19f6"
+      "records": 13335,
+      "bytes": 8388539,
+      "sha256": "7574c394d099d47ab4ab9065debb9cc3c8438175d6f34d3b4da518d794635460"
     },
     {
       "file": "part-0014.json",
       "records": 12922,
-      "bytes": 8388528,
-      "sha256": "5bd311753fee262ccc0d963530b2d422581574e3fc5cc15d476f26667048e1af"
+      "bytes": 8388521,
+      "sha256": "2b494d6d58bb3062d2f27073bb6263e34d9a30d3451d8409891dd48c892fdeff"
     },
     {
       "file": "part-0015.json",
       "records": 12701,
-      "bytes": 8388248,
-      "sha256": "add658b89446f10d0945bc363da6d47a17115374d00557d614b7a87139a554e0"
+      "bytes": 8388170,
+      "sha256": "3b7845c20878f1f32bea05a723814dd7656b0978d5efcca02e70c86b60496ee7"
     },
     {
       "file": "part-0016.json",
       "records": 12552,
-      "bytes": 8388112,
-      "sha256": "cf378cb0c713ecd8b762ccb0a9089aa17e81001a0d554aca538bf14633e81d74"
+      "bytes": 8388286,
+      "sha256": "5dcad58af3dd61a34f78adccf052f8653c1519f210aa54d4c3aa89d752d4b63d"
     },
     {
       "file": "part-0017.json",
       "records": 12996,
-      "bytes": 8388397,
-      "sha256": "f3fd4c725654c30259a2936cd9c2a649bece631c9ac98a62955eaf1569a36cff"
+      "bytes": 8388283,
+      "sha256": "f4d8a58b87d0b3a03fa9976ee845f8dcabaf6a4d49c1cece11a0161d9b09b427"
     },
     {
       "file": "part-0018.json",
-      "records": 12801,
-      "bytes": 8388572,
-      "sha256": "d18e539c2b3dbd652dcd93ed9c0acbe707ccb0279824522f3148f9f00d0473e3"
+      "records": 12800,
+      "bytes": 8388130,
+      "sha256": "86d402fcc7deb734ffbbe12d5332db3e12ea925d67711e770d6dcaada63d1411"
     },
     {
       "file": "part-0019.json",
       "records": 12721,
-      "bytes": 8388049,
-      "sha256": "ba9d2c221805106707df0120ca133f056efafcc4194e550be049342f30355efa"
+      "bytes": 8388193,
+      "sha256": "e1a823aff1d22f0e58c0d66f8bb9cfed94bc1e4c8a5a70d9a397266b56e18564"
     },
     {
       "file": "part-0020.json",
       "records": 12867,
-      "bytes": 8388450,
-      "sha256": "db76da1171696281880d7e60a654681d8096b1f3480114289612d302b169a24a"
+      "bytes": 8388415,
+      "sha256": "c5931704b915dc472836c9810c39d88af135bbae7ad1f6327c22c0d01fca7077"
     },
     {
       "file": "part-0021.json",
       "records": 12883,
-      "bytes": 8388025,
-      "sha256": "c86610cb67e218f790493920e0406fb82fa51504a10d28f2207e135d24260e7a"
+      "bytes": 8387995,
+      "sha256": "252791e088a45ed67c980d462486c94062e351fbfa5d0c0b9db6a15b841e0c6c"
     },
     {
       "file": "part-0022.json",
       "records": 12866,
-      "bytes": 8387993,
-      "sha256": "62bb37e70357158493bb18552c353dc451171b093b68554ce3b6116fc0138f78"
+      "bytes": 8388062,
+      "sha256": "f7044e2b0f7bf7204ccff8d3e4982d87e4e4990c0d08ea64b05da277bc915cf0"
     },
     {
       "file": "part-0023.json",
       "records": 12690,
-      "bytes": 8388379,
-      "sha256": "08a66fa7d653f6c2084dafbef281a40f5f59db12771d5f32aa8dcd04ff33e60b"
+      "bytes": 8388370,
+      "sha256": "7a7694f111bdc8383233bc6021d557d465d81e36785514bfd5b9c2ca5f6c5a36"
     },
     {
       "file": "part-0024.json",
       "records": 12690,
-      "bytes": 8388405,
-      "sha256": "4baa27dff8b8ec5c55ca9670a0f97e6d6d48d57c7e307db3b19fae4076c10a2c"
+      "bytes": 8388407,
+      "sha256": "5cb9afa21433f67b054f7b9c72d0dc342476af6e8b88e85bf1ec2ac35e97af13"
     },
     {
       "file": "part-0025.json",
       "records": 12685,
-      "bytes": 8388403,
-      "sha256": "6c7ea1abb88238af54f223c7d6d82265aa2978e7b8d2df8a7f2b76ced4cf1fa7"
+      "bytes": 8388397,
+      "sha256": "5d461ca67be57824edd2f349b0f77f518f9e272832ab8dcce23372ff772c0f53"
     },
     {
       "file": "part-0026.json",
       "records": 13137,
-      "bytes": 8388122,
-      "sha256": "ba722c0cc786852ab4a8e2ec6a22d46bd332c59ae2b83c0d8cd075cff72633e2"
+      "bytes": 8388014,
+      "sha256": "ebb090a7cedc91f7a862aef79f168ce308185ffbd7ca51d1ce861c9cadfeb0aa"
     },
     {
       "file": "part-0027.json",
-      "records": 12907,
-      "bytes": 8388409,
-      "sha256": "659e34675ebcec4b2b0630dfbc1c352246206eae2d0955f66c58d7c39af84c00"
+      "records": 12906,
+      "bytes": 8388174,
+      "sha256": "b7a3a25cb54fcf619ce57e4d2929b44218b0bd9043db7db816de0c83e80882d4"
     },
     {
       "file": "part-0028.json",
-      "records": 12681,
-      "bytes": 8388111,
-      "sha256": "db0309c2d24a25d0ea9825ef180b61b097cf674dce41e86c425773156736545d"
+      "records": 12682,
+      "bytes": 8388549,
+      "sha256": "767436fedfcb3dff9be335b857e58b3a73f25ef59b4d7cedfe0c9f6a6f84cadc"
     },
     {
       "file": "part-0029.json",
-      "records": 13320,
-      "bytes": 8388466,
-      "sha256": "d0a731c14220745d672e02a4810241ceaab7ef8ec93a21754368cc3026bd99cd"
+      "records": 13313,
+      "bytes": 8388450,
+      "sha256": "8367d8c02f7a1a160402b0c823f2009750b4121a3cfed89e96e7aeea35e2e19f"
     },
     {
       "file": "part-0030.json",
       "records": 13201,
-      "bytes": 8388136,
-      "sha256": "41c2dfa7afab698dbb00e0986890bf5fae79a103ef3506cd824dfd679a934219"
+      "bytes": 8388393,
+      "sha256": "e4003e2a1c2359ae847667ab10c03f908fbf8ff320ed05c3c804f75cf2378c03"
     },
     {
       "file": "part-0031.json",
-      "records": 13333,
-      "bytes": 8388491,
-      "sha256": "ac18a2ad1036c84904209a796dc497e9f2fba7b6a6003d224af12792ededc4f0"
+      "records": 13332,
+      "bytes": 8388099,
+      "sha256": "1c86fc715cf54c27f59e90d49da4c20fae21a64d5cdbf04e2c31447ca3880580"
     },
     {
       "file": "part-0032.json",
-      "records": 13410,
-      "bytes": 8388410,
-      "sha256": "8c2378d4c3f1137f7e89687ba48e9a11e8d57f16a731fb82a3efe5eff39e6c5d"
+      "records": 13406,
+      "bytes": 8388431,
+      "sha256": "716327a93b580a1919905f96d92a9214b0dcbfa317568627df1d0e8334fe60f4"
     },
     {
       "file": "part-0033.json",
-      "records": 13645,
-      "bytes": 8388447,
-      "sha256": "a1ebaa790e7dc524f6c32f0ccf6ec710e71678d3983f3d2e322f7cd711a8d387"
+      "records": 13643,
+      "bytes": 8388077,
+      "sha256": "6358a42088843743a665b2c1ebb29a867b37978e7e24eb90b9236387e92fd12d"
     },
     {
       "file": "part-0034.json",
-      "records": 13595,
-      "bytes": 8388336,
-      "sha256": "f9a1a7eb845a69ef4e414ab2ce2553e1ae1c6386a051d84e443e69699ecf3d8b"
+      "records": 13598,
+      "bytes": 8388569,
+      "sha256": "fea29a93560e280a0344d230d8c639ececa9e21e6c856a3ea7efac1d6f9bdd8e"
     },
     {
       "file": "part-0035.json",
-      "records": 13653,
-      "bytes": 8388203,
-      "sha256": "4d48f73144bae62b409cb83b85ecefaf324459681a57b0cddfecba5d8539c8c4"
+      "records": 13650,
+      "bytes": 8388429,
+      "sha256": "6d988adc121d674225f3800c1e19975f7260dfabab52d62517b743f00e95ca1c"
     },
     {
       "file": "part-0036.json",
-      "records": 13133,
-      "bytes": 8388114,
-      "sha256": "d3bdf261fde85aff5e1999e9e20de9132c1b2eebc04df062599f1abec38387d7"
+      "records": 13135,
+      "bytes": 8388457,
+      "sha256": "701a58ca44a143ae6891ee4e6ea5eb549ede9305f7554a427f879b511d4a9479"
     },
     {
       "file": "part-0037.json",
-      "records": 13076,
-      "bytes": 8388484,
-      "sha256": "90fe5b09b10769295eb1818e4b8c49d2126cf784845aff98b16fc446beb5efa1"
+      "records": 13077,
+      "bytes": 8388291,
+      "sha256": "49a2e3eb169bf395e0a745edda7bf4228d5f5e1b2a536e6f650108c488e78d8c"
     },
     {
       "file": "part-0038.json",
-      "records": 12828,
-      "bytes": 8388455,
-      "sha256": "811c4565eca06f02e9f13a654ceb0dde61fc34d3733399d5459e4cf998459b93"
+      "records": 12825,
+      "bytes": 8388176,
+      "sha256": "a60f9fd407a0bf4b851b0ad6cf27972bc5368ce3b2ff250e316623a143cab8e8"
     },
     {
       "file": "part-0039.json",
-      "records": 13015,
-      "bytes": 8388236,
-      "sha256": "acc7f10d9d75a39c26b81cc033bf674c666e10027c7db281398b17a143a70ab9"
+      "records": 13016,
+      "bytes": 8388142,
+      "sha256": "bc69313a32ead5bf0f3f693c8b24d350b176d1eca79845b2866c199c3d4e6cdd"
     },
     {
       "file": "part-0040.json",
-      "records": 13230,
-      "bytes": 8388402,
-      "sha256": "d22446987a32cb7871f5020459ccbb55737120c076b6d1d4eb9deab0fab32201"
+      "records": 13228,
+      "bytes": 8388106,
+      "sha256": "4d3b1afb773de86f9e4c6a29f37737e605438ba7bff7e672e1537ec5716752a2"
     },
     {
       "file": "part-0041.json",
-      "records": 13098,
-      "bytes": 8388465,
-      "sha256": "bb0f8d90287e5bd470c6509fcc7d4874bd0b3ca59f3974aea3422e9d09245ece"
+      "records": 13097,
+      "bytes": 8388143,
+      "sha256": "e3ca05e17fb43e39a34b4c3b67a5fda74d539f29d3488975e2274e8d3e0d4354"
     },
     {
       "file": "part-0042.json",
       "records": 13065,
-      "bytes": 8388067,
-      "sha256": "bfa4421584619d50bc228608f3fc7c5019946d1aaba49bd5e5594dfa945d9bd2"
+      "bytes": 8388459,
+      "sha256": "3deabb3e83dd314850fc934e06dafdbaa07de4dbe48cbd9205c594d1d8f6a5f8"
     },
     {
       "file": "part-0043.json",
       "records": 13202,
-      "bytes": 8388386,
-      "sha256": "c1a5ae0cbb6625ed82b68d9e4feded40e1c7ca1fad38e2a704c17acd73c5ff52"
+      "bytes": 8388409,
+      "sha256": "2f775dfb06f092dac701f33df2ad0e3ce73804ef057556762560b99046970032"
     },
     {
       "file": "part-0044.json",
-      "records": 13349,
-      "bytes": 8388357,
-      "sha256": "e2567b625dd442a2fa921f244035fa0eb78db0fd3779ed7b68808bf512fcc575"
+      "records": 13351,
+      "bytes": 8388278,
+      "sha256": "9375fb4661563286677a78a5ed5852b46458f5d72e5c9a67c813ba7e1d413099"
     },
     {
       "file": "part-0045.json",
-      "records": 13388,
-      "bytes": 8388352,
-      "sha256": "b8cf706bb691c0317fda02f02d8509f138d85324c263e0d26ad7ad4c116ea020"
+      "records": 13385,
+      "bytes": 8388401,
+      "sha256": "61a35f2d0de8020d16b92fed3d09b19fa49122d0de7bc793dd5932674cc72792"
     },
     {
       "file": "part-0046.json",
       "records": 13548,
-      "bytes": 8388180,
-      "sha256": "03e79ba7903f903ff4f0d61b5dbaa157f0b9b129fef01ae0c5de1bb56765f6f2"
+      "bytes": 8388436,
+      "sha256": "27fcf1b4649628c5595696ca3219ad62bd72bc3d836f936b5eb10d71d86dbdf7"
     },
     {
       "file": "part-0047.json",
-      "records": 13551,
-      "bytes": 8388127,
-      "sha256": "a46025db3d9b1f3c74ed4e8668ae45403c2702fce5c2e39743112dcb4a1e11ac"
+      "records": 13552,
+      "bytes": 8388001,
+      "sha256": "6fc6b470286309bf492cd603a10f02463c1e96ba6c9f8f7933f823f4deba0171"
     },
     {
       "file": "part-0048.json",
-      "records": 13628,
-      "bytes": 8388340,
-      "sha256": "396cb461c2311952791c711fa21e99668529fe8b55cab0c35b3daf4e3eac2398"
+      "records": 13626,
+      "bytes": 8388589,
+      "sha256": "d8dd1b20ea1e3a71167bec9c1dd9fbb40731ad2d8b1e8c1d99e51507d5c40657"
     },
     {
       "file": "part-0049.json",
-      "records": 4490,
-      "bytes": 2765269,
-      "sha256": "88bf6afbc3a032f64c5bbd4b7db35569fda8017a83803469aa3681a1087afa81"
+      "records": 4513,
+      "bytes": 2779641,
+      "sha256": "0d6fca73ce0e07c65645c5e0aaf716f28d30d0603113bece1b968f8e8687ed67"
     }
   ],
   "isinIndexes": [
@@ -373,7 +373,7 @@
       "file": "isin-index-CH.json",
       "entries": 42602,
       "bytes": 1363266,
-      "gitBlobSha": "b7a030337f64c26335bfd113419e8e6aea4fbdd7"
+      "gitBlobSha": "436b0f42c7765f14ce7cbfb242ee8bb0f37acede"
     },
     {
       "prefix": "CL",
@@ -415,7 +415,7 @@
       "file": "isin-index-DE.json",
       "entries": 311967,
       "bytes": 9982946,
-      "gitBlobSha": "91929b997918be17834ca4f97b0bf76be3dddbf8"
+      "gitBlobSha": "aca5e2ab4f27567191c510fed6dd23bad1e0fdaa"
     },
     {
       "prefix": "DK",
@@ -464,7 +464,7 @@
       "file": "isin-index-FR.json",
       "entries": 30906,
       "bytes": 988994,
-      "gitBlobSha": "0a7349677240b324f5475768adffeee5590a9bfb"
+      "gitBlobSha": "f8e50314e4272bca6276477a642d5a8432138585"
     },
     {
       "prefix": "GB",
@@ -667,7 +667,7 @@
       "file": "isin-index-NO.json",
       "entries": 2576,
       "bytes": 82434,
-      "gitBlobSha": "4bcfa6af1325b4440b3a199ef4abb84631010ef4"
+      "gitBlobSha": "95e19c29348195a5d2c024409a3cd5449f00649f"
     },
     {
       "prefix": "NZ",
@@ -849,7 +849,7 @@
       "file": "isin-index-US.json",
       "entries": 43444,
       "bytes": 1390210,
-      "gitBlobSha": "2adb896c8e794e6ef82406ea2077daa70e7bf958"
+      "gitBlobSha": "4415b059698d390e03af1f60ad7abc360e71eb6b"
     },
     {
       "prefix": "XC",
@@ -870,7 +870,7 @@
       "file": "isin-index-XS.json",
       "entries": 165529,
       "bytes": 5296930,
-      "gitBlobSha": "6b7199b23d2643ded22dfbc44e1b8c0f117f113e"
+      "gitBlobSha": "e6aa8afc19d887b2e48d52400c642ae231efcac4"
     },
     {
       "prefix": "ZA",
@@ -892,218 +892,218 @@
       "prefix": "0",
       "file": "name-index-0.json",
       "trigrams": 537,
-      "bytes": 94109,
-      "gitBlobSha": "4e1a001571d92cde3bdc0c04ba3543fa899b507b"
+      "bytes": 94092,
+      "gitBlobSha": "bd583479f81cc3a157bac28dada247a416ea7803"
     },
     {
       "prefix": "1",
       "file": "name-index-1.json",
       "trigrams": 486,
-      "bytes": 101368,
-      "gitBlobSha": "859e869cf1db0c74867c744c7734cd92cdad5d50"
+      "bytes": 101283,
+      "gitBlobSha": "1c864659fc8be3ea42c8b2dc88c560ef4bacc986"
     },
     {
       "prefix": "2",
       "file": "name-index-2.json",
       "trigrams": 627,
-      "bytes": 104621,
-      "gitBlobSha": "edb414397226f233220566d0b13b39e5d5620d1d"
+      "bytes": 104604,
+      "gitBlobSha": "27b77e4d45d457acff76d7918fa04ecb23bd67fa"
     },
     {
       "prefix": "3",
       "file": "name-index-3.json",
       "trigrams": 422,
       "bytes": 84332,
-      "gitBlobSha": "92a88fb97293b7840d10ac2d0b8b1e894ba6e7cb"
+      "gitBlobSha": "2f388b02cea557e9ce6d6182678fc07c773833d8"
     },
     {
       "prefix": "4",
       "file": "name-index-4.json",
       "trigrams": 333,
       "bytes": 73352,
-      "gitBlobSha": "487abe6cd6cf25029d0c5fa30ef060e29c5ddb17"
+      "gitBlobSha": "89943eb7a745f9db4772586212885c359d80888a"
     },
     {
       "prefix": "5",
       "file": "name-index-5.json",
       "trigrams": 364,
-      "bytes": 74790,
-      "gitBlobSha": "e74cb9b88de3a95a10edb17fd60016de4ec16adf"
+      "bytes": 74773,
+      "gitBlobSha": "1c63da294b3ba8c2cd0704706f6a40d35f8626cf"
     },
     {
       "prefix": "6",
       "file": "name-index-6.json",
       "trigrams": 299,
-      "bytes": 69595,
-      "gitBlobSha": "cd4d1e72d2176bddf85b20ec277c676156dd16c8"
+      "bytes": 69629,
+      "gitBlobSha": "b21274c7f33455b0b0f207ff9500cc255f6307e2"
     },
     {
       "prefix": "7",
       "file": "name-index-7.json",
       "trigrams": 315,
       "bytes": 70573,
-      "gitBlobSha": "3824faed83e814fa54385ea2c347a3aff901215d"
+      "gitBlobSha": "cf3a942805a6353cb9667c04a291773e6eebc251"
     },
     {
       "prefix": "8",
       "file": "name-index-8.json",
       "trigrams": 299,
       "bytes": 70972,
-      "gitBlobSha": "c85814a0655d003e9ce40e82bb3189797f710568"
+      "gitBlobSha": "fbabe726b390641384871f2cc2bc6cf1c81f9f5c"
     },
     {
       "prefix": "9",
       "file": "name-index-9.json",
       "trigrams": 270,
-      "bytes": 68411,
-      "gitBlobSha": "aa718985e1a8b7356c2cedd1f080f47cc039368a"
+      "bytes": 68394,
+      "gitBlobSha": "ea4b7019e8a92e939813c1113f0e4ea18c0000e6"
     },
     {
       "prefix": "a",
       "file": "name-index-a.json",
       "trigrams": 768,
       "bytes": 175415,
-      "gitBlobSha": "89fd484b4094216d0d7c451e8ef1f68b40058927"
+      "gitBlobSha": "62367673d22850f9e5b3ebdfef18faef63e1c83a"
     },
     {
       "prefix": "b",
       "file": "name-index-b.json",
       "trigrams": 677,
-      "bytes": 105786,
-      "gitBlobSha": "1a42b755e922ed885ccf81e6aa57227ab88f743b"
+      "bytes": 105769,
+      "gitBlobSha": "a85a4b1e51a563c548c159c31b1f075c836ca3d2"
     },
     {
       "prefix": "c",
       "file": "name-index-c.json",
       "trigrams": 756,
-      "bytes": 122415,
-      "gitBlobSha": "d2495198abf4f32a407403495e12e2357e24930a"
+      "bytes": 122432,
+      "gitBlobSha": "4e8c6508146ab4a1727559f486a3d58b9bb13cee"
     },
     {
       "prefix": "d",
       "file": "name-index-d.json",
       "trigrams": 670,
       "bytes": 95139,
-      "gitBlobSha": "d441576517c4f0d6dfab2e8b0d6292c16f36f53f"
+      "gitBlobSha": "a59825febb80aeaf1e813b41f9151f8fb3a3f6b3"
     },
     {
       "prefix": "e",
       "file": "name-index-e.json",
       "trigrams": 757,
       "bytes": 169428,
-      "gitBlobSha": "fd301c0dad73e10b9d75800bd1bbbfbb5fafda09"
+      "gitBlobSha": "2568fd828336d998429f6375c41073968f973b59"
     },
     {
       "prefix": "f",
       "file": "name-index-f.json",
       "trigrams": 571,
-      "bytes": 66229,
-      "gitBlobSha": "e5151895ba8288a30a7f529320fae05bcaeb4d16"
+      "bytes": 66195,
+      "gitBlobSha": "5cae305dc0365499d99360b3c78803e0254a8d8f"
     },
     {
       "prefix": "g",
       "file": "name-index-g.json",
       "trigrams": 591,
-      "bytes": 76062,
-      "gitBlobSha": "35df2e211eecdb5343ce6251558b1ef0d0105aab"
+      "bytes": 76113,
+      "gitBlobSha": "7a87af98c3c127b254af3531fa8955f268ff910a"
     },
     {
       "prefix": "h",
       "file": "name-index-h.json",
       "trigrams": 534,
       "bytes": 72716,
-      "gitBlobSha": "3cc4738233cdd0bdf3348bda95d50d9ef90e68df"
+      "gitBlobSha": "5fea8d65e255a13a111df8675979ac871342073f"
     },
     {
       "prefix": "i",
       "file": "name-index-i.json",
       "trigrams": 678,
-      "bytes": 140440,
-      "gitBlobSha": "bb12a32b20dddbec2510bdfe971ec3a6e40a042e"
+      "bytes": 140474,
+      "gitBlobSha": "2ee0a638f4106b7442e169458ea42064c2c975f1"
     },
     {
       "prefix": "j",
       "file": "name-index-j.json",
       "trigrams": 245,
-      "bytes": 19081,
-      "gitBlobSha": "2f99533aa469d6c2dffe1ad21e27920b9e4265fc"
+      "bytes": 19064,
+      "gitBlobSha": "7680013992216a54706bcc5dc85c70e5d88b7b7e"
     },
     {
       "prefix": "k",
       "file": "name-index-k.json",
       "trigrams": 548,
       "bytes": 66198,
-      "gitBlobSha": "5496927b591c984d330d8d181a174c9ef85ff0ce"
+      "gitBlobSha": "fd406a4e27699cbc5f1fd56c953e366463bc8cbb"
     },
     {
       "prefix": "l",
       "file": "name-index-l.json",
       "trigrams": 687,
-      "bytes": 120129,
-      "gitBlobSha": "3834b8ed656c8e70d10ac541cd60ec916828d2cb"
+      "bytes": 120095,
+      "gitBlobSha": "dcc54ad83dc9cfa7a890c013ca3dfccbe803678c"
     },
     {
       "prefix": "m",
       "file": "name-index-m.json",
       "trigrams": 570,
       "bytes": 91126,
-      "gitBlobSha": "1a3fea5adcb421497cc6668f26d42c00226f88ff"
+      "gitBlobSha": "617976bd1b8b114ac869a9b55c2568f00cfa2e3f"
     },
     {
       "prefix": "n",
       "file": "name-index-n.json",
       "trigrams": 734,
-      "bytes": 150204,
-      "gitBlobSha": "a801e36378809b6b91a9538754a2a7da5ff1cb6a"
+      "bytes": 150187,
+      "gitBlobSha": "3a3a189446a6c9a033a43fb73118872609a5b289"
     },
     {
       "prefix": "o",
       "file": "name-index-o.json",
       "trigrams": 664,
-      "bytes": 137591,
-      "gitBlobSha": "272d9af42092c88086de84ae7589da954d4bb0e3"
+      "bytes": 137608,
+      "gitBlobSha": "37878b6701b487a062429ffe7509efd873cd87a9"
     },
     {
       "prefix": "p",
       "file": "name-index-p.json",
       "trigrams": 650,
-      "bytes": 94265,
-      "gitBlobSha": "b3d5c29e9e8178ec3488d4436b913fcae4a78a1a"
+      "bytes": 94248,
+      "gitBlobSha": "bf3dd283cb8b20bdc9b4fe16d29a99c96ed9bd65"
     },
     {
       "prefix": "q",
       "file": "name-index-q.json",
       "trigrams": 181,
       "bytes": 11378,
-      "gitBlobSha": "651b0a3248a8670130d2ab44833997b36d585c40"
+      "gitBlobSha": "48b4974c2abebbbb32ed98c687444a146a42e19b"
     },
     {
       "prefix": "r",
       "file": "name-index-r.json",
       "trigrams": 756,
-      "bytes": 153746,
-      "gitBlobSha": "640b26d933d7bb807032abe66ea5be631482c5ec"
+      "bytes": 153729,
+      "gitBlobSha": "33e75c950f660de62552eb630e96b5e94235d83e"
     },
     {
       "prefix": "s",
       "file": "name-index-s.json",
       "trigrams": 789,
-      "bytes": 155761,
-      "gitBlobSha": "770828ebf5a503ab123154c3aead761079cb317f"
+      "bytes": 155778,
+      "gitBlobSha": "7be431f2a7412f0de781113cc3a7b6ab8c8db9c9"
     },
     {
       "prefix": "t",
       "file": "name-index-t.json",
       "trigrams": 683,
-      "bytes": 116969,
-      "gitBlobSha": "c9ce2207955fe9561f2d35e0b91d1eb2b5558645"
+      "bytes": 117003,
+      "gitBlobSha": "a9edcf13f67e07ddbea0855584e4b398612f897a"
     },
     {
       "prefix": "u",
       "file": "name-index-u.json",
       "trigrams": 541,
-      "bytes": 89755,
-      "gitBlobSha": "ff6bc49065c84028f73f9717890c1ee82c438cae"
+      "bytes": 89772,
+      "gitBlobSha": "072143a6f5d2dcfac2e5e343d7befaf411e94309"
     },
     {
       "prefix": "v",
@@ -1117,28 +1117,28 @@
       "file": "name-index-w.json",
       "trigrams": 355,
       "bytes": 35516,
-      "gitBlobSha": "0e3c59a0fee78575bbccc642371db440a5c7dc10"
+      "gitBlobSha": "b2bb47f8c055b1d7f897522079738a086153ae05"
     },
     {
       "prefix": "x",
       "file": "name-index-x.json",
       "trigrams": 358,
-      "bytes": 37172,
-      "gitBlobSha": "4479dbcc9624f0f97461d0ff4a73076bac566e42"
+      "bytes": 37189,
+      "gitBlobSha": "56388669b9e297edf284d0f2787f5a6d373360f2"
     },
     {
       "prefix": "y",
       "file": "name-index-y.json",
       "trigrams": 390,
-      "bytes": 37224,
-      "gitBlobSha": "04b591a9e9e033ad705798af8423f73253c443cb"
+      "bytes": 37207,
+      "gitBlobSha": "687620dfc8d8824753d2be7aec9986b7bae7f97f"
     },
     {
       "prefix": "z",
       "file": "name-index-z.json",
       "trigrams": 325,
-      "bytes": 30499,
-      "gitBlobSha": "316079609a8f8d32f39b30299a9c2b31add3b998"
+      "bytes": 30482,
+      "gitBlobSha": "46cd3d899179a5df191ede9c346f9abc54609a74"
     }
   ],
   "notes": "ISIN discovery catalogue only; an ISIN is not a verified quote or a fully enriched bond record."
