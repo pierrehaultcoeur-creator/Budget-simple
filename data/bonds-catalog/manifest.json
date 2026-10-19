@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "generatedAt": "2026-10-19T04:49:51+00:00",
+  "generatedAt": "2026-10-19T17:05:27+00:00",
   "sourcePublicationDate": "20261017",
   "source": "ESMA FIRDS",
   "sourceFileType": "FULINS_D",
@@ -198,8 +198,8 @@
     {
       "file": "part-0032.json",
       "records": 13406,
-      "bytes": 8388431,
-      "sha256": "716327a93b580a1919905f96d92a9214b0dcbfa317568627df1d0e8334fe60f4"
+      "bytes": 8388473,
+      "sha256": "148dd66919c51d045d21ce8a69c14154f4a823ad6aa3d1e96aa344485a010ba8"
     },
     {
       "file": "part-0033.json",
