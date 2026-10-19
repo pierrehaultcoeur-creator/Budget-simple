@@ -180,5 +180,34 @@ class ParserTests(unittest.TestCase):
                 self.assertEqual(record["couponRateStatus"], "VERIFIED_OVERRIDE")
                 self.assertEqual(record["couponRateSource"], module.COUPON_OVERRIDES[isin]["source"])
 
+
+    def test_verified_greek_coupon_overrides_keep_raw_esma_values(self):
+        cases = (
+            ("GR0128010676", "2023-02-24"),
+            ("GR0128011682", "2024-02-24"),
+            ("GR0128012698", "2025-02-24"),
+            ("GR0128013704", "2026-02-24"),
+            ("GR0128014710", "2027-02-24"),
+        )
+        for isin, maturity in cases:
+            with self.subTest(isin=isin):
+                xml = f"""<Document>
+                  <FinInstrm>
+                    <FinInstrmGnlAttrbts>
+                      <Id>{isin}</Id>
+                      <FullNm>Greek Government Bond</FullNm>
+                      <ClssfctnTp>DBFTGB</ClssfctnTp>
+                      <NtnlCcy>EUR</NtnlCcy>
+                    </FinInstrmGnlAttrbts>
+                    <DebtInstrmAttrbts><MtrtyDt>{maturity}</MtrtyDt><Fxd>365</Fxd></DebtInstrmAttrbts>
+                  </FinInstrm>
+                </Document>""".encode()
+                record = module.parse_xml(xml)[0]
+                self.assertEqual(record["couponRate"], "2.000")
+                self.assertEqual(record["couponRateRaw"], "365")
+                self.assertEqual(record["couponRateStatus"], "VERIFIED_OVERRIDE")
+                self.assertEqual(record["couponRateSource"], module.COUPON_OVERRIDES[isin]["source"])
+                self.assertTrue(record["couponRateSourceReason"])
+
 if __name__ == "__main__":
     unittest.main()
