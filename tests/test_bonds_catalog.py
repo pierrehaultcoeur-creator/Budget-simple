@@ -281,3 +281,43 @@ class ParserTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+    def test_verified_floating_rate_override_preserves_margin_without_faking_fixed_coupon(self):
+        xml = b"""<Document>
+          <FinInstrm>
+            <FinInstrmGnlAttrbts>
+              <Id>NO0012654534</Id>
+              <FullNm>JYSKE BANK A-S Issue of NOK 400,000,000 Tier 2 Subordinated Floating Rate Notes due August 2032</FullNm>
+              <ShrtNm>Jyske Bank/VAR BD 20320831</ShrtNm>
+              <ClssfctnTp>DBVUGR</ClssfctnTp>
+              <NtnlCcy>NOK</NtnlCcy>
+            </FinInstrmGnlAttrbts>
+            <DebtInstrmAttrbts>
+              <MtrtyDt>2032-08-31</MtrtyDt>
+              <Fxd>305</Fxd>
+            </DebtInstrmAttrbts>
+          </FinInstrm>
+        </Document>"""
+        record = module.parse_xml(xml)[0]
+        override = module.FLOATING_RATE_OVERRIDES["NO0012654534"]
+        self.assertIsNone(record["couponRate"])
+        self.assertEqual(record["couponRateRaw"], "305")
+        self.assertEqual(record["couponRateStatus"], "FLOATING_RATE_REFERENCE")
+        self.assertEqual(record["couponSourceField"], "Fxd")
+        self.assertTrue(record["floatingRateFieldPresent"])
+        self.assertEqual(record["floatingRateRaw"], "NIBOR")
+        self.assertEqual(record["floatingRateTerm"], "3M")
+        self.assertEqual(record["floatingRateSpreadBps"], "305")
+        self.assertEqual(record["floatingRateSource"], override["source"])
+        self.assertTrue(record["floatingRateSourceReason"])
+
+    def test_every_floating_rate_override_has_complete_provenance(self):
+        for isin, override in module.FLOATING_RATE_OVERRIDES.items():
+            with self.subTest(isin=isin):
+                self.assertRegex(isin, r"^[A-Z]{2}[A-Z0-9]{9}[0-9]$")
+                self.assertTrue(override["reason"].strip())
+                self.assertTrue(override["source"].startswith("https://"))
+                self.assertEqual(override["referenceRate"], "NIBOR")
+                self.assertEqual(override["term"], "3M")
+                self.assertGreater(int(override["spreadBps"]), 0)

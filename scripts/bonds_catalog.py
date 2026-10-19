@@ -38,6 +38,8 @@ if LOOKBACK_DAYS < 1:
 
 OVERRIDES_PATH = Path(__file__).resolve().parent / "bond_coupon_overrides.json"
 COUPON_OVERRIDES = json.loads(OVERRIDES_PATH.read_text(encoding="utf-8"))
+FLOATING_RATE_OVERRIDES_PATH = Path(__file__).resolve().parent / "bond_floating_rate_overrides.json"
+FLOATING_RATE_OVERRIDES = json.loads(FLOATING_RATE_OVERRIDES_PATH.read_text(encoding="utf-8"))
 
 
 def http_get(url: str, timeout: int = 180) -> bytes:
@@ -192,6 +194,15 @@ def parse_xml(xml_bytes: bytes) -> list[dict]:
             )
             floating_rate_term = first_descendant_text(floating_rate_element, "Term") if floating_rate_element is not None else None
             floating_rate_spread = first_descendant_text(floating_rate_element, "BsisPtSprd") if floating_rate_element is not None else None
+            floating_rate_override = FLOATING_RATE_OVERRIDES.get(isin)
+            if floating_rate_override:
+                # Some ESMA records put a floating-rate margin in Fxd and omit
+                # the nested Fltg structure. Only an exact-ISIN, source-verified
+                # override may repair that metadata; never turn the margin into
+                # a fixed coupon.
+                floating_rate_raw = floating_rate_override["referenceRate"]
+                floating_rate_term = floating_rate_override["term"]
+                floating_rate_spread = str(floating_rate_override["spreadBps"])
             coupon_raw = fixed_coupon_raw or interest_rate_raw
             coupon_source_field = (
                 "Fxd" if fixed_coupon_raw else
@@ -205,11 +216,11 @@ def parse_xml(xml_bytes: bytes) -> list[dict]:
             # ambiguous: it may be a reference or spread, not a fixed annual
             # coupon. Hide it unless a separate, verified fixed-coupon override
             # is available for an instrument without floating-rate metadata.
-            if floating_rate_element is not None:
+            if floating_rate_element is not None or floating_rate_override:
                 coupon = None
                 coupon_status = "FLOATING_RATE_REFERENCE"
             override = COUPON_OVERRIDES.get(isin)
-            if override and floating_rate_element is None:
+            if override and floating_rate_element is None and not floating_rate_override:
                 coupon = str(override["couponRate"])
                 coupon_status = "VERIFIED_OVERRIDE"
                 coupon_source = override["source"]
@@ -230,10 +241,12 @@ def parse_xml(xml_bytes: bytes) -> list[dict]:
                 "couponRateRaw": coupon_raw,
                 "couponRateStatus": coupon_status,
                 "couponSourceField": coupon_source_field,
-                "floatingRateFieldPresent": floating_rate_element is not None,
+                "floatingRateFieldPresent": floating_rate_element is not None or floating_rate_override is not None,
                 "floatingRateRaw": floating_rate_raw,
                 "floatingRateTerm": floating_rate_term,
                 "floatingRateSpreadBps": floating_rate_spread,
+                "floatingRateSource": floating_rate_override.get("source") if floating_rate_override else None,
+                "floatingRateSourceReason": floating_rate_override.get("reason") if floating_rate_override else None,
                 "couponRateSource": coupon_source,
                 "couponRateSourceReason": coupon_source_reason,
                 "issuerLei": first_descendant_text(node, "Issr"),

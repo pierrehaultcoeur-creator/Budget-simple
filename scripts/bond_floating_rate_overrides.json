@@ -1,0 +1,9 @@
+{
+  "NO0012654534": {
+    "referenceRate": "NIBOR",
+    "term": "3M",
+    "spreadBps": "305",
+    "reason": "Jyske Bank's final terms dated 30 August 2022 identify this exact ISIN and specify a floating rate of 3-month NIBOR + 3.05% per annum. ESMA's Fxd field contains 305, which is the margin in basis points, not a fixed coupon.",
+    "source": "https://jyskebank.com/wps/wcm/connect/jbc/dcdfbf5e-3b99-4847-83fb-bfb567ed19cf/Final%2BTerms%2BJyske%2B10NC5%2BNOK%2B400m%2BTier%2B2%2BAug%2B2022.pdf?CVID=obTXygg&MOD=AJPERES"
+  }
+}
