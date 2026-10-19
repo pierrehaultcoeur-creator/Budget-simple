@@ -131,11 +131,13 @@ class ParserTests(unittest.TestCase):
         xml = b"""<Document>
           <FinInstrm>
             <FinInstrmGnlAttrbts><Id>US0378331005</Id><FullNm>Floating rate note</FullNm><ClssfctnTp>DBVUFR</ClssfctnTp></FinInstrmGnlAttrbts>
-            <DebtInstrmAttrbts><IntrstRate><Fltg><RefRate><Indx>EURIBOR</Indx></RefRate><Term>3M</Term><BsisPtSprd>125</BsisPtSprd></Fltg></IntrstRate></DebtInstrmAttrbts>
+            <DebtInstrmAttrbts><Fxd>305</Fxd><IntrstRate><Fltg><RefRate><Indx>EURIBOR</Indx></RefRate><Term>3M</Term><BsisPtSprd>125</BsisPtSprd></Fltg></IntrstRate></DebtInstrmAttrbts>
           </FinInstrm>
         </Document>"""
         record = module.parse_xml(xml)[0]
         self.assertIsNone(record["couponRate"])
+        self.assertEqual(record["couponRateRaw"], "305")
+        self.assertEqual(record["couponRateStatus"], "FLOATING_RATE_REFERENCE")
         self.assertTrue(record["floatingRateFieldPresent"])
         self.assertEqual(record["floatingRateRaw"], "EURIBOR")
         self.assertEqual(record["floatingRateTerm"], "3M")
