@@ -33,6 +33,10 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
+        with:
+          # Runs may wait behind another catalogue build while the branch advances.
+          # Resolve the branch at job start instead of checking out the stale event SHA.
+          ref: ${{ github.ref_name }}
 
       - name: Set up Python
         uses: actions/setup-python@v7
