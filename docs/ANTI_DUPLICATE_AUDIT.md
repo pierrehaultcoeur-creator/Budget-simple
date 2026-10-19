@@ -100,3 +100,12 @@ Les contrôles intégrés du commit ci-dessus ont tous réussi : tests Python du
 - À chaque reprise dans une nouvelle conversation ou après interruption, refaire ce récapitulatif à partir de l'état réel du dépôt. Ne pas supposer que la mémoire conversationnelle est exhaustive ni demander à l'utilisateur de rappeler ce qui est déjà dans le projet.
 - Après intervention seulement : inspecter le diff, consigner les résultats, relier les runs au SHA exact et mettre à jour ce registre. Aucun merge ni déploiement sans autorisation explicite.
 
+## Audit anti-doublon — correction d'une source de coupon obsolète (19 octobre 2026)
+- Audit préalable effectué : récapitulatif global du dépôt, registre, PR #2, commits récents, runs et 12 corrections de coupons consultés avant toute modification.
+- Manque confirmé : la source Borsa Italiana de l'ISIN `GR0118019679` redirigeait vers une page générique. Une notice officielle d'Athens Exchange identifie cet ISIN et confirme le taux fixe annuel de 1,875 %.
+- Correction ciblée dans `scripts/bond_coupon_overrides.json` : remplacement de la justification et de l'URL obsolète par la notice officielle ATHEX. Les 12 entrées et toutes les valeurs de coupons sont inchangées.
+- Commit : [`b781ec7`](https://github.com/pierrehaultcoeur-creator/Budget-simple/commit/b781ec79ca386864efb70a7f72f6f3a0677a0701). Diff vérifié : une seule entrée de données modifiée, deux lignes.
+- Validation : [Build ESMA #39290733594](https://github.com/pierrehaultcoeur-creator/Budget-simple/actions/runs/39290733594) en attente sur le SHA exact `b781ec79ca386864efb70a7f72f6f3a0677a0701`. Ne pas annoncer de succès avant la fin du run.
+- Les sources publiques consultées corroborent plusieurs entrées, notamment ATHEX pour les coupons grecs, Börse Stuttgart pour `XS1722899918`, Cbonds pour `XS3262577961`, Erste Group pour `GR0114031561` et les titres du registre Central Bank of Ireland pour les deux émissions Netcity. L'audit documentaire exhaustif des 12 correspondances ISIN/coupon reste ouvert.
+- Aucun run manuel ajouté. PR #2 reste ouverte en brouillon ; pas de merge ni de déploiement.
+
