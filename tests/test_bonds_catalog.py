@@ -15,6 +15,12 @@ class ParserTests(unittest.TestCase):
             module.classify_cfi("DEXXXX"),
             ("DE", "Produit structuré sans protection du capital"),
         )
+        # Keep the parser's DY label aligned with the quality auditor's CFI
+        # taxonomy; DY is other debt instruments, not a money-market label.
+        self.assertEqual(
+            module.classify_cfi("DYXXXX"),
+            ("DY", "Autre instrument de dette"),
+        )
 
     def test_suspicious_coupon_is_withheld_not_rescaled(self):
         self.assertEqual(module.normalized_coupon("3375"), (None, "SUSPICIOUS_SOURCE_VALUE"))
