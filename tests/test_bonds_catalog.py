@@ -272,7 +272,7 @@ class ParserTests(unittest.TestCase):
                 source = str(override.get("source") or "")
                 self.assertTrue(source.startswith("https://"), "Override needs an HTTPS source URL")
                 rate_text = str(override.get("couponRate") or "").strip()
-                self.assertRegex(rate_text, r"^-?\\d+(?:\\.\\d+)?$")
+                self.assertRegex(rate_text, r"^-?\d+(?:\.\d+)?$")
                 rate = float(rate_text)
                 self.assertTrue(module.math.isfinite(rate))
                 self.assertGreaterEqual(rate, -100)
