@@ -25,13 +25,16 @@ API = (
     "https://registers.esma.europa.eu/solr/"
     "esma_registers_firds_files/select"
 )
-OUT = Path("data/bonds-catalog.json")
+OUT = Path(os.environ.get("BONDS_CATALOG_OUT", "data/bonds-catalog.json"))
 USER_AGENT = "Budget-Simplement-Bond-Catalog/1.0"
 ISIN_RE = re.compile(r"^[A-Z]{2}[A-Z0-9]{9}[0-9]$")
 FILE_RE = re.compile(
     r"FULINS_D_(\d{8})_(\d+)of(\d+)\.zip$", re.IGNORECASE
 )
 MIN_RECORDS = int(os.environ.get("BONDS_MIN_RECORDS", "1"))
+LOOKBACK_DAYS = int(os.environ.get("BONDS_LOOKBACK_DAYS", "21"))
+if LOOKBACK_DAYS < 1:
+    raise ValueError("BONDS_LOOKBACK_DAYS must be at least 1")
 
 OVERRIDES_PATH = Path(__file__).resolve().parent / "bond_coupon_overrides.json"
 COUPON_OVERRIDES = json.loads(OVERRIDES_PATH.read_text(encoding="utf-8"))
@@ -321,7 +324,7 @@ def completeness(record: dict) -> int:
 
 def build_catalogue() -> dict:
     today = date.today()
-    files = query_esma_files(today - timedelta(days=21), today)
+    files = query_esma_files(today - timedelta(days=LOOKBACK_DAYS), today)
     publication = choose_complete_publication(files)
     publication_date = publication[0]["date"]
     print(f"Selected FULINS_D publication {publication_date}: {len(publication)} part(s)")
