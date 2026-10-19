@@ -1,8 +1,8 @@
 {
   "GR0118017657": {
     "couponRate": "3.375",
-    "reason": "Bondfish identifies this exact ISIN as a fixed-rate Greek government bond with a 3.375% coupon.",
-    "source": "https://bondfish.com/bonds/GR0118017657"
+    "reason": "Athens Exchange's official listing notice identifies this exact ISIN and confirms the fixed annual coupon of 3.375%.",
+    "source": "https://www.athexgroup.gr/en/documents/10180/4959576/HELLENIC%20REPUBLIC%20-%20LISTING%20OF%20NEW%20BOND%2015%20-%2002%20-%202018/03f99d76-75e7-47c7-90ab-4b2fae7904d0"
   },
   "GR0118019679": {
     "couponRate": "1.875",
