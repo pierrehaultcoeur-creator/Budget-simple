@@ -255,7 +255,7 @@ CFI_GROUP_LABELS = {
     "DE": "Produit structuré sans protection du capital",
     "DG": "Titre adossé à des créances hypothécaires (MBS)",
     "DN": "Obligation municipale",
-    "DY": "Instrument monétaire",
+    "DY": "Autre instrument de dette",
     "DM": "Autre instrument de dette",
 }
 
