@@ -245,13 +245,14 @@ def parse_xml(xml_bytes: bytes) -> list[dict]:
                 "floatingRateRaw": floating_rate_raw,
                 "floatingRateTerm": floating_rate_term,
                 "floatingRateSpreadBps": floating_rate_spread,
-                "floatingRateSource": floating_rate_override.get("source") if floating_rate_override else None,
-                "floatingRateSourceReason": floating_rate_override.get("reason") if floating_rate_override else None,
                 "couponRateSource": coupon_source,
                 "couponRateSourceReason": coupon_source_reason,
                 "issuerLei": first_descendant_text(node, "Issr"),
                 "marketMic": first_descendant_text(trading, "Id") if trading is not None else None,
             }
+            if floating_rate_override:
+                record["floatingRateSource"] = floating_rate_override["source"]
+                record["floatingRateSourceReason"] = floating_rate_override["reason"]
             records.append(record)
             node.clear()
     except ET.ParseError as exc:

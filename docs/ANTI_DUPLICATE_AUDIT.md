@@ -158,3 +158,8 @@ Les contrôles intégrés du commit ci-dessus ont tous réussi : tests Python du
 - Modification ciblée : nouveau registre `scripts/bond_floating_rate_overrides.json` avec uniquement l'ISIN vérifié ; le parseur utilise ces données pour exposer `NIBOR`, `3M`, `305` bps, les sources et la justification, marque la fiche comme taux variable et conserve la valeur brute ESMA. Le coupon reste nul avec le statut `FLOATING_RATE_REFERENCE`. Aucun changement des 12 coupons fixes ni du catalogue brut ESMA.
 - Tests ajoutés : régression ciblée sur le cas exact `Fxd=305` sans `Fltg` et contrôle de complétude/provenance du registre de taux variables. Ils complètent les tests génériques existants sans les dupliquer.
 - Validation : exécuter les workflows automatiques déclenchés par ce commit et n'accepter que les runs sur son SHA ou un SHA de catalogue généré qui en descend. Aucun run manuel, aucun merge ni déploiement. PR #2 reste en brouillon.
+
+
+### Revue anti-doublon du diff avant génération — métadonnées de taux variable
+- Relecture du diff avant tout run : les champs de provenance du taux variable sont désormais ajoutés uniquement aux ISIN disposant d'un override vérifié. Cela évite d'ajouter des champs `null` à chacun des ~631 000 instruments et de provoquer un changement artificiel massif du catalogue généré.
+- Le correctif est intégré dans le commit de suivi ci-dessous avant validation CI ; aucune génération de catalogue n'a été lancée manuellement.
