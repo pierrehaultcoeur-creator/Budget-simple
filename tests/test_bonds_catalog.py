@@ -259,5 +259,25 @@ class ParserTests(unittest.TestCase):
                 self.assertEqual(record["couponRateSource"], module.COUPON_OVERRIDES[isin]["source"])
                 self.assertTrue(record["couponRateSourceReason"])
 
+
+    def test_every_coupon_override_has_complete_provenance_and_valid_rate(self):
+        # Keep all manual corrections auditable; a single incomplete entry
+        # must fail CI instead of silently enriching catalogue records.
+        self.assertTrue(module.COUPON_OVERRIDES)
+        for isin, override in module.COUPON_OVERRIDES.items():
+            with self.subTest(isin=isin):
+                self.assertRegex(isin, module.ISIN_RE)
+                self.assertIsInstance(override, dict)
+                self.assertTrue(str(override.get("reason") or "").strip())
+                source = str(override.get("source") or "")
+                self.assertTrue(source.startswith("https://"), "Override needs an HTTPS source URL")
+                rate_text = str(override.get("couponRate") or "").strip()
+                self.assertRegex(rate_text, r"^-?\\d+(?:\\.\\d+)?$")
+                rate = float(rate_text)
+                self.assertTrue(module.math.isfinite(rate))
+                self.assertGreaterEqual(rate, -100)
+                self.assertLessEqual(rate, 100)
+
+
 if __name__ == "__main__":
     unittest.main()
