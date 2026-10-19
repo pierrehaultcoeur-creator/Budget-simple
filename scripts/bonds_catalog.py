@@ -198,8 +198,15 @@ def parse_xml(xml_bytes: bytes) -> list[dict]:
             coupon, coupon_status = normalized_coupon(coupon_raw)
             coupon_source = None
             coupon_source_reason = None
+            # A floating-rate marker makes a numeric Fxd/IntrstRate value
+            # ambiguous: it may be a reference or spread, not a fixed annual
+            # coupon. Hide it unless a separate, verified fixed-coupon override
+            # is available for an instrument without floating-rate metadata.
+            if floating_rate_element is not None:
+                coupon = None
+                coupon_status = "FLOATING_RATE_REFERENCE"
             override = COUPON_OVERRIDES.get(isin)
-            if override:
+            if override and floating_rate_element is None:
                 coupon = str(override["couponRate"])
                 coupon_status = "VERIFIED_OVERRIDE"
                 coupon_source = override["source"]
