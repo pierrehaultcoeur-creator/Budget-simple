@@ -279,10 +279,6 @@ class ParserTests(unittest.TestCase):
                 self.assertLessEqual(rate, 100)
 
 
-if __name__ == "__main__":
-    unittest.main()
-
-
     def test_verified_floating_rate_override_preserves_margin_without_faking_fixed_coupon(self):
         xml = b"""<Document>
           <FinInstrm>
@@ -321,3 +317,7 @@ if __name__ == "__main__":
                 self.assertEqual(override["referenceRate"], "NIBOR")
                 self.assertEqual(override["term"], "3M")
                 self.assertGreater(int(override["spreadBps"]), 0)
+
+
+if __name__ == "__main__":
+    unittest.main()

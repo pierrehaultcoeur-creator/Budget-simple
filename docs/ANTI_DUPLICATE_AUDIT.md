@@ -163,3 +163,7 @@ Les contrôles intégrés du commit ci-dessus ont tous réussi : tests Python du
 ### Revue anti-doublon du diff avant génération — métadonnées de taux variable
 - Relecture du diff avant tout run : les champs de provenance du taux variable sont désormais ajoutés uniquement aux ISIN disposant d'un override vérifié. Cela évite d'ajouter des champs `null` à chacun des ~631 000 instruments et de provoquer un changement artificiel massif du catalogue généré.
 - Le correctif est intégré dans le commit de suivi ci-dessous avant validation CI ; aucune génération de catalogue n'a été lancée manuellement.
+
+
+### Contrôle de placement des tests avant validation
+- La relecture du fichier a détecté que les deux tests spécifiques avaient été ajoutés après le bloc `unittest.main()` plutôt qu'à l'intérieur de `ParserTests`. Ils ont été replacés dans la classe avant le point d'entrée, avant toute validation CI ; les tests seront donc découverts par `unittest`.
