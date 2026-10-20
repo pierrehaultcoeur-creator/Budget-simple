@@ -236,6 +236,24 @@ class BondCatalogueAuditTests(unittest.TestCase):
         self.assertIsNone(samples[0]["couponSourceField"])
         self.assertFalse(samples[0]["floatingRateFieldPresent"])
 
+    def test_coupon_override_registry_coverage_flags_missing_and_mismatched_entries(self):
+        overrides = {
+            "FR0000047607": {"couponRate": "3.375", "source": "https://example.org/source-a"},
+            "US0378331005": {"couponRate": "4.0", "source": "https://example.org/source-b"},
+        }
+        records = [{
+            "isin": "FR0000047607",
+            "couponRate": "3.375",
+            "couponRateStatus": "VERIFIED_OVERRIDE",
+            "couponRateSource": "https://example.org/source-a",
+        }]
+        coverage = module.audit_records(records, coupon_overrides=overrides)["couponOverrideCoverage"]
+        self.assertEqual(coverage["registryCount"], 2)
+        self.assertEqual(coverage["matchedCount"], 1)
+        self.assertEqual(coverage["missingCount"], 1)
+        self.assertEqual(coverage["mismatchCount"], 0)
+        self.assertEqual(coverage["missingIsins"], ["US0378331005"])
+
 
 if __name__ == "__main__":
     unittest.main()
