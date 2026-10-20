@@ -166,6 +166,7 @@ def write_shards(records, source_metadata=None):
         'source': source_metadata.get('source'),
         'sourceFileType': source_metadata.get('sourceFileType'),
         'sourceFile': SOURCE.name,
+        'sourceFiles': source_metadata.get('sourceFiles', []),
         'recordCount': total,
         'partCount': len(manifest_parts),
         'hasSearchableNames': has_names,

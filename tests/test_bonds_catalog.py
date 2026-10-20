@@ -1,3 +1,4 @@
+import hashlib
 import importlib.util
 import pathlib
 import unittest
@@ -322,6 +323,21 @@ class ParserTests(unittest.TestCase):
                 self.assertEqual(override["referenceRate"], "NIBOR")
                 self.assertEqual(override["term"], "3M")
                 self.assertGreater(int(override["spreadBps"]), 0)
+
+
+    def test_source_file_provenance_records_exact_archive_fingerprint(self):
+        item = {
+            "filename": "FULINS_D_20261017_1of1.zip",
+            "url": "https://registers.esma.europa.eu/files/FULINS_D_20261017_1of1.zip",
+        }
+        archive = b"sample archive payload"
+        expected = {
+            "filename": item["filename"],
+            "url": item["url"],
+            "bytes": len(archive),
+            "sha256": hashlib.sha256(archive).hexdigest(),
+        }
+        self.assertEqual(module.source_file_provenance(item, archive), expected)
 
 
 if __name__ == "__main__":

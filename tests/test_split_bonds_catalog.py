@@ -34,7 +34,7 @@ class SplitterIndexTests(unittest.TestCase):
             try:
                 module.OUT = pathlib.Path(tmp) / "catalogue"
                 module.TARGET_BYTES = 45
-                module.write_shards(records, {"source": "ESMA FIRDS", "sourceFileType": "FULINS_D", "publicationDate": "2026-10-11", "generatedAt": "2026-10-12T10:00:00+00:00"})
+                module.write_shards(records, {"source": "ESMA FIRDS", "sourceFileType": "FULINS_D", "publicationDate": "2026-10-11", "generatedAt": "2026-10-12T10:00:00+00:00", "sourceFiles": [{"filename": "FULINS_D_20261011_1of1.zip", "url": "https://registers.esma.europa.eu/files/FULINS_D_20261011_1of1.zip", "bytes": 17, "sha256": "0123456789abcdef"}]})
                 manifest = json.loads((module.OUT / "manifest.json").read_text(encoding="utf-8"))
                 self.assertEqual(manifest["recordCount"], 3)
                 self.assertEqual(manifest["version"], 3)
@@ -42,6 +42,7 @@ class SplitterIndexTests(unittest.TestCase):
                 self.assertEqual(manifest["sourceFileType"], "FULINS_D")
                 self.assertEqual(manifest["sourcePublicationDate"], "2026-10-11")
                 self.assertEqual(manifest["generatedAt"], "2026-10-12T10:00:00+00:00")
+                self.assertEqual(manifest["sourceFiles"], [{"filename": "FULINS_D_20261011_1of1.zip", "url": "https://registers.esma.europa.eu/files/FULINS_D_20261011_1of1.zip", "bytes": 17, "sha256": "0123456789abcdef"}])
                 indexes = {item["prefix"]: item for item in manifest["isinIndexes"]}
                 self.assertIn("FR", indexes)
                 self.assertIn("US", indexes)

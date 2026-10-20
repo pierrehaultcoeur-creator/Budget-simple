@@ -7,6 +7,7 @@ Standard library only; intended for GitHub Actions.
 """
 from __future__ import annotations
 
+import hashlib
 import io
 import json
 import math
@@ -336,6 +337,16 @@ def completeness(record: dict) -> int:
     return sum(record.get(field) not in (None, "") for field in fields)
 
 
+def source_file_provenance(item: dict, archive_data: bytes) -> dict:
+    """Fingerprint one exact ESMA archive so a generated catalogue is reproducible."""
+    return {
+        "filename": item["filename"],
+        "url": item["url"],
+        "bytes": len(archive_data),
+        "sha256": hashlib.sha256(archive_data).hexdigest(),
+    }
+
+
 def build_catalogue() -> dict:
     today = date.today()
     files = query_esma_files(today - timedelta(days=LOOKBACK_DAYS), today)
@@ -346,10 +357,12 @@ def build_catalogue() -> dict:
     deduplicated: dict[str, dict] = {}
     downloaded_bytes = 0
     xml_count = 0
+    source_files = []
     for item in publication:
         print(f"Downloading {item['filename']}")
         archive_data = http_get(item["url"])
         downloaded_bytes += len(archive_data)
+        source_files.append(source_file_provenance(item, archive_data))
         try:
             with zipfile.ZipFile(io.BytesIO(archive_data)) as archive:
                 xml_names = [n for n in archive.namelist() if n.lower().endswith(".xml")]
@@ -381,6 +394,7 @@ def build_catalogue() -> dict:
         "recordCount": len(records),
         "xmlFileCount": xml_count,
         "downloadedBytes": downloaded_bytes,
+        "sourceFiles": source_files,
         "records": records,
     }
 
