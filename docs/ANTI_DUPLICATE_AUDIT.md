@@ -292,3 +292,11 @@ Les contrôles intégrés du commit ci-dessus ont tous réussi : tests Python du
 - Les quatre archives sources sont présentes exactement une fois ; noms et URL sont uniques ; les quatre URL sont HTTPS ; les tailles sont positives ; chaque empreinte respecte le format SHA-256 de 64 caractères hexadécimaux. Les noms couvrent bien les parties `01of04` à `04of04`.
 - Ce contrôle confirme la cohérence structurelle et la présence des métadonnées. Il ne remplace pas une comparaison des empreintes avec les octets des ZIP originaux téléchargés indépendamment.
 - Les workflows #227 et #40 sur le code/catalogue pertinent sont encore en cours lors de cette note. Pas de run manuel supplémentaire.
+
+
+## Audit anti-doublon — Cairn taux variable (20 octobre 2026)
+- Avant modification : relecture du HEAD `9e95c1b5d9a898c3f2e61f5d3b6c079e4cad19ce`, du registre `scripts/bond_floating_rate_overrides.json`, du parseur `scripts/bonds_catalog.py`, des tests et du journal. L'override Jyske `NO0012654534` existe déjà; aucun override ni test dédié Cairn `XS1538267490` n'existait.
+- Preuve primaire déjà identifiée : Listing Particulars officiels de Cairn CLO VII (Irish Stock Exchange), qui relient l'ISIN exact `XS1538267490` à la classe D IM Removal and Replacement Non-Voting Notes, à EURIBOR et à une marge de 3,42 % p.a. (342 pb). Source : https://www.ise.ie/debt_documents/ListingParticulars_6e044ce7-6f09-42e7-95ed-b07012efd0b9.pdf
+- Changement proposé dans ce commit : ajouter l'override exact Cairn; généraliser les assertions du registre pour accepter des références/périodes documentées (sans imposer NIBOR/3M); ajouter une régression vérifiant que 342 reste une marge et ne devient jamais un coupon fixe.
+- Anti-doublon : le parseur gère déjà les overrides flottants par ISIN exact; aucun changement de parseur nécessaire. L'override Jyske et son test de régression restent inchangés.
+- Validation : à effectuer uniquement via les workflows automatiques déclenchés par le nouveau commit; aucun run manuel n'est lancé ici. PR #2 reste ouverte en brouillon, sans fusion ni déploiement.

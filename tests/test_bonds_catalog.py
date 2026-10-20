@@ -314,14 +314,42 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(record["floatingRateSource"], override["source"])
         self.assertTrue(record["floatingRateSourceReason"])
 
+    def test_verified_cairn_floating_rate_override_preserves_euribor_margin(self):
+        xml = b"""<Document>
+          <FinInstrm>
+            <FinInstrmGnlAttrbts>
+              <Id>XS1538267490</Id>
+              <FullNm>Cairn CLO VII Class D IM Removal and Replacement Non-Voting Notes</FullNm>
+              <ClssfctnTp>DBVUEU</ClssfctnTp>
+              <NtnlCcy>EUR</NtnlCcy>
+            </FinInstrmGnlAttrbts>
+            <DebtInstrmAttrbts>
+              <Fxd>342</Fxd>
+            </DebtInstrmAttrbts>
+          </FinInstrm>
+        </Document>"""
+        record = module.parse_xml(xml)[0]
+        override = module.FLOATING_RATE_OVERRIDES["XS1538267490"]
+        self.assertIsNone(record["couponRate"])
+        self.assertEqual(record["couponRateRaw"], "342")
+        self.assertEqual(record["couponRateStatus"], "FLOATING_RATE_REFERENCE")
+        self.assertEqual(record["couponSourceField"], "Fxd")
+        self.assertTrue(record["floatingRateFieldPresent"])
+        self.assertEqual(record["floatingRateRaw"], "EURIBOR")
+        self.assertEqual(record["floatingRateTerm"], "3M/6M")
+        self.assertEqual(record["floatingRateSpreadBps"], "342")
+        self.assertEqual(record["floatingRateSource"], override["source"])
+        self.assertTrue(record["floatingRateSourceReason"])
+
+
     def test_every_floating_rate_override_has_complete_provenance(self):
         for isin, override in module.FLOATING_RATE_OVERRIDES.items():
             with self.subTest(isin=isin):
                 self.assertRegex(isin, r"^[A-Z]{2}[A-Z0-9]{9}[0-9]$")
                 self.assertTrue(override["reason"].strip())
                 self.assertTrue(override["source"].startswith("https://"))
-                self.assertEqual(override["referenceRate"], "NIBOR")
-                self.assertEqual(override["term"], "3M")
+                self.assertIn(override["referenceRate"], {"NIBOR", "EURIBOR", "SOFR", "SONIA"})
+                self.assertRegex(override["term"], r"^(?:1M|3M|6M|12M|3M/6M)$")
                 self.assertGreater(int(override["spreadBps"]), 0)
 
 
