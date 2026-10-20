@@ -1,10 +1,36 @@
 {
   "version": 3,
-  "generatedAt": "2026-10-20T08:28:04+00:00",
+  "generatedAt": "2026-10-20T11:29:00+00:00",
   "sourcePublicationDate": "20261017",
   "source": "ESMA FIRDS",
   "sourceFileType": "FULINS_D",
   "sourceFile": "bonds-catalog.json",
+  "sourceFiles": [
+    {
+      "filename": "FULINS_D_20261017_01of04.zip",
+      "url": "https://firds.esma.europa.eu/firds/FULINS_D_20261017_01of04.zip",
+      "bytes": 17150888,
+      "sha256": "c4e46063f25ca182c8e3e1317f7b697d5e6ef413c6978805930254526aa47a14"
+    },
+    {
+      "filename": "FULINS_D_20261017_02of04.zip",
+      "url": "https://firds.esma.europa.eu/firds/FULINS_D_20261017_02of04.zip",
+      "bytes": 8813748,
+      "sha256": "9c97a6c71515d28d1e4b417727b03258748ce0e750aca7655fe3a1c7757e3ea9"
+    },
+    {
+      "filename": "FULINS_D_20261017_03of04.zip",
+      "url": "https://firds.esma.europa.eu/firds/FULINS_D_20261017_03of04.zip",
+      "bytes": 15239451,
+      "sha256": "eacc103c3013c8d83a81d8220331dac04715cbe0895264c89cbfdf7de1918c19"
+    },
+    {
+      "filename": "FULINS_D_20261017_04of04.zip",
+      "url": "https://firds.esma.europa.eu/firds/FULINS_D_20261017_04of04.zip",
+      "bytes": 11081422,
+      "sha256": "3dcc0c25bbfd143ef8ee9a55be27a354618e243c9cf98329ca8d18daa2f73884"
+    }
+  ],
   "recordCount": 631239,
   "partCount": 49,
   "hasSearchableNames": true,
