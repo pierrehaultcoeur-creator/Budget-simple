@@ -198,3 +198,19 @@ Les contrôles intégrés du commit ci-dessus ont tous réussi : tests Python du
 - Piste documentaire : pour `XS2074549820`, la liste officielle Euronext Dublin confirme le caractère variable de l'instrument (`https://live.euronext.com/sites/default/files/statistics/dol/DOL2025-06-13.pdf`) ; un rapport de notation associe cet ISIN à `EUR1M + 2.00%` (`https://neprocrainformes.blob.core.windows.net/informes/20000013/1591/ALHAMBRA_SME_FUNDING_2019-1_DAC_REV_NOV_2020_V2_CLASS_C-ASFSFSCR-V22_0.pdf`). Le rapport de notation n'est pas une source primaire : aucune correction n'est autorisée sur cette seule base.
 - Suite distincte : retrouver pour chaque candidat les conditions finales/prospectus ou autre source primaire identifiant explicitement l'ISIN et le taux de référence/marge ; ne corriger que les cas démontrés. Les 13 valeurs brutes ne sont ni converties ni réinterprétées par heuristique.
 - Aucun workflow n'a été relancé pour cette seule mise à jour documentaire ; les contrôles existants sont réutilisés. PR #2 reste en brouillon, sans fusion ni déploiement.
+
+
+## Audit anti-doublon — preuve primaire des spreads BlueMountain CLO 2013-2 (20 octobre 2026)
+- Audit préalable : HEAD confirmé `8e653973b59a45a88d4b25884b02c08c0f71637d`, PR #2 ouverte en brouillon et non fusionnée. Le registre contient déjà les 13 candidats et l'unique override Jyske ; aucun nouvel override n'est créé dans cette étape.
+- Source primaire trouvée : notice du trustee Bank of New York Mellon et supplément d'indenture exécuté le 23 octobre 2017, publié via London Stock Exchange RNS : https://www.rns-pdf.londonstockexchange.com/rns/6380U_-2017-10-25.pdf. Le tableau des conditions à la page 8 (page PDF 7) identifie le benchmark LIBOR à 3 mois et les spreads initiaux ; la notice identifie les ISIN Reg S exacts.
+- Correspondances exactes établies dans cette source :
+  - `USG1351TAD49` — classe E-R — 6,30 % (raw ESMA `630`).
+  - `USG1351UAH26` — classe A-2-R — 1,30 % (raw `130`).
+  - `USG1351UAJ81` — classe B-R — 1,60 % (raw `160`).
+  - `USG1351UAK54` — classe C-R — 1,95 % (raw `195`).
+  - `USG1351UAL38` — classe D-R — 2,90 % (raw `290`).
+- Limite avant correction : la source est primaire pour les conditions de refinancement de 2017, mais elle précède la cessation du LIBOR. La recherche effectuée n'a pas permis de retrouver un supplément postérieur confirmant l'indice contractuel de remplacement actuellement applicable. Les marges concordent exactement avec les valeurs brutes ESMA, mais le champ de référence actuel ne doit pas être présenté comme certain avant vérification de ce point. Aucun changement de données, de parseur ou de tests dans cette étape.
+- Piste secondaire distincte : les dépôts SEC de portefeuille confirment des taux variables/coupons courants pour certains titres, mais ne remplacent pas les documents contractuels pour établir l'indice de référence applicable ; ils ne sont pas utilisés comme base d'override.
+- Runs existants réutilisés sur le HEAD audité : [ESMA FIRDS bulk bond import #39367556772](https://github.com/pierrehaultcoeur-creator/Budget-simple/actions/runs/39367556772) SUCCESS et [Bond search CI #39367556788](https://github.com/pierrehaultcoeur-creator/Budget-simple/actions/runs/39367556788) SUCCESS. Aucun run manuel supplémentaire lancé pour cette documentation.
+- Prochaine action distincte : rechercher le supplément de benchmark transition/LIBOR fallback postérieur à 2017 pour BlueMountain CLO 2013-2. Ne créer les cinq overrides que lorsque le benchmark actuellement applicable est vérifié, tout en conservant les spreads prouvés et les valeurs brutes ESMA.
+- PR #2 maintenue en brouillon ; aucune fusion ni mise en production.
