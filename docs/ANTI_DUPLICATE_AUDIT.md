@@ -175,3 +175,26 @@ Les contrôles intégrés du commit ci-dessus ont tous réussi : tests Python du
 - Audit anti-doublon de portée : le shard contient 13 643 fiches, mais `floatingRateSource` et `floatingRateSourceReason` n'apparaissent chacun qu'une fois, pour cet override vérifié. Pas de champs de provenance ajoutés massivement aux autres fiches. Les 12 overrides de coupons fixes restent inchangés.
 - Validations existantes réutilisées, sans relance manuelle : [Build ESMA #39304206096](https://github.com/pierrehaultcoeur-creator/Budget-simple/actions/runs/39304206096) réussi sur le SHA de code/tests `1065b0922c166a275732b46880da60885ee853dd`; [Bond search CI #39306997664](https://github.com/pierrehaultcoeur-creator/Budget-simple/actions/runs/39306997664) et [import ESMA #39306997626](https://github.com/pierrehaultcoeur-creator/Budget-simple/actions/runs/39306997626) réussis sur le SHA catalogue `5bf5684ca57e494566380593fc4dc37facfd78e9`, descendant du correctif. Les exécutions intermédiaires annulées ne sont pas comptées comme validations.
 - Conclusion : correction ciblée présente dans les données générées et contrôles pertinents réussis. PR #2 toujours ouverte en brouillon, sans fusion ni déploiement. Aucune valeur de coupon fixe modifiée.
+
+
+## Audit anti-doublon — présélection de fiches à taux variable (20 octobre 2026)
+- État avant action : PR #2 ouverte en brouillon, non fusionnée ; HEAD contrôlé `60c88a64351500a6397a9dce6f947d008285642a`. Aucun correctif de données n'est appliqué dans cette étape.
+- Réutilisation d'un audit déjà exécuté : le rapport qualité joint au run [Build ESMA #39304206096](https://github.com/pierrehaultcoeur-creator/Budget-simple/actions/runs/39304206096), succès sur le SHA de code/tests `1065b0922c166a275732b46880da60885ee853dd`, a déjà exposé les fiches avec coupon suspect. Aucun nouveau run n'est lancé.
+- Après exclusion de Jyske Bank (`NO0012654534`), déjà corrigée et vérifiée dans le catalogue généré, 13 fiches dont le nom mentionne explicitement « Floating Rate Notes » restent à examiner. Leurs valeurs brutes ESMA sont conservées et leurs coupons utilisables sont nuls ; cette liste est une présélection, pas une confirmation que chaque valeur représente une marge :
+  - `US03762XAE94` — valeur brute `786` — APIDOS CLO XXIV — Class E-R Junior Deferrable Floating Rate Notes.
+  - `USG04883AD92` — valeur brute `786` — APIDOS CLO XXIV — Class E-R Junior Deferrable Floating Rate Notes.
+  - `USG1351TAD49` — valeur brute `630` — BLUEMOUNTAIN CLO 2013-2 — Class E-R Senior Secured Deferrable Floating Rate Notes.
+  - `USG1351UAH26` — valeur brute `130` — BLUEMOUNTAIN CLO 2013-2 — Class A-2-R Senior Secured Floating Rate Notes.
+  - `USG1351UAJ81` — valeur brute `160` — BLUEMOUNTAIN CLO 2013-2 — Class B-R Senior Secured Floating Rate Notes.
+  - `USG1351UAK54` — valeur brute `195` — BLUEMOUNTAIN CLO 2013-2 — Class C-R Senior Secured Deferrable Floating Rate Notes.
+  - `USG1351UAL38` — valeur brute `290` — BLUEMOUNTAIN CLO 2013-2 — Class D-R Senior Secured Deferrable Floating Rate Notes.
+  - `XS1538267490` — valeur brute `342` — CAIRN CLO VII — Class D Senior Secured Deferrable Floating Rate Notes.
+  - `XS2074549820` — valeur brute `200` — ALHAMBRA SME FUNDING 2019-1 — Class A Residential Mortgage Backed Floating Rate Notes.
+  - `XS2074551990` — valeur brute `1500` — ALHAMBRA SME FUNDING 2019-1 — Class E Residential Mortgage Backed Floating Rate Notes.
+  - `XS2074554820` — valeur brute `1500` — ALHAMBRA SME FUNDING 2019-1 — Class Z1 Residential Mortgage Backed Floating Rate Notes.
+  - `XS2113149236` — valeur brute `863` — MAN GLG EURO CLO VI — Class F Deferrable Junior Floating Rate Notes (Reg S).
+  - `XS2113149319` — valeur brute `863` — MAN GLG EURO CLO VI — Class F Deferrable Junior Floating Rate Notes (144A).
+- Contrôle anti-doublon : aucun nouvel override, aucune modification du parseur et aucun test de régression ajouté. Le registre `scripts/bond_floating_rate_overrides.json` contient toujours uniquement l'ISIN Jyske déjà sourcé.
+- Piste documentaire : pour `XS2074549820`, la liste officielle Euronext Dublin confirme le caractère variable de l'instrument (`https://live.euronext.com/sites/default/files/statistics/dol/DOL2025-06-13.pdf`) ; un rapport de notation associe cet ISIN à `EUR1M + 2.00%` (`https://neprocrainformes.blob.core.windows.net/informes/20000013/1591/ALHAMBRA_SME_FUNDING_2019-1_DAC_REV_NOV_2020_V2_CLASS_C-ASFSFSCR-V22_0.pdf`). Le rapport de notation n'est pas une source primaire : aucune correction n'est autorisée sur cette seule base.
+- Suite distincte : retrouver pour chaque candidat les conditions finales/prospectus ou autre source primaire identifiant explicitement l'ISIN et le taux de référence/marge ; ne corriger que les cas démontrés. Les 13 valeurs brutes ne sont ni converties ni réinterprétées par heuristique.
+- Aucun workflow n'a été relancé pour cette seule mise à jour documentaire ; les contrôles existants sont réutilisés. PR #2 reste en brouillon, sans fusion ni déploiement.
