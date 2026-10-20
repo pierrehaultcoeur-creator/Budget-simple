@@ -268,3 +268,12 @@ Les contrôles intégrés du commit ci-dessus ont tous réussi : tests Python du
 - Limite explicite : le manifeste actuellement commité provient d'une génération antérieure et ne peut pas être complété rétroactivement sans re-télécharger les archives exactes de la publication. Le champ de provenance par archive sera renseigné lors de la prochaine génération réussie ; ne pas prétendre que les empreintes historiques sont déjà présentes.
 - Validation attendue : les workflows automatiques déclenchés par ce commit devront être lus sur le SHA de code/tests correspondant. Les succès #223 et #36 valident le HEAD précédent uniquement. Aucun workflow manuel n'est lancé ; aucun merge ni déploiement.
 - Audit de portée toujours ouvert : 586 commits et 187 fichiers, dont les shards/index générés. Cette amélioration ferme un manque de traçabilité de la source ; elle ne remplace pas la revue complète de provenance des commits et des données.
+
+
+## Audit anti-doublon — validation de la traçabilité ESMA (20 octobre 2026, après exécution)
+- HEAD confirmé : `5b97839c8fff773133202dbd5f84736a66d78d67`. La PR #2 est toujours ouverte, en brouillon et non fusionnée ; 587 commits et 187 fichiers.
+- Bond search CI #225 : SUCCESS sur ce SHA exact. Les étapes offline catalogue/index, complétude de l'index de noms, tests de régression et syntaxe JavaScript ont toutes réussi : https://github.com/pierrehaultcoeur-creator/Budget-simple/actions/runs/39414876735
+- ESMA FIRDS bulk bond import #38 : SUCCESS sur ce SHA exact. Les tests hors ligne, la génération isolée de l'aperçu ESMA, l'audit du catalogue et le dépôt du rapport d'audit ont réussi : https://github.com/pierrehaultcoeur-creator/Budget-simple/actions/runs/39414876723
+- Artefact d'audit disponible jusqu'au 19 novembre 2026 : `esma-firds-bond-audit-38` (18 871 374 octets environ). L'aperçu a été généré dans un répertoire isolé et n'a pas remplacé le catalogue commité.
+- Le nouveau champ `sourceFiles` est calculé depuis les octets réellement téléchargés et propagé vers le manifeste produit par une génération. Le manifeste commité existant n'est pas rétroactivement complété : les empreintes exactes des archives historiques ne sont pas affirmées sans les données sources.
+- Anti-doublon : aucun test manuel ou run supplémentaire lancé. Les deux exécutions automatiques précédentes sont confirmées vertes sur le SHA pertinent. Aucun merge ni déploiement.
