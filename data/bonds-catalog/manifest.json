@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "generatedAt": "2026-10-19T18:48:52+00:00",
+  "generatedAt": "2026-10-20T08:28:04+00:00",
   "sourcePublicationDate": "20261017",
   "source": "ESMA FIRDS",
   "sourceFileType": "FULINS_D",
@@ -198,8 +198,8 @@
     {
       "file": "part-0032.json",
       "records": 13406,
-      "bytes": 8388621,
-      "sha256": "f065fa4845321ee3cbc365c8fe51f0f435337507df807fd41d77f869e5d72916"
+      "bytes": 8388361,
+      "sha256": "2d58ebcb7e651f48ed49100ae803b0053ff26ef260703e82709caacde49d5235"
     },
     {
       "file": "part-0033.json",
@@ -287,21 +287,21 @@
     },
     {
       "file": "part-0047.json",
-      "records": 13552,
-      "bytes": 8388001,
-      "sha256": "6fc6b470286309bf492cd603a10f02463c1e96ba6c9f8f7933f823f4deba0171"
+      "records": 13554,
+      "bytes": 8388322,
+      "sha256": "0746ca267b6e8daa913d7ed4184dbd521ac1e8f05e87c307f1e9de1917cad1e5"
     },
     {
       "file": "part-0048.json",
       "records": 13626,
-      "bytes": 8388589,
-      "sha256": "d8dd1b20ea1e3a71167bec9c1dd9fbb40731ad2d8b1e8c1d99e51507d5c40657"
+      "bytes": 8388530,
+      "sha256": "31034cf7dabc99b4823947877e3bb5dc41dad16bd7e6b7067c40f9da9d26abc9"
     },
     {
       "file": "part-0049.json",
-      "records": 4513,
-      "bytes": 2779641,
-      "sha256": "0d6fca73ce0e07c65645c5e0aaf716f28d30d0603113bece1b968f8e8687ed67"
+      "records": 4511,
+      "bytes": 2778437,
+      "sha256": "90672f4d3a85e58f9412540be48230ed0e62b68061ca47487f586189a60c599b"
     }
   ],
   "isinIndexes": [
@@ -870,7 +870,7 @@
       "file": "isin-index-XS.json",
       "entries": 165529,
       "bytes": 5296930,
-      "gitBlobSha": "e6aa8afc19d887b2e48d52400c642ae231efcac4"
+      "gitBlobSha": "d0fb82dd4d861bc5c815c163ee1a2cfcf885debd"
     },
     {
       "prefix": "ZA",
@@ -1012,7 +1012,7 @@
       "file": "name-index-h.json",
       "trigrams": 534,
       "bytes": 72716,
-      "gitBlobSha": "5fea8d65e255a13a111df8675979ac871342073f"
+      "gitBlobSha": "cfc7e88c90a5ae1c050c30fec7e8cb595404f407"
     },
     {
       "prefix": "i",
@@ -1046,8 +1046,8 @@
       "prefix": "m",
       "file": "name-index-m.json",
       "trigrams": 570,
-      "bytes": 91126,
-      "gitBlobSha": "617976bd1b8b114ac869a9b55c2568f00cfa2e3f"
+      "bytes": 91143,
+      "gitBlobSha": "f4d84fe46d39e01bad26fb81768fe04943269c43"
     },
     {
       "prefix": "n",
@@ -1060,8 +1060,8 @@
       "prefix": "o",
       "file": "name-index-o.json",
       "trigrams": 664,
-      "bytes": 137608,
-      "gitBlobSha": "37878b6701b487a062429ffe7509efd873cd87a9"
+      "bytes": 137591,
+      "gitBlobSha": "ed4ec7f8988e4984c5b10d1bffd90dd758dacdc7"
     },
     {
       "prefix": "p",
@@ -1095,8 +1095,8 @@
       "prefix": "t",
       "file": "name-index-t.json",
       "trigrams": 683,
-      "bytes": 117003,
-      "gitBlobSha": "a9edcf13f67e07ddbea0855584e4b398612f897a"
+      "bytes": 116986,
+      "gitBlobSha": "0df6c203383b8def91afd0cafc8025f33c6c2d38"
     },
     {
       "prefix": "u",
