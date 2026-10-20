@@ -2216,7 +2216,7 @@ test('investment page routes ordinary bond-name queries to server search', async
             isin: 'FR0000047607',
             name: 'Example Issuer 2030',
             issuer: 'Example Issuer',
-            source: 'ESMA FIRDS', currency: 'EUR', maturity: '2030-12-31', coupon: 3
+            source: 'ESMA FIRDS', currency: 'EUR', maturity: '2030-12-31', coupon: 3, instrumentCategory: 'conventional-bond', confidence: 'catalog-record'
           }]
         })
       };
@@ -2230,7 +2230,7 @@ test('investment page routes ordinary bond-name queries to server search', async
   assert.equal(requests.length, 1);
   assert.ok(requests[0].includes('/.netlify/functions/bond-search?'));
   assert.match(page.elements.results.innerHTML, /Example Issuer 2030/);
-  assert.match(page.elements.status.textContent, /1 résultat\(s\) via bond-master/);
+  assert.match(page.elements.status.textContent, /1 résultat\(s\) complet\(s\) via bond-master/);
   assert.equal(page.elements.search.disabled, false);
 });
 
@@ -2255,7 +2255,7 @@ test('investment page retries loading the local manifest after a transient outag
     if (url.endsWith('part-0001.json')) {
       return {
         ok: true,
-        json: async () => [{ isin: 'FR0000047607', name: 'Recovered local bond', currency: 'EUR', maturity: '2030-12-31', coupon: 3 }]
+        json: async () => [{ isin: 'FR0000047607', name: 'Recovered local bond', currency: 'EUR', maturity: '2030-12-31', coupon: 3, instrumentGroup: 'DB' }]
       };
     }
     if (url.includes('/.netlify/functions/bond-search?')) {
@@ -2300,7 +2300,7 @@ test('investment page retries loading a catalogue shard after a transient outage
       if (shardAttempts === 1) throw new Error('Temporary shard outage');
       return {
         ok: true,
-        json: async () => [{ isin: 'FR0000047607', name: 'Recovered shard bond', currency: 'EUR', maturity: '2030-12-31', coupon: 3 }]
+        json: async () => [{ isin: 'FR0000047607', name: 'Recovered shard bond', currency: 'EUR', maturity: '2030-12-31', coupon: 3, instrumentGroup: 'DB' }]
       };
     }
     if (url.includes('/.netlify/functions/bond-search?')) {
@@ -2339,7 +2339,7 @@ test('investment page retries an ordinary name search after a transient server o
         results: [{
           isin: 'FR0000047607',
           name: 'Recovered Example Issuer 2030',
-          source: 'ESMA FIRDS'
+          source: 'ESMA FIRDS', currency: 'EUR', maturity: '2030-12-31', coupon: 3, instrumentCategory: 'conventional-bond', confidence: 'catalog-record'
         }]
       })
     };
@@ -2352,7 +2352,7 @@ test('investment page retries an ordinary name search after a transient server o
 
   await page.doSearch();
   assert.equal(serverAttempts, 2, 'A failed server search must not block a later retry');
-  assert.match(page.elements.status.textContent, /1 résultat\(s\) via bond-master/);
+  assert.match(page.elements.status.textContent, /1 résultat\(s\) complet\(s\) via bond-master/);
   assert.match(page.elements.results.innerHTML, /Recovered Example Issuer 2030/);
   assert.equal(page.elements.search.disabled, false);
 });
@@ -2377,7 +2377,7 @@ test('investment page retries loading an ISIN index after a transient outage', a
     if (url.endsWith('part-0001.json')) {
       return {
         ok: true,
-        json: async () => [{ isin: 'FR0000047607', name: 'Recovered indexed bond', currency: 'EUR', maturity: '2030-12-31', coupon: 3 }]
+        json: async () => [{ isin: 'FR0000047607', name: 'Recovered indexed bond', currency: 'EUR', maturity: '2030-12-31', coupon: 3, instrumentGroup: 'DB' }]
       };
     }
     if (url.includes('/.netlify/functions/bond-search?')) {
@@ -2608,9 +2608,9 @@ test('investment page visibly distinguishes conventional bonds, structured produ
   const payload = {
     source: 'bond-master',
     results: [
-      { isin: 'FR0000000010', name: 'Example conventional bond', instrumentCategory: 'conventional-bond', currency: 'EUR', maturity: '2030-12-31', coupon: 3 },
-      { isin: 'FR0000000028', name: 'Example structured product', instrumentCategory: 'structured-product', currency: 'EUR', maturity: '2031-12-31', coupon: 2.5 },
-      { isin: 'FR0000000036', instrumentCategory: 'unclassified-debt-instrument', currency: 'EUR', maturity: '2032-12-31', coupon: 2 }
+      { isin: 'FR0000000010', name: 'Example conventional bond', instrumentCategory: 'conventional-bond', currency: 'EUR', maturity: '2030-12-31', coupon: 3, confidence: 'catalog-record' },
+      { isin: 'FR0000000028', name: 'Example structured product', instrumentCategory: 'structured-product', currency: 'EUR', maturity: '2031-12-31', coupon: 2.5, confidence: 'catalog-record' },
+      { isin: 'FR0000000036', instrumentCategory: 'unclassified-debt-instrument', currency: 'EUR', maturity: '2032-12-31', coupon: 2, confidence: 'catalog-record' }
     ]
   };
   const page = loadInvestmentSearchPage(async url => {
@@ -2670,10 +2670,10 @@ test('investment page category filter narrows visible results and restores all c
     return { ok: true, json: async () => ({
       source: 'bond-master',
       results: [
-        { isin: 'FR0000000119', name: 'Classic example', instrumentCategory: 'conventional-bond', currency: 'EUR', maturity: '2030-12-31', coupon: 3 },
-        { isin: 'FR0000000127', name: 'Structured example', instrumentCategory: 'structured-product', currency: 'EUR', maturity: '2031-12-31', coupon: 2.5 },
-        { isin: 'FR0000000135', name: 'Related debt example', instrumentCategory: 'related-debt-instrument', currency: 'EUR', maturity: '2032-12-31', coupon: 2 },
-        { isin: 'FR0000000143', name: 'Unknown category example', instrumentCategory: 'unclassified-debt-instrument', currency: 'EUR', maturity: '2033-12-31', coupon: 2 }
+        { isin: 'FR0000000119', name: 'Classic example', instrumentCategory: 'conventional-bond', currency: 'EUR', maturity: '2030-12-31', coupon: 3, confidence: 'catalog-record' },
+        { isin: 'FR0000000127', name: 'Structured example', instrumentCategory: 'structured-product', currency: 'EUR', maturity: '2031-12-31', coupon: 2.5, confidence: 'catalog-record' },
+        { isin: 'FR0000000135', name: 'Related debt example', instrumentCategory: 'related-debt-instrument', currency: 'EUR', maturity: '2032-12-31', coupon: 2, confidence: 'catalog-record' },
+        { isin: 'FR0000000143', name: 'Unknown category example', instrumentCategory: 'unclassified-debt-instrument', currency: 'EUR', maturity: '2033-12-31', coupon: 2, confidence: 'catalog-record' }
       ]
     }) };
   });
