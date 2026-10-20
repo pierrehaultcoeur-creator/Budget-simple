@@ -341,3 +341,13 @@ Les contrôles intégrés du commit ci-dessus ont tous réussi : tests Python du
 - Écart identifié à traiter : rapport catalogue = 9 overrides de coupon fixe vérifiés, registre = 10 entrées; réconciliation ISIN par ISIN requise. L'interface masque coupons suspects et dates sentinelles mais peut encore afficher une fiche avec d'autres champs essentiels manquants.
 - Vérification anti-doublon : le registre d'acceptation n'existait pas dans la branche avant création. Aucun code produit, aucune donnée d'obligation et aucun test n'ont été modifiés par ce livrable documentaire; aucun run n'a été relancé. Les runs Build ESMA #39465765263 et ESMA import #39465777991 restent SUCCESS sur le SHA code/données de référence `293cca158949d486c6450e681375b20507b4b38e`; Bond search CI #39465778220 reste CANCELLED et ne compte pas comme succès.
 - Commits documentaires : mesure initiale `1fa793ec93b2e87e03b9c540dfc223eb9e800ea9`; registre d'acceptation `38437b4e37b162c033833974b24df7bf8931ca10`. Aucun merge ni déploiement; PR #2 reste ouverte en brouillon.
+
+
+## Audit anti-doublon — validation du filtre des fiches complètes (20 octobre 2026)
+- Audit préalable : lecture du registre d'acceptation, du code du filtre UI, des régressions et des runs existants. Pas de nouvelle batterie lancée manuellement.
+- HEAD validé : `3f756a2a2c00d920c80349e1486849b8a913e00c`.
+- [Bond search CI #242](https://github.com/pierrehaultcoeur-creator/Budget-simple/actions/runs/39474736280) : SUCCESS sur le HEAD exact; tests hors ligne catalogue/index, vérification de complétude de l'index de noms, régressions de recherche et syntaxe JavaScript réussis.
+- [ESMA FIRDS bulk bond import #55](https://github.com/pierrehaultcoeur-creator/Budget-simple/actions/runs/39474736336) : SUCCESS sur le même SHA; tests hors ligne, construction isolée de l'aperçu/audit ESMA et dépôt de l'artefact réussis.
+- [Bond search CI #241](https://github.com/pierrehaultcoeur-creator/Budget-simple/actions/runs/39474687062) : CANCELLED avant les étapes de complétude d'index et de régression; doublon remplacé par #242 sur le SHA courant, non compté comme échec fonctionnel.
+- Le filtre `isDisplayEligible` exclut les fiches ne satisfaisant pas les champs essentiels avant rendu; les régressions UI correspondantes passent. Le registre d'acceptation est mis à jour à 7/12 critères DONE (58,3 %), contre 5/12 (41,7 %) avant ces preuves.
+- Anti-doublon : réutilisation des résultats existants, aucun test manuel supplémentaire, aucune modification du catalogue source dans cette tâche documentaire. PR #2 reste ouverte en brouillon, non fusionnée et non déployée. Les critères de qualité des coupons et d'échéances ainsi que l'audit complet de provenance restent ouverts.
