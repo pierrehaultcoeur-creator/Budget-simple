@@ -300,3 +300,12 @@ Les contrôles intégrés du commit ci-dessus ont tous réussi : tests Python du
 - Changement proposé dans ce commit : ajouter l'override exact Cairn; généraliser les assertions du registre pour accepter des références/périodes documentées (sans imposer NIBOR/3M); ajouter une régression vérifiant que 342 reste une marge et ne devient jamais un coupon fixe.
 - Anti-doublon : le parseur gère déjà les overrides flottants par ISIN exact; aucun changement de parseur nécessaire. L'override Jyske et son test de régression restent inchangés.
 - Validation : à effectuer uniquement via les workflows automatiques déclenchés par le nouveau commit; aucun run manuel n'est lancé ici. PR #2 reste ouverte en brouillon, sans fusion ni déploiement.
+
+
+## Résultats finaux — correction Cairn taux variable (20 octobre 2026)
+- La correction a été enregistrée dans le commit `9165d0f3c7f722071760af9ea4aa77c4f91dfe0a` : override Cairn exact, test de régression, assouplissement ciblé des valeurs de référence/période et entrée d'audit.
+- Validation sur ce commit : Bond search CI run `39460219340` SUCCESS; ESMA FIRDS bulk bond import run `39460219341` SUCCESS; Build ESMA bond catalogue run `39460204590` SUCCESS. Les trois runs référencent bien le SHA `9165d0f3c7f722071760af9ea4aa77c4f91dfe0a`; aucun run manuel n'a été lancé.
+- Le workflow catalogue a ensuite produit automatiquement le commit `e85c4f042fbde3956006f283548d3a74be1cf25c` (`Update ESMA bond catalogue`). Ce commit est enfant direct du commit Cairn et modifie les fragments/index générés ainsi que le manifeste.
+- Validation sur le HEAD actuel `e85c4f042fbde3956006f283548d3a74be1cf25c` : Bond search CI run `39461681992` SUCCESS et ESMA FIRDS bulk bond import run `39461682019` SUCCESS. Le manifeste reste à 631 239 enregistrements, 49 fragments et quatre archives sources.
+- Relecture anti-doublon après génération : l'override Cairn et l'override Jyske sont toujours présents; le test de régression Cairn et le présent journal sont toujours présents. Aucun changement du parseur ni aucune seconde correction Cairn n'a été ajouté.
+- État final de cette tâche : correction enregistrée et validée; PR #2 toujours ouverte en brouillon, non fusionnée. Audit global de provenance et réconciliation complète du diff de PR restent des sujets distincts et ouverts.
