@@ -527,6 +527,81 @@ test('local investment-page canonicalization withholds invalid coupon and maturi
   assert.equal(floating.floatingRateSpreadBps, 125);
 });
 
+test('investment page excludes incomplete obligation records from displayed results', () => {
+  const html = fs.readFileSync(path.join(__dirname, '..', '..', 'investissement.html'), 'utf8');
+  const start = html.indexOf('function cfiLabel(group){');
+  const end = html.indexOf('\nasync function searchLocal', start);
+  assert.ok(start >= 0 && end > start, 'Expected to locate investment-page validation functions');
+  const helperSource = html.slice(start, end) + '; ({ canonical, isDisplayEligible, validIsinChecksum })';
+  const { canonical, isDisplayEligible, validIsinChecksum } = vm.runInNewContext(helperSource);
+
+  const valid = canonical({
+    isin: 'FR0000120271',
+    name: 'Complete fixed-rate bond',
+    currency: 'EUR',
+    cfi: 'DBFTFR',
+    couponRate: '3.25',
+    couponRateStatus: 'SOURCE_PERCENTAGE',
+    maturityDate: '2030-12-31'
+  });
+  assert.equal(validIsinChecksum('FR0000120271'), true);
+  assert.equal(isDisplayEligible(valid), true, 'A complete, valid fixed-rate bond should be shown');
+
+  const missingMaturity = canonical({
+    isin: 'FR0000120271',
+    name: 'Bond without maturity',
+    currency: 'EUR',
+    cfi: 'DBFTFR',
+    couponRate: '3.25'
+  });
+  assert.equal(isDisplayEligible(missingMaturity), false, 'Missing maturity must exclude the whole fiche');
+
+  const suspiciousCoupon = canonical({
+    isin: 'FR0000120271',
+    name: 'Bond with suspicious coupon',
+    currency: 'EUR',
+    cfi: 'DBFTFR',
+    couponRate: '3375',
+    couponRateStatus: 'VERIFIED',
+    maturityDate: '2030-12-31'
+  });
+  assert.equal(isDisplayEligible(suspiciousCoupon), false, 'A suspicious coupon must exclude the whole fiche');
+
+  const incompleteFloating = canonical({
+    isin: 'FR0000120271',
+    name: 'Floating bond with benchmark only',
+    currency: 'EUR',
+    cfi: 'DBVUEU',
+    floatingRateFieldPresent: true,
+    floatingRateRaw: 'Y',
+    maturityDate: '2030-12-31'
+  });
+  assert.equal(isDisplayEligible(incompleteFloating), false, 'A generic floating-rate flag is not enough');
+
+  const completeFloating = canonical({
+    isin: 'FR0000120271',
+    name: 'Complete floating-rate bond',
+    currency: 'EUR',
+    cfi: 'DBVUEU',
+    floatingRateFieldPresent: true,
+    floatingRateRaw: 'EURIBOR',
+    floatingRateTerm: '3M',
+    floatingRateSpreadBps: 125,
+    maturityDate: '2030-12-31'
+  });
+  assert.equal(isDisplayEligible(completeFloating), true, 'A fully specified floating rate may replace a fixed coupon');
+
+  const badChecksum = canonical({
+    isin: 'FR0000120272',
+    name: 'Bond with invalid ISIN checksum',
+    currency: 'EUR',
+    cfi: 'DBFTFR',
+    couponRate: '3.25',
+    maturityDate: '2030-12-31'
+  });
+  assert.equal(isDisplayEligible(badChecksum), false, 'An invalid ISIN checksum must exclude the fiche');
+});
+
 test('server and investment page classify every supported CFI debt group consistently', () => {
   const html = fs.readFileSync(path.join(__dirname, '..', '..', 'investissement.html'), 'utf8');
   const start = html.indexOf('function cfiLabel(group){');
