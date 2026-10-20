@@ -1857,7 +1857,7 @@ test('investment page actually calls server search when an ISIN prefix has no in
         ok: true,
         json: async () => ({
           source: 'bond-master',
-          results: [{ isin: 'FR9900000004', name: 'Server fallback bond', source: 'Catalogue ESMA', currency: 'EUR', maturity: '2030-12-31', coupon: 3 }]
+          results: [{ isin: 'FR9900000004', name: 'Server fallback bond', source: 'Catalogue ESMA', currency: 'EUR', maturity: '2030-12-31', coupon: 3, instrumentCategory: 'conventional-bond', confidence: 'catalog-record' }]
         })
       };
     }
@@ -1869,7 +1869,7 @@ test('investment page actually calls server search when an ISIN prefix has no in
 
   assert.ok(requests.some(url => url.includes('/.netlify/functions/bond-search?q=FR99')),
     'A valid index with no prefix matches must fall back to the server endpoint');
-  assert.match(page.elements.status.textContent, /1 résultat/);
+  assert.match(page.elements.status.textContent, /1 résultat\(s\) complet\(s\)/);
   assert.match(page.elements.results.innerHTML, /Server fallback bond/);
   assert.equal(page.elements.search.disabled, false);
 });
@@ -1889,8 +1889,8 @@ test('investment page renders exact and partial ISIN matches from the local inde
     }]
   };
   const shard = [
-    { isin: 'FR0000047607', name: 'Local indexed bond one', issuer: 'Example issuer', currency: 'EUR', maturity: '2030-12-31', coupon: 3 },
-    { isin: 'FR0000047615', name: 'Local indexed bond two', issuer: 'Example issuer', currency: 'EUR', maturity: '2031-12-31', coupon: 2.5 }
+    { isin: 'FR0000047607', name: 'Local indexed bond one', issuer: 'Example issuer', currency: 'EUR', maturity: '2030-12-31', coupon: 3, instrumentGroup: 'DB' },
+    { isin: 'FR0000047615', name: 'Local indexed bond two', issuer: 'Example issuer', currency: 'EUR', maturity: '2031-12-31', coupon: 2.5, instrumentGroup: 'DB' }
   ];
 
   for (const query of ['FR0000047607', 'FR0000']) {
@@ -1935,7 +1935,7 @@ test('investment page falls back to server search when the local catalogue canno
             name: 'Server fallback bond',
             source: 'Test server',
             confidence: 'catalog-record',
-            currency: 'EUR', maturity: '2030-12-31', coupon: 3
+            currency: 'EUR', maturity: '2030-12-31', coupon: 3, instrumentCategory: 'conventional-bond', confidence: 'catalog-record'
           }]
         })
       };
@@ -1949,7 +1949,7 @@ test('investment page falls back to server search when the local catalogue canno
   assert.ok(requests.some(url => url.includes('/.netlify/functions/bond-search?')),
     'Expected server search to run when the local manifest cannot be loaded');
   assert.match(page.elements.results.innerHTML, /Server fallback bond/);
-  assert.match(page.elements.status.textContent, /1 résultat\(s\) via Test server/);
+  assert.match(page.elements.status.textContent, /1 résultat\(s\) complet\(s\) via Test server/);
   assert.equal(page.elements.search.disabled, false);
 });
 
@@ -2141,7 +2141,7 @@ test('investment page falls back to server for a valid ISIN prefix absent from t
         ok: true,
         json: async () => ({
           source: 'bond-master',
-          results: [{ isin: 'FR0000047607', name: 'Fallback result for absent prefix', source: 'Catalogue ESMA', currency: 'EUR', maturity: '2030-12-31', coupon: 3 }]
+          results: [{ isin: 'FR0000047607', name: 'Fallback result for absent prefix', source: 'Catalogue ESMA', currency: 'EUR', maturity: '2030-12-31', coupon: 3, instrumentCategory: 'conventional-bond', confidence: 'catalog-record' }]
         })
       };
     }
@@ -2182,7 +2182,7 @@ test('investment page falls back when the real ISIN index has no matching entrie
         ok: true,
         json: async () => ({
           source: 'bond-master',
-          results: [{ isin: 'FR0000047607', name: 'Server fallback for unmatched prefix', source: 'Catalogue ESMA', currency: 'EUR', maturity: '2030-12-31', coupon: 3 }]
+          results: [{ isin: 'FR0000047607', name: 'Server fallback for unmatched prefix', source: 'Catalogue ESMA', currency: 'EUR', maturity: '2030-12-31', coupon: 3, instrumentCategory: 'conventional-bond', confidence: 'catalog-record' }]
         })
       };
     }
