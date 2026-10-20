@@ -285,3 +285,10 @@ Les contrôles intégrés du commit ci-dessus ont tous réussi : tests Python du
 - Le catalogue conserve 631 239 enregistrements répartis en 49 fragments. Le diff du commit automatisé touche le manifeste, pas les valeurs d'obligations elles-mêmes : il ajoute les métadonnées des archives et actualise `generatedAt`.
 - Les workflows PR #39 (ESMA) et #226 (Bond search) sur le commit automatisé `d08ec57...` ont le statut `action_required`, et non SUCCESS : ils ne sont pas comptés comme validations réussies. Après le commit de traçabilité, ESMA #40 et Bond search CI #227 ont été déclenchés sur `5233c1743d4c67f871393234a2f00deeeb0ea779`; leurs résultats doivent être consultés avant de considérer le HEAD courant validé.
 - Anti-doublon : pas de relance manuelle. Le succès des runs #38 et #225 ne vaut que pour le SHA antérieur `5b97839...`. Aucun merge ni déploiement.
+
+
+## Contrôle structurel du manifeste ESMA (20 octobre 2026)
+- Lecture directe de `data/bonds-catalog/manifest.json` sur le HEAD `acf0834be88a2259cec4b872b5b7ae9bb94838c9` : publication `20261017`, 631 239 enregistrements, 49 fragments.
+- Les quatre archives sources sont présentes exactement une fois ; noms et URL sont uniques ; les quatre URL sont HTTPS ; les tailles sont positives ; chaque empreinte respecte le format SHA-256 de 64 caractères hexadécimaux. Les noms couvrent bien les parties `01of04` à `04of04`.
+- Ce contrôle confirme la cohérence structurelle et la présence des métadonnées. Il ne remplace pas une comparaison des empreintes avec les octets des ZIP originaux téléchargés indépendamment.
+- Les workflows #227 et #40 sur le code/catalogue pertinent sont encore en cours lors de cette note. Pas de run manuel supplémentaire.
