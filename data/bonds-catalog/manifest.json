@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "generatedAt": "2026-10-20T16:48:09+00:00",
+  "generatedAt": "2026-10-20T17:28:00+00:00",
   "sourcePublicationDate": "20261017",
   "source": "ESMA FIRDS",
   "sourceFileType": "FULINS_D",
@@ -259,15 +259,15 @@
     },
     {
       "file": "part-0038.json",
-      "records": 12825,
-      "bytes": 8388146,
-      "sha256": "6a7a9f52e3be110ccf36f14f3ce2f4a59b581ad2a0448c65e1eb85b4ee26c421"
+      "records": 12824,
+      "bytes": 8388069,
+      "sha256": "876fab24bcdcdfb7a9c9037bc8a648b486a1f27f93a6abd504e63a835deb9c35"
     },
     {
       "file": "part-0039.json",
-      "records": 13016,
-      "bytes": 8387935,
-      "sha256": "9c9d6f3783d0674218edfda40fa00b8a91c38735a981388ec0654f6a8b79850a"
+      "records": 13017,
+      "bytes": 8388545,
+      "sha256": "58ac76cb565241cd5575e4de9fceb4c18bcc39a7587c0953ae094a4575b7234b"
     },
     {
       "file": "part-0040.json",
@@ -896,7 +896,7 @@
       "file": "isin-index-XS.json",
       "entries": 165529,
       "bytes": 5296930,
-      "gitBlobSha": "6c3827158fe3526c9cc93309f618601bee764caa"
+      "gitBlobSha": "d10346b2342b2e3cd019286b3ae27712656ecef9"
     },
     {
       "prefix": "ZA",
