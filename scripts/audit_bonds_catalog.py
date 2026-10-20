@@ -62,7 +62,7 @@ def valid_isin_checksum(value: str) -> bool:
     return total % 10 == 0
 
 
-def audit_records(records: list[dict]) -> dict:
+def audit_records(records: list[dict], coupon_overrides: dict | None = None) -> dict:
     total = len(records)
     seen: set[str] = set()
     duplicates = 0
@@ -225,6 +225,22 @@ def audit_records(records: list[dict]) -> dict:
             except ValueError:
                 malformed_maturities += 1
 
+        # Count every applied fixed-coupon override independently of whether
+        # the original ESMA value was suspicious. A valid raw percentage can
+        # still be explicitly overridden, and must not disappear from the
+        # registry reconciliation merely because it is within the numeric range.
+        if record.get("couponRateStatus") == "VERIFIED_OVERRIDE":
+            verified_coupon_override_count += 1
+            verified_coupon_overrides.append({
+                "isin": isin,
+                "couponRateRaw": record.get("couponRateRaw"),
+                "couponRate": record.get("couponRate"),
+                "couponRateStatus": record.get("couponRateStatus"),
+                "couponRateSource": record.get("couponRateSource"),
+                "cfi": record.get("cfi"),
+                "name": record.get("name"),
+            })
+
         coupon = record.get("couponRateRaw") or record.get("couponRate")
         if coupon not in (None, ""):
             try:
@@ -246,10 +262,7 @@ def audit_records(records: list[dict]) -> dict:
                         "name": record.get("name"),
                     }
                     suspicious_coupon_records.append(detail)
-                    if status == "VERIFIED_OVERRIDE":
-                        verified_coupon_override_count += 1
-                        verified_coupon_overrides.append(detail)
-                    else:
+                    if status != "VERIFIED_OVERRIDE":
                         unresolved_suspicious_coupon_count += 1
                     if len(suspicious_coupon_samples) < 10:
                         suspicious_coupon_samples.append(detail)
@@ -338,6 +351,40 @@ def audit_records(records: list[dict]) -> dict:
         bucket["usableCouponPercent"] = round(bucket["usableCoupon"] / count * 100, 2) if count else 0.0
         bucket["usableMaturityAndCouponPercent"] = round(bucket["usableMaturityAndCoupon"] / count * 100, 2) if count else 0.0
 
+    coupon_override_coverage = None
+    if coupon_overrides is not None:
+        records_by_isin = {
+            str(record.get("isin") or "").replace(" ", "").upper(): record
+            for record in records
+            if isinstance(record, dict) and record.get("isin")
+        }
+        missing_coupon_override_isins = []
+        mismatched_coupon_override_isins = []
+        matched_coupon_override_isins = []
+        for override_isin, override in coupon_overrides.items():
+            record = records_by_isin.get(str(override_isin).upper())
+            if record is None:
+                missing_coupon_override_isins.append(override_isin)
+                continue
+            matches = (
+                record.get("couponRateStatus") == "VERIFIED_OVERRIDE"
+                and str(record.get("couponRate")) == str(override.get("couponRate"))
+                and record.get("couponRateSource") == override.get("source")
+            )
+            if matches:
+                matched_coupon_override_isins.append(override_isin)
+            else:
+                mismatched_coupon_override_isins.append(override_isin)
+        coupon_override_coverage = {
+            "registryCount": len(coupon_overrides),
+            "matchedCount": len(matched_coupon_override_isins),
+            "missingCount": len(missing_coupon_override_isins),
+            "mismatchCount": len(mismatched_coupon_override_isins),
+            "matchedIsins": sorted(matched_coupon_override_isins),
+            "missingIsins": sorted(missing_coupon_override_isins),
+            "mismatchedIsins": sorted(mismatched_coupon_override_isins),
+        }
+
     conventional_bonds = cfi_group_coverage.get("DB", {
         "records": 0, "usableMaturity": 0, "usableCoupon": 0,
         "usableMaturityAndCoupon": 0, "missingCoupon": 0, "sentinelMaturity": 0,
@@ -374,6 +421,7 @@ def audit_records(records: list[dict]) -> dict:
         "suspiciousCouponCount": suspicious_coupon,
         "verifiedCouponOverrideCount": verified_coupon_override_count,
         "verifiedCouponOverrides": verified_coupon_overrides,
+        "couponOverrideCoverage": coupon_override_coverage,
         "unresolvedSuspiciousCouponCount": unresolved_suspicious_coupon_count,
         "suspiciousCouponSamples": suspicious_coupon_samples,
         "suspiciousCouponRecords": suspicious_coupon_records,
@@ -411,7 +459,9 @@ def main() -> int:
     if not isinstance(records, list):
         print("ERROR: expected a JSON array or an object with a records array", file=sys.stderr)
         return 2
-    report = audit_records(records)
+    overrides_path = ROOT / "scripts" / "bond_coupon_overrides.json"
+    coupon_overrides = json.loads(overrides_path.read_text(encoding="utf-8"))
+    report = audit_records(records, coupon_overrides=coupon_overrides)
     report["sourceFile"] = source.name
     report["sourcePublicationDate"] = payload.get("publicationDate") if isinstance(payload, dict) else None
     print(json.dumps(report, ensure_ascii=False, indent=2))
