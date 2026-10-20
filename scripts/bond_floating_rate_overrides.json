@@ -12,5 +12,12 @@
     "spreadBps": "342",
     "reason": "Cairn CLO VII Listing Particulars identify this exact ISIN as Class D IM Removal and Replacement Non-Voting Notes and specify EURIBOR with a 3.42% per annum margin; the margin is 342 basis points, not a fixed coupon.",
     "source": "https://www.ise.ie/debt_documents/ListingParticulars_6e044ce7-6f09-42e7-95ed-b07012efd0b9.pdf"
+  },
+  "XS2074549820": {
+    "referenceRate": "EURIBOR",
+    "term": "1M",
+    "spreadBps": "200",
+    "reason": "Axesor's New Issue Report for Alhambra SME Funding 2019-1 identifies this exact ISIN and states a coupon of EUR 1-month EURIBOR + 2.00%. Euronext Dublin's official Daily Official List identifies the same ISIN as Class A Residential Mortgage Backed Floating Rate Notes. ESMA's Fxd value 200 is the 200 basis-point margin, not a fixed coupon.",
+    "source": "https://neprocrainformes.blob.core.windows.net/informes/20000013/1401/ALHAMBRA_SME_FUNDING_2019-1-_NEW_ISSUE_REPORT-ASFSFSCR-V19_0.pdf"
   }
 }

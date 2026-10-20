@@ -309,3 +309,12 @@ Les contrôles intégrés du commit ci-dessus ont tous réussi : tests Python du
 - Validation sur le HEAD actuel `e85c4f042fbde3956006f283548d3a74be1cf25c` : Bond search CI run `39461681992` SUCCESS et ESMA FIRDS bulk bond import run `39461682019` SUCCESS. Le manifeste reste à 631 239 enregistrements, 49 fragments et quatre archives sources.
 - Relecture anti-doublon après génération : l'override Cairn et l'override Jyske sont toujours présents; le test de régression Cairn et le présent journal sont toujours présents. Aucun changement du parseur ni aucune seconde correction Cairn n'a été ajouté.
 - État final de cette tâche : correction enregistrée et validée; PR #2 toujours ouverte en brouillon, non fusionnée. Audit global de provenance et réconciliation complète du diff de PR restent des sujets distincts et ouverts.
+
+
+## Audit anti-doublon — Alhambra Class A taux variable (20 octobre 2026)
+- Avant modification : relecture du HEAD `71c47a13130278c3e5afe011d1ae21fb0c1600d1`, du registre flottant, du parseur, des tests et du rapport d'audit ESMA `esma-firds-bond-audit-44`. Le rapport identifie `XS2074549820` avec le nom Class A Floating Rate Notes et la valeur brute `Fxd=200`; aucun override ni test dédié Alhambra n'existait.
+- Source de taux : le rapport d'émission Axesor identifie explicitement l'ISIN `XS2074549820` et indique `EUR 1-month EURIBOR + 2.00%` : https://neprocrainformes.blob.core.windows.net/informes/20000013/1401/ALHAMBRA_SME_FUNDING_2019-1-_NEW_ISSUE_REPORT-ASFSFSCR-V19_0.pdf
+- Contrôle d'identité indépendant : la Daily Official List d'Euronext Dublin identifie le même ISIN comme Class A Residential Mortgage Backed Floating Rate Notes : https://live.euronext.com/sites/default/files/statistics/dol/DOL2025-02-26.pdf
+- Changement ciblé : ajouter un override exact ISIN avec EURIBOR, terme 1M et marge 200 pb; ajouter une régression prouvant que le champ brut `200` reste une marge et n'est jamais affiché comme coupon fixe. Le parseur gère déjà les overrides par ISIN, donc aucun changement de parseur.
+- Anti-doublon : Jyske `NO0012654534`, Cairn `XS1538267490` et leurs tests sont conservés; aucun override existant n'a été remplacé. Validation attendue via les workflows automatiques sur le nouveau commit; aucun run manuel.
+- Aucun merge ni déploiement; PR #2 reste ouverte en brouillon.

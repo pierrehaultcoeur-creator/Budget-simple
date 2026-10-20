@@ -342,6 +342,35 @@ class ParserTests(unittest.TestCase):
         self.assertTrue(record["floatingRateSourceReason"])
 
 
+    def test_verified_alhambra_class_a_floating_rate_override(self):
+        xml = b"""<Document>
+          <FinInstrm>
+            <FinInstrmGnlAttrbts>
+              <Id>XS2074549820</Id>
+              <FullNm>ALHAMBRA SME FUNDING 2019-1 DAC Class A Residential Mortgage Backed Floating Rate Notes 2028</FullNm>
+              <ClssfctnTp>DBVXFR</ClssfctnTp>
+              <NtnlCcy>EUR</NtnlCcy>
+            </FinInstrmGnlAttrbts>
+            <DebtInstrmAttrbts>
+              <MtrtyDt>2028-11-30</MtrtyDt>
+              <Fxd>200</Fxd>
+            </DebtInstrmAttrbts>
+          </FinInstrm>
+        </Document>"""
+        record = module.parse_xml(xml)[0]
+        override = module.FLOATING_RATE_OVERRIDES["XS2074549820"]
+        self.assertIsNone(record["couponRate"])
+        self.assertEqual(record["couponRateRaw"], "200")
+        self.assertEqual(record["couponRateStatus"], "FLOATING_RATE_REFERENCE")
+        self.assertEqual(record["couponSourceField"], "Fxd")
+        self.assertTrue(record["floatingRateFieldPresent"])
+        self.assertEqual(record["floatingRateRaw"], "EURIBOR")
+        self.assertEqual(record["floatingRateTerm"], "1M")
+        self.assertEqual(record["floatingRateSpreadBps"], "200")
+        self.assertEqual(record["floatingRateSource"], override["source"])
+        self.assertTrue(record["floatingRateSourceReason"])
+
+
     def test_every_floating_rate_override_has_complete_provenance(self):
         for isin, override in module.FLOATING_RATE_OVERRIDES.items():
             with self.subTest(isin=isin):
