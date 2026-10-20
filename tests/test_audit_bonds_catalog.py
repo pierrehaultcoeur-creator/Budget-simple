@@ -178,6 +178,14 @@ class BondCatalogueAuditTests(unittest.TestCase):
                 "couponRateSource": "https://example.com/verified-reference",
             },
             {
+                "isin": "FR0000120271",
+                "cfi": "DBFTFR",
+                "couponRateRaw": "3.25",
+                "couponRate": "3.25",
+                "couponRateStatus": "VERIFIED_OVERRIDE",
+                "couponRateSource": "https://example.org/verified-rate",
+            },
+            {
                 "isin": "US5949181045",
                 "cfi": "DAVSGR",
                 "couponRateRaw": "786",
@@ -186,7 +194,7 @@ class BondCatalogueAuditTests(unittest.TestCase):
             },
         ])
         self.assertEqual(report["suspiciousCouponCount"], 2)
-        self.assertEqual(report["verifiedCouponOverrideCount"], 1)
+        self.assertEqual(report["verifiedCouponOverrideCount"], 2)
         self.assertEqual(report["unresolvedSuspiciousCouponCount"], 1)
         self.assertEqual(
             report["verifiedCouponOverrides"][0]["couponRate"],
