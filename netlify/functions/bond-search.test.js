@@ -1857,7 +1857,7 @@ test('investment page actually calls server search when an ISIN prefix has no in
         ok: true,
         json: async () => ({
           source: 'bond-master',
-          results: [{ isin: 'FR9900000001', name: 'Server fallback bond', source: 'Catalogue ESMA' }]
+          results: [{ isin: 'FR9900000004', name: 'Server fallback bond', source: 'Catalogue ESMA', currency: 'EUR', maturity: '2030-12-31', coupon: 3 }]
         })
       };
     }
@@ -1889,8 +1889,8 @@ test('investment page renders exact and partial ISIN matches from the local inde
     }]
   };
   const shard = [
-    { isin: 'FR0000047607', name: 'Local indexed bond one', issuer: 'Example issuer' },
-    { isin: 'FR0000047615', name: 'Local indexed bond two', issuer: 'Example issuer' }
+    { isin: 'FR0000047607', name: 'Local indexed bond one', issuer: 'Example issuer', currency: 'EUR', maturity: '2030-12-31', coupon: 3 },
+    { isin: 'FR0000047615', name: 'Local indexed bond two', issuer: 'Example issuer', currency: 'EUR', maturity: '2031-12-31', coupon: 2.5 }
   ];
 
   for (const query of ['FR0000047607', 'FR0000']) {
@@ -1906,7 +1906,7 @@ test('investment page renders exact and partial ISIN matches from the local inde
 
     await page.doSearch();
 
-    assert.match(page.elements.status.textContent, /résultat\(s\) dans le catalogue ESMA/);
+    assert.match(page.elements.status.textContent, /résultat\(s\) complet\(s\) dans le catalogue ESMA/);
     assert.match(page.elements.results.innerHTML, /Local indexed bond one/);
     assert.ok(!requests.some(url => url.includes('/.netlify/functions/bond-search?')),
       'Valid exact and partial ISIN matches should be served locally without a remote fallback');
@@ -1934,7 +1934,8 @@ test('investment page falls back to server search when the local catalogue canno
             isin: 'FR0000047607',
             name: 'Server fallback bond',
             source: 'Test server',
-            confidence: 'catalog-record'
+            confidence: 'catalog-record',
+            currency: 'EUR', maturity: '2030-12-31', coupon: 3
           }]
         })
       };
@@ -1996,7 +1997,7 @@ test('investment page renders real SAINT-GOBAIN results from the public handler'
   await page.doSearch();
 
   assert.equal(requests.length, 1);
-  assert.match(page.elements.status.textContent, /résultat\(s\) via bond-master/);
+  assert.match(page.elements.status.textContent, /résultat\(s\) complet\(s\) via bond-master/);
   assert.match(page.elements.results.innerHTML, /SAINT|Saint|saint/i);
   assert.equal(page.elements.search.disabled, false);
 });
@@ -2020,7 +2021,7 @@ test('investment page searches the real ESMA catalogue locally for the FR00 pref
   page.elements.q.value = 'FR00';
   await page.doSearch();
 
-  assert.match(page.elements.status.textContent, /résultat\(s\) dans le catalogue ESMA/);
+  assert.match(page.elements.status.textContent, /résultat\(s\) complet\(s\) dans le catalogue ESMA/);
   assert.match(page.elements.results.innerHTML, /FR00/);
   assert.ok(requests.some(url => url.endsWith('isin-index-FR.json')),
     'Expected the real French ISIN index to be used');
@@ -2049,7 +2050,7 @@ test('investment page normalizes case and whitespace for a real ESMA ISIN prefix
   page.elements.q.value = ' fr 00 ';
   await page.doSearch();
 
-  assert.match(page.elements.status.textContent, /résultat\(s\) dans le catalogue ESMA/);
+  assert.match(page.elements.status.textContent, /résultat\(s\) complet\(s\) dans le catalogue ESMA/);
   assert.match(page.elements.results.innerHTML, /FR00/);
   assert.ok(requests.some(url => url.endsWith('isin-index-FR.json')),
     'Expected normalized prefix to use the real French ISIN index');
@@ -2079,8 +2080,9 @@ test('investment page resolves the exact French ISIN from the real ESMA catalogu
   page.elements.q.value = 'FR0000047607';
   await page.doSearch();
 
-  assert.match(page.elements.status.textContent, /résultat\(s\) dans le catalogue ESMA/);
-  assert.match(page.elements.results.innerHTML, /FR0000047607/);
+  assert.match(page.elements.status.textContent, /0 résultat\(s\) complet\(s\) dans le catalogue ESMA\. 1 fiche\(s\) exclue\(s\) car incomplète\(s\)/);
+  assert.doesNotMatch(page.elements.results.innerHTML, /FR0000047607/,
+    'The exact identifier may be found locally but must not be displayed when its fiche is incomplete');
   assert.ok(requests.some(url => url.endsWith('isin-index-FR.json')),
     'Expected the real French ISIN index to be used for an exact identifier');
   assert.ok(requests.some(url => /part-\d{4,}\.json$/.test(url)),
@@ -2109,8 +2111,9 @@ test('investment page normalizes case and whitespace for an exact real ESMA ISIN
   page.elements.q.value = ' fr 0000047607 ';
   await page.doSearch();
 
-  assert.match(page.elements.status.textContent, /1 résultat\(s\) dans le catalogue ESMA/);
-  assert.match(page.elements.results.innerHTML, /FR0000047607/);
+  assert.match(page.elements.status.textContent, /0 résultat\(s\) complet\(s\) dans le catalogue ESMA\. 1 fiche\(s\) exclue\(s\) car incomplète\(s\)/);
+  assert.doesNotMatch(page.elements.results.innerHTML, /FR0000047607/,
+    'The normalized exact identifier must remain hidden when its fiche is incomplete');
   assert.ok(requests.some(url => url.endsWith('isin-index-FR.json')),
     'Expected normalized query to use the real French ISIN index');
   assert.ok(requests.some(url => /part-\d{4,}\.json$/.test(url)),
@@ -2138,7 +2141,7 @@ test('investment page falls back to server for a valid ISIN prefix absent from t
         ok: true,
         json: async () => ({
           source: 'bond-master',
-          results: [{ isin: 'FR0000047607', name: 'Fallback result for absent prefix', source: 'Catalogue ESMA' }]
+          results: [{ isin: 'FR0000047607', name: 'Fallback result for absent prefix', source: 'Catalogue ESMA', currency: 'EUR', maturity: '2030-12-31', coupon: 3 }]
         })
       };
     }
@@ -2179,7 +2182,7 @@ test('investment page falls back when the real ISIN index has no matching entrie
         ok: true,
         json: async () => ({
           source: 'bond-master',
-          results: [{ isin: 'FR0000047607', name: 'Server fallback for unmatched prefix', source: 'Catalogue ESMA' }]
+          results: [{ isin: 'FR0000047607', name: 'Server fallback for unmatched prefix', source: 'Catalogue ESMA', currency: 'EUR', maturity: '2030-12-31', coupon: 3 }]
         })
       };
     }
@@ -2213,7 +2216,7 @@ test('investment page routes ordinary bond-name queries to server search', async
             isin: 'FR0000047607',
             name: 'Example Issuer 2030',
             issuer: 'Example Issuer',
-            source: 'ESMA FIRDS'
+            source: 'ESMA FIRDS', currency: 'EUR', maturity: '2030-12-31', coupon: 3
           }]
         })
       };
@@ -2252,7 +2255,7 @@ test('investment page retries loading the local manifest after a transient outag
     if (url.endsWith('part-0001.json')) {
       return {
         ok: true,
-        json: async () => [{ isin: 'FR0000047607', name: 'Recovered local bond' }]
+        json: async () => [{ isin: 'FR0000047607', name: 'Recovered local bond', currency: 'EUR', maturity: '2030-12-31', coupon: 3 }]
       };
     }
     if (url.includes('/.netlify/functions/bond-search?')) {
@@ -2266,12 +2269,12 @@ test('investment page retries loading the local manifest after a transient outag
 
   page.elements.q.value = 'FR0000047607';
   await page.doSearch();
-  assert.match(page.elements.status.textContent, /0 résultat\(s\) via bond-master/);
+  assert.match(page.elements.status.textContent, /0 résultat\(s\) complet\(s\) via bond-master/);
   assert.equal(page.elements.search.disabled, false);
 
   await page.doSearch();
   assert.equal(manifestAttempts, 2, 'A failed manifest request must not stay cached forever');
-  assert.match(page.elements.status.textContent, /résultat\(s\) dans le catalogue ESMA/);
+  assert.match(page.elements.status.textContent, /résultat\(s\) complet\(s\) dans le catalogue ESMA/);
   assert.match(page.elements.results.innerHTML, /Recovered local bond/);
   assert.equal(page.elements.search.disabled, false);
 });
@@ -2297,7 +2300,7 @@ test('investment page retries loading a catalogue shard after a transient outage
       if (shardAttempts === 1) throw new Error('Temporary shard outage');
       return {
         ok: true,
-        json: async () => [{ isin: 'FR0000047607', name: 'Recovered shard bond' }]
+        json: async () => [{ isin: 'FR0000047607', name: 'Recovered shard bond', currency: 'EUR', maturity: '2030-12-31', coupon: 3 }]
       };
     }
     if (url.includes('/.netlify/functions/bond-search?')) {
@@ -2311,12 +2314,12 @@ test('investment page retries loading a catalogue shard after a transient outage
 
   page.elements.q.value = 'FR0000047607';
   await page.doSearch();
-  assert.match(page.elements.status.textContent, /0 résultat\(s\) via bond-master/);
+  assert.match(page.elements.status.textContent, /0 résultat\(s\) complet\(s\) via bond-master/);
   assert.equal(page.elements.search.disabled, false);
 
   await page.doSearch();
   assert.equal(shardAttempts, 2, 'A failed shard request must be removed from the cache');
-  assert.match(page.elements.status.textContent, /1 résultat\(s\) dans le catalogue ESMA/);
+  assert.match(page.elements.status.textContent, /1 résultat\(s\) complet\(s\) dans le catalogue ESMA/);
   assert.match(page.elements.results.innerHTML, /Recovered shard bond/);
   assert.equal(page.elements.search.disabled, false);
 });
@@ -2374,7 +2377,7 @@ test('investment page retries loading an ISIN index after a transient outage', a
     if (url.endsWith('part-0001.json')) {
       return {
         ok: true,
-        json: async () => [{ isin: 'FR0000047607', name: 'Recovered indexed bond' }]
+        json: async () => [{ isin: 'FR0000047607', name: 'Recovered indexed bond', currency: 'EUR', maturity: '2030-12-31', coupon: 3 }]
       };
     }
     if (url.includes('/.netlify/functions/bond-search?')) {
@@ -2388,12 +2391,12 @@ test('investment page retries loading an ISIN index after a transient outage', a
 
   page.elements.q.value = 'FR0000047607';
   await page.doSearch();
-  assert.match(page.elements.status.textContent, /0 résultat\(s\) via bond-master/);
+  assert.match(page.elements.status.textContent, /0 résultat\(s\) complet\(s\) via bond-master/);
   assert.equal(page.elements.search.disabled, false);
 
   await page.doSearch();
   assert.equal(indexAttempts, 2, 'A failed ISIN index request must be removed from the cache');
-  assert.match(page.elements.status.textContent, /1 résultat\(s\) dans le catalogue ESMA/);
+  assert.match(page.elements.status.textContent, /1 résultat\(s\) complet\(s\) dans le catalogue ESMA/);
   assert.match(page.elements.results.innerHTML, /Recovered indexed bond/);
   assert.equal(page.elements.search.disabled, false);
 });
@@ -2605,9 +2608,9 @@ test('investment page visibly distinguishes conventional bonds, structured produ
   const payload = {
     source: 'bond-master',
     results: [
-      { isin: 'FR0000000001', name: 'Example conventional bond', instrumentCategory: 'conventional-bond' },
-      { isin: 'FR0000000002', name: 'Example structured product', instrumentCategory: 'structured-product' },
-      { isin: 'FR0000000003', instrumentCategory: 'unclassified-debt-instrument' }
+      { isin: 'FR0000000010', name: 'Example conventional bond', instrumentCategory: 'conventional-bond', currency: 'EUR', maturity: '2030-12-31', coupon: 3 },
+      { isin: 'FR0000000028', name: 'Example structured product', instrumentCategory: 'structured-product', currency: 'EUR', maturity: '2031-12-31', coupon: 2.5 },
+      { isin: 'FR0000000036', instrumentCategory: 'unclassified-debt-instrument', currency: 'EUR', maturity: '2032-12-31', coupon: 2 }
     ]
   };
   const page = loadInvestmentSearchPage(async url => {
@@ -2622,9 +2625,8 @@ test('investment page visibly distinguishes conventional bonds, structured produ
 
   assert.match(page.elements.results.innerHTML, /Obligation classique/);
   assert.match(page.elements.results.innerHTML, /Produit structuré/);
-  assert.match(page.elements.results.innerHTML, /Catégorie à vérifier/);
-  assert.match(page.elements.results.innerHTML, /Instrument de dette — FR0000000003/,
-    'Records without a name must use a neutral debt-instrument title');
+  assert.doesNotMatch(page.elements.results.innerHTML, /Catégorie à vérifier|FR0000000036/,
+    'Unclassified records without a name must be excluded rather than rendered as incomplete fiches');
 });
 
 
@@ -2668,10 +2670,10 @@ test('investment page category filter narrows visible results and restores all c
     return { ok: true, json: async () => ({
       source: 'bond-master',
       results: [
-        { isin: 'FR0000000011', name: 'Classic example', instrumentCategory: 'conventional-bond' },
-        { isin: 'FR0000000012', name: 'Structured example', instrumentCategory: 'structured-product' },
-        { isin: 'FR0000000013', name: 'Related debt example', instrumentCategory: 'related-debt-instrument' },
-        { isin: 'FR0000000014', name: 'Unknown category example', instrumentCategory: 'unclassified-debt-instrument' }
+        { isin: 'FR0000000119', name: 'Classic example', instrumentCategory: 'conventional-bond', currency: 'EUR', maturity: '2030-12-31', coupon: 3 },
+        { isin: 'FR0000000127', name: 'Structured example', instrumentCategory: 'structured-product', currency: 'EUR', maturity: '2031-12-31', coupon: 2.5 },
+        { isin: 'FR0000000135', name: 'Related debt example', instrumentCategory: 'related-debt-instrument', currency: 'EUR', maturity: '2032-12-31', coupon: 2 },
+        { isin: 'FR0000000143', name: 'Unknown category example', instrumentCategory: 'unclassified-debt-instrument', currency: 'EUR', maturity: '2033-12-31', coupon: 2 }
       ]
     }) };
   });
@@ -2680,7 +2682,7 @@ test('investment page category filter narrows visible results and restores all c
   assert.match(page.elements.results.innerHTML, /Classic example/);
   assert.match(page.elements.results.innerHTML, /Structured example/);
   assert.match(page.elements.results.innerHTML, /Related debt example/);
-  assert.match(page.elements.results.innerHTML, /Unknown category example/);
+  assert.doesNotMatch(page.elements.results.innerHTML, /Unknown category example/);
   page.elements['category-filter'].value = 'conventional-bond';
   page.elements['category-filter'].listeners.change();
   assert.match(page.elements.results.innerHTML, /Classic example/);
@@ -2694,6 +2696,6 @@ test('investment page category filter narrows visible results and restores all c
   assert.match(page.elements.results.innerHTML, /Classic example/);
   assert.match(page.elements.results.innerHTML, /Structured example/);
   assert.match(page.elements.results.innerHTML, /Related debt example/);
-  assert.match(page.elements.results.innerHTML, /Unknown category example/);
+  assert.doesNotMatch(page.elements.results.innerHTML, /Unknown category example/);
   assert.equal(requests, 1, 'Changing the filter must not issue another network search');
 });
