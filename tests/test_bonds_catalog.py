@@ -206,29 +206,34 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(records[0]["marketMic"], "XPAR")
 
 
-    def test_verified_netcity_coupon_overrides_keep_raw_esma_values(self):
+    def test_unverified_netcity_coupon_overrides_are_not_applied(self):
+        # The public CBI register confirms issue titles and coupons, but the
+        # accessible source text does not expose the exact ISIN. Keep both
+        # raw ESMA values and suppress the overrides until exact-ISIN evidence
+        # is available; do not turn a plausible name match into verified data.
         cases = (
-            ("XS3420465927", "5468", "5.468"),
-            ("XS3420466065", "5611", "5.611"),
+            ("XS3420465927", "5468", "5.468", "2046-06-30"),
+            ("XS3420466065", "5611", "5.611", "2052-12-31"),
         )
-        for isin, raw_coupon, expected_coupon in cases:
+        for isin, raw_coupon, coupon_text, maturity in cases:
             with self.subTest(isin=isin):
+                self.assertNotIn(isin, module.COUPON_OVERRIDES)
                 xml = f"""<Document>
                   <FinInstrm>
                     <FinInstrmGnlAttrbts>
                       <Id>{isin}</Id>
-                      <FullNm>Netcity Telecom S.A. {expected_coupon} per cent Secured Amortising Bonds</FullNm>
+                      <FullNm>Netcity Telecom S.A. {coupon_text} per cent Secured Amortising Bonds</FullNm>
                       <ClssfctnTp>DBFXFR</ClssfctnTp>
                       <NtnlCcy>EUR</NtnlCcy>
                     </FinInstrmGnlAttrbts>
-                    <DebtInstrmAttrbts><Fxd>{raw_coupon}</Fxd><MtrtyDt>2046-06-30</MtrtyDt></DebtInstrmAttrbts>
+                    <DebtInstrmAttrbts><Fxd>{raw_coupon}</Fxd><MtrtyDt>{maturity}</MtrtyDt></DebtInstrmAttrbts>
                   </FinInstrm>
                 </Document>""".encode()
                 record = module.parse_xml(xml)[0]
-                self.assertEqual(record["couponRate"], expected_coupon)
+                self.assertIsNone(record["couponRate"])
                 self.assertEqual(record["couponRateRaw"], raw_coupon)
-                self.assertEqual(record["couponRateStatus"], "VERIFIED_OVERRIDE")
-                self.assertEqual(record["couponRateSource"], module.COUPON_OVERRIDES[isin]["source"])
+                self.assertEqual(record["couponRateStatus"], "SUSPICIOUS_SOURCE_VALUE")
+                self.assertIsNone(record["couponRateSource"])
 
 
     def test_verified_greek_coupon_overrides_keep_raw_esma_values(self):
