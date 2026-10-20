@@ -1,7 +1,7 @@
 # Phase obligations — registre d'acceptation et mesure d'avancement
 
 Date de référence : 20 octobre 2026  
-HEAD de référence : `293cca158949d486c6450e681375b20507b4b38e`  
+HEAD de référence : `3f756a2a2c00d920c80349e1486849b8a913e00c`  
 PR #2 : ouverte en brouillon, non fusionnée.
 
 ## Méthode de calcul
@@ -21,8 +21,8 @@ Cette méthode est volontairement stricte. Les métriques de couverture des donn
 | 1 | Catalogue structurellement intègre : ISIN uniques et checksum valides, CFI bien formés | DONE | Rapport d'audit du catalogue : 631 239 enregistrements, 0 doublon, 0 checksum invalide, 0 CFI mal formé |
 | 2 | Manifeste conserve pour chaque archive ESMA l'URL, la taille et le SHA-256 | DONE | Manifeste publication 20261017 : 4 archives décrites avec URL, octets et SHA-256. La comparaison indépendante avec les ZIP sources reste un contrôle distinct |
 | 3 | Recherche, endpoint et index existent et ont passé leurs tests sur le code de recherche inchangé | DONE | Les index ISIN/noms, `netlify/functions/bond-search.js` et l'interface existent; les runs de recherche précédents sont verts et aucun code de recherche/UI n'a changé dans le commit de référence |
-| 4 | Batterie CI de recherche verte sur le HEAD de référence | OPEN | Bond search CI #39465778220 est CANCELLED sur le SHA de référence; ne pas compter comme succès |
-| 5 | Une fiche obligataire ne s'affiche que si tous les champs essentiels requis sont exploitables; sinon elle est exclue des résultats | OPEN | Le code masque les coupons suspects et les échéances sentinelles, mais peut encore afficher une fiche avec d'autres champs essentiels absents |
+| 4 | Batterie CI de recherche verte sur le HEAD de référence | DONE | Bond search CI #39474736280 SUCCESS sur le HEAD `3f756a2a2c00d920c80349e1486849b8a913e00c`; tests catalogue/index, régressions de recherche et syntaxe JavaScript réussis |
+| 5 | Une fiche obligataire ne s'affiche que si tous les champs essentiels requis sont exploitables; sinon elle est exclue des résultats | DONE | `investissement.html` applique `isDisplayEligible` avant le rendu; les régressions couvrent les fiches complètes/incomplètes et l'exclusion de la fiche ESMA incomplète. Bond search CI #39474736280 SUCCESS sur le HEAD de référence |
 | 6 | Tous les overrides de coupon fixe présents dans le registre sont retrouvés et confirmés dans l'audit du catalogue | OPEN | Le rapport indique 9 overrides fixes vérifiés alors que le registre comporte 10 entrées; réconcilier cet écart ISIN par ISIN |
 | 7 | Chaque coupon suspect est sourcé ou mis en quarantaine et exclu des fiches éligibles | OPEN | 43 valeurs suspectes détectées, 34 encore non résolues; le comportement d'exclusion au niveau de la fiche entière n'est pas garanti |
 | 8 | Chaque coupon absent est classé (taux variable, valeur non applicable, donnée inconnue) et les fiches non conformes sont exclues | OPEN | 38 731 coupons absents tous groupes CFI confondus; 9 051 dans DA, 7 566 dans DB, et les autres groupes détaillés dans le rapport. Absence de coupon ne signifie pas toujours erreur, donc classification requise |
@@ -33,14 +33,14 @@ Cette méthode est volontairement stricte. Les métriques de couverture des donn
 
 ## Score mesuré
 
-- Critères DONE : 5 / 12.
-- **Score de critères fermés : 41,7 %**.
-- Critères OPEN : 7 / 12.
+- Critères DONE : 7 / 12.
+- **Score de critères fermés : 58,3 %**.
+- Critères OPEN : 5 / 12.
 - Le score de 41,7 % est un décompte strict des critères ci-dessus; ce n'est ni le pourcentage d'obligations présentes, ni une estimation du temps ou de l'effort restant.
 
 ## Couverture du catalogue — indicateurs distincts
 
-Rapports d'audit produits par les workflows Build ESMA #39465765263 et ESMA FIRDS bulk import #39465777991, tous deux SUCCESS sur le HEAD de référence, publication ESMA 20261017 :
+Rapports d'audit produits par les workflows précédents Build ESMA #39465765263 et ESMA FIRDS bulk import #39465777991, publication ESMA 20261017. Validation actuelle du workflow isolé : ESMA FIRDS bulk bond import #39474736336 SUCCESS sur le HEAD `3f756a2a2c00d920c80349e1486849b8a913e00c` :
 
 - 631 239 enregistrements; 631 239 ISIN uniques et valides.
 - Coupon présent : 592 508 / 631 239 = 93,86 %.
@@ -58,3 +58,13 @@ Ces ratios mesurent la présence/exploitabilité des champs, pas la vérificatio
 - Après chaque changement, ajouter la preuve, mettre à jour l'état d'un critère et recalculer le score uniquement si un critère entier est fermé.
 - Un run annulé, en attente ou échoué ne vaut jamais DONE.
 - PR #2 reste ouverte en brouillon; aucun merge ni déploiement sans instruction explicite.
+
+
+## Mesure actualisée — 20 octobre 2026, après CI #242 et ESMA #55
+- HEAD de code contrôlé : `3f756a2a2c00d920c80349e1486849b8a913e00c`.
+- Bond search CI #242 (`39474736280`) : SUCCESS sur ce SHA. Tests offline, intégrité de l'index des noms, tests de régression de recherche et syntaxe JavaScript réussis.
+- ESMA FIRDS bulk bond import #55 (`39474736336`) : SUCCESS sur le même SHA. Tests hors ligne, génération isolée de l'aperçu et audit, puis dépôt de l'artefact réussis.
+- Bond search CI #241 (`39474687062`) : CANCELLED avant les étapes de vérification d'index et de recherche; remplacé par #242 sur le HEAD plus récent, il n'est pas compté comme test échoué.
+- Critères fermés : 7/12 = 58,3 %. Les critères 4 et 5 sont désormais DONE sur la base des workflows verts et des régressions du filtre des fiches complètes. Le score ne signifie ni que 58,3 % des obligations sont vérifiées, ni que 58,3 % du temps est écoulé.
+- Restent ouverts : réconciliation des overrides fixes (6), coupons suspects non résolus (7), classification des coupons absents (8), qualification exhaustive des échéances sentinelles (10) et provenance complète de la PR (12).
+- Anti-doublon : aucun test relancé manuellement; résultats des runs existants réutilisés. PR #2 reste ouverte en brouillon, non fusionnée et non déployée.
