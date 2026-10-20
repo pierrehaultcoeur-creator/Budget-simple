@@ -21,18 +21,8 @@
   },
   "GR0114031561": {
     "couponRate": "3.45",
-    "reason": "The ESMA raw value is 345; an Erste Group fixed-income research table lists this ISIN with a 3.450% coupon.",
-    "source": "https://research.erste-group.com/ERSTE/external/download?q=15e7b7893a03cdf711efaab96f2e5c33a855e97f3YWJjZGVmMDEyMzQ1Njc4OYRI7I%2BStdrpYLidZNhCrXeCGEoxGevgcNyyllqzES3TxQ1Q%2BIE8mCkm05%2Fff7IQxAJYF68wz0cuEYvMbHR65mDqFce92J%2F%2BWyFEwnd4FVj9JjNOIs9OTmEfnvcqQw75wfBNRIm4JAEpdstBRMPGAy%2FBiXCcMYIcKD7W6%2B3YxEW8oaFSoUdQexZBBFVPpkydivvpjZicyGzliwNGVjkMIiUamVPOVRu1ljFfWjzZqWxpFgzOnwltk5qS69YtYB%2F3a8VGvNKSBuzRZWlRwTn%2Bqf%2FYBFRiL5OfXlS26%2FSD5Hn%2B"
-  },
-  "XS3420465927": {
-    "couponRate": "5.468",
-    "reason": "The ESMA instrument name identifies this exact issue as Netcity Telecom S.A. €15,000,000 5.468% secured amortising bonds due June 2046; the Central Bank of Ireland's approved-prospectus register independently confirms the issue title and stated coupon.",
-    "source": "https://www.centralbank.ie/regulation/industry-market-sectors/securities-markets/prospectus-regulation/prospectuses/netcity-telecom-s.a.----15-000-000-5.468-per-cent.-secured-amortising-bonds-due-june-2046---20-july-2026"
-  },
-  "XS3420466065": {
-    "couponRate": "5.611",
-    "reason": "The ESMA instrument name identifies this exact issue as Netcity Telecom S.A. €45,000,000 5.611% secured amortising bonds due December 2052; the Central Bank of Ireland's approved-prospectus register independently confirms the issue title and stated coupon.",
-    "source": "https://www.centralbank.ie/regulation/industry-market-sectors/securities-markets/prospectus-regulation/prospectuses/netcity-telecom-s.a.----45-000-000-5.611-per-cent.-secured-amortising-bonds-due-december-2052---20-july-2026"
+    "reason": "Athens Exchange's official listing notice identifies this exact ISIN and confirms the fixed annual coupon of 3.450%.",
+    "source": "https://www.athexgroup.gr/documents/10180/5315048/HELLENIC%2BREPUBLIC%2B-%2BLISTING%2BOF%2BNEW%2BBOND%2B05%2B-%2B02%2B-%2B2019/4bf5c10e-4523-4093-98a7-2f9c615b0c9d?version=1.0"
   },
   "GR0128010676": {
     "couponRate": "2.000",
