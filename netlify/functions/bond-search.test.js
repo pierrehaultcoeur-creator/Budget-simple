@@ -2767,8 +2767,9 @@ test('investment page quarantines all blocked coupon statuses without suppressin
       {
         isin: 'FR0000000044', name: 'Complete floating-rate bond', instrumentCategory: 'conventional-bond',
         currency: 'EUR', maturity: '2030-12-31', coupon: null,
-        couponStatus: 'FLOATING_RATE_REFERENCE', floatingRateRaw: 'EURIBOR',
-        floatingRateTerm: '6M', floatingRateSpreadBps: 125,
+        couponStatus: 'FLOATING_RATE_REFERENCE', couponSourceValue: '305',
+        floatingRateRaw: 'EURIBOR', floatingRateTerm: '6M', floatingRateSpreadBps: 125,
+        floatingRateSource: 'https://example.org/final-terms.pdf',
         floatingRateFieldPresent: true, confidence: 'catalog-record'
       }
     ]
@@ -2787,6 +2788,8 @@ test('investment page quarantines all blocked coupon statuses without suppressin
   assert.doesNotMatch(page.elements.results.innerHTML, /Suspicious coupon|Invalid coupon|Unverified external coupon/);
   assert.doesNotMatch(page.elements.results.innerHTML, /4\.5 %/,
     'A numeric coupon from an unverified external source must not be rendered');
+  assert.doesNotMatch(page.elements.results.innerHTML, /305/,
+    'A suspicious raw fixed-coupon value must not be rendered when the fiche is shown using sourced floating-rate metadata');
   assert.match(page.elements.status.textContent, /1 résultat\(s\) complet\(s\)/);
   assert.match(page.elements.status.textContent, /3 fiche\(s\) exclue\(s\) car incomplète\(s\)/);
 });

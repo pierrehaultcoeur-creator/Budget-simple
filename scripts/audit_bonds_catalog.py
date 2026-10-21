@@ -78,6 +78,8 @@ def audit_records(records: list[dict], coupon_overrides: dict | None = None) -> 
     verified_coupon_override_count = 0
     verified_coupon_overrides = []
     unresolved_suspicious_coupon_count = 0
+    verified_floating_rate_coupon_resolution_count = 0
+    verified_floating_rate_coupon_resolutions = []
     sample_sentinels = []
     suspicious_coupon_samples = []
     non_numeric_coupon_samples = []
@@ -278,11 +280,34 @@ def audit_records(records: list[dict], coupon_overrides: dict | None = None) -> 
                         "couponRate": record.get("couponRate"),
                         "couponRateStatus": status,
                         "couponRateSource": record.get("couponRateSource"),
+                        "floatingRateRaw": record.get("floatingRateRaw"),
+                        "floatingRateTerm": record.get("floatingRateTerm"),
+                        "floatingRateSpreadBps": record.get("floatingRateSpreadBps"),
+                        "floatingRateSource": record.get("floatingRateSource"),
                         "cfi": record.get("cfi"),
                         "name": record.get("name"),
                     }
                     suspicious_coupon_records.append(detail)
-                    if status != "VERIFIED_OVERRIDE":
+                    benchmark = str(record.get("floatingRateRaw") or "").strip().upper()
+                    term = str(record.get("floatingRateTerm") or "").strip().upper()
+                    try:
+                        spread = float(record.get("floatingRateSpreadBps"))
+                    except (TypeError, ValueError):
+                        spread = math.nan
+                    verified_floating_rate_resolution = (
+                        status == "FLOATING_RATE_REFERENCE"
+                        and bool(record.get("floatingRateSource"))
+                        and benchmark in {"NIBOR", "EURIBOR", "SOFR", "SONIA"}
+                        and term in {"1M", "3M", "6M", "12M", "3M/6M"}
+                        and math.isfinite(spread)
+                        and spread >= 0
+                    )
+                    if status == "VERIFIED_OVERRIDE":
+                        pass
+                    elif verified_floating_rate_resolution:
+                        verified_floating_rate_coupon_resolution_count += 1
+                        verified_floating_rate_coupon_resolutions.append(detail)
+                    else:
                         unresolved_suspicious_coupon_count += 1
                     if len(suspicious_coupon_samples) < 10:
                         suspicious_coupon_samples.append(detail)
@@ -443,6 +468,8 @@ def audit_records(records: list[dict], coupon_overrides: dict | None = None) -> 
         "verifiedCouponOverrides": verified_coupon_overrides,
         "couponOverrideCoverage": coupon_override_coverage,
         "unresolvedSuspiciousCouponCount": unresolved_suspicious_coupon_count,
+        "verifiedFloatingRateCouponResolutionCount": verified_floating_rate_coupon_resolution_count,
+        "verifiedFloatingRateCouponResolutions": verified_floating_rate_coupon_resolutions,
         "suspiciousCouponSamples": suspicious_coupon_samples,
         "suspiciousCouponRecords": suspicious_coupon_records,
         "suspiciousCouponCountsByCfiGroup": dict(sorted(suspicious_coupon_by_cfi_group.items())),

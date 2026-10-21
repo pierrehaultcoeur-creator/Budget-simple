@@ -213,6 +213,47 @@ class BondCatalogueAuditTests(unittest.TestCase):
             "3.375",
         )
 
+    def test_suspicious_raw_coupon_is_resolved_only_by_complete_sourced_floating_metadata(self):
+        report = module.audit_records([
+            {
+                "isin": "NO0012654534",
+                "cfi": "DBVUGR",
+                "couponRateRaw": "305",
+                "couponRate": None,
+                "couponRateStatus": "FLOATING_RATE_REFERENCE",
+                "floatingRateRaw": "NIBOR",
+                "floatingRateTerm": "3M",
+                "floatingRateSpreadBps": "305",
+                "floatingRateSource": "https://example.org/final-terms.pdf",
+            },
+            {
+                "isin": "XS0000000000",
+                "cfi": "DBVUGR",
+                "couponRateRaw": "450",
+                "couponRate": None,
+                "couponRateStatus": "FLOATING_RATE_REFERENCE",
+                "floatingRateRaw": "EURIBOR",
+                "floatingRateTerm": None,
+                "floatingRateSpreadBps": "450",
+                "floatingRateSource": "https://example.org/incomplete-terms.pdf",
+            },
+            {
+                "isin": "US5949181045",
+                "cfi": "DAVSGR",
+                "couponRateRaw": "786",
+                "couponRate": None,
+                "couponRateStatus": "SUSPICIOUS_SOURCE_VALUE",
+            },
+        ])
+        self.assertEqual(report["suspiciousCouponCount"], 3)
+        self.assertEqual(report["verifiedFloatingRateCouponResolutionCount"], 1)
+        self.assertEqual(report["unresolvedSuspiciousCouponCount"], 2)
+        self.assertEqual(
+            report["verifiedFloatingRateCouponResolutions"][0]["floatingRateSource"],
+            "https://example.org/final-terms.pdf",
+        )
+        self.assertIsNone(report["verifiedFloatingRateCouponResolutions"][0]["couponRate"])
+
     def test_detects_duplicate_isins_and_bad_coupon(self):
         report = module.audit_records([
             {"isin": "FR0000047607", "couponRate": "unknown"},
