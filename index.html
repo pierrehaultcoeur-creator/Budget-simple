@@ -103,6 +103,40 @@ body{margin:0;background:#f5f7f5;color:#343b35;font-family:Inter,"Avenir Next",s
 @media(min-width:560px){.app{padding-left:18px;padding-right:18px}.top{margin-left:-18px;margin-right:-18px;padding-left:20px;padding-right:20px}.monthbar{margin-left:-18px;margin-right:-18px;padding-left:18px;padding-right:18px}.budget-ring{width:162px}}
 @media(max-width:380px){.app{padding-left:11px;padding-right:11px}.top{margin-left:-11px;margin-right:-11px;padding-left:13px;padding-right:13px}.monthbar{margin-left:-11px;margin-right:-11px;padding-left:11px;padding-right:11px}.hero{padding:15px 12px}.budget-ring{width:143px}.stat{padding:9px}.stat b{font-size:14px}}
 
+
+/* Reference recreation: compact budget tracker, multicolor category bars and persistent bottom navigation. */
+:root{--ref-green:#5f9978;--ref-green-dark:#39775a;--ref-bg:#f5f7f5;--ref-line:#e4e8e4;--ref-gold:#b2a52f}
+body{background:var(--ref-bg);color:#354039}
+.app{max-width:520px;padding:0 14px 112px;background:#f7f8f6}
+.top{margin:0 -14px;padding:14px 16px;background:var(--ref-green);color:#fff;min-height:64px}
+.brand{color:#fff;font-size:20px;letter-spacing:-.04em}.brand span{color:#e6f0e9;font-size:12px}
+.calendar-btn,.lang{background:#ffffff12;border:1px solid #ffffff66;color:#fff;border-radius:14px;box-shadow:none}
+.monthbar{margin:0 -14px 0;padding:13px 17px;background:var(--ref-green);color:white;border-top:1px solid #ffffff38}
+.monthbar button{width:38px;height:38px;border-radius:50%;background:#ffffff20;color:white;font-size:26px}
+.month{color:white;font-size:19px}.year{color:#e1eee5;font-size:13px}.swipehint{font-size:12px;color:#9aa49d;margin:11px 0 15px}
+.hero{background:#fff;color:#354039;border:1px solid var(--ref-line);border-radius:28px;padding:22px 18px;box-shadow:0 5px 24px #203b2907;margin-bottom:20px}
+.hero-layout{display:flex;flex-direction:column;align-items:center;gap:16px}
+.budget-ring{width:190px;height:190px;border-radius:50%;background:conic-gradient(var(--ref-gold) var(--progress),#e8ebe7 0);display:grid;place-items:center;padding:8px;flex:0 0 auto}
+.budget-ring-inner{width:100%;height:100%;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center}
+.ring-label{font-size:13px;color:#89938c;font-weight:700}.ring-value{font-size:29px;color:var(--ref-green-dark);line-height:1.25;margin-top:3px}
+.hero-details{width:100%;text-align:center}.hero-kicker{font-size:15px;color:#89938c;font-weight:750;margin:0 0 6px}.hero-progress-copy{font-size:14px;color:#5b8c70;font-weight:750}
+.stats{gap:10px;margin-top:18px;text-align:left}.stat{background:#f4f7f4;border:1px solid #e8ece8;border-radius:18px;padding:12px 13px;color:#354039}.stat small{color:#8a938d;font-size:12px;font-weight:650}.stat b{display:block;margin-top:4px;font-size:17px}.edit-income{background:#eef5ef;color:#47765b}
+.sectionhead{margin:22px 3px 12px}.sectionhead h2{font-size:18px;font-weight:800;color:#354039}.customize-btn{background:white;color:#67816f;border:1px solid #e3e8e3;border-radius:14px}
+.cards{gap:10px}.card{border:1px solid var(--ref-line);border-radius:22px;padding:16px;background:#fff;box-shadow:0 3px 12px #243a2a06}
+.cathead{gap:11px}.emoji{width:42px;height:42px;border-radius:14px;background:var(--cat-tint,#e9f3ec);color:var(--cat-color,#5f9978);font-size:0}
+.emoji svg{width:22px;height:22px;stroke:currentColor}
+.card:nth-child(6n+1){--cat-color:#548d70;--cat-tint:#e5f1e9}.card:nth-child(6n+2){--cat-color:#d1a13d;--cat-tint:#fbf0d7}.card:nth-child(6n+3){--cat-color:#d56b5f;--cat-tint:#fbe9e6}.card:nth-child(6n+4){--cat-color:#4d91c5;--cat-tint:#e4f1fa}.card:nth-child(6n+5){--cat-color:#9270b6;--cat-tint:#f0e9f8}.card:nth-child(6n){--cat-color:#4caaa2;--cat-tint:#e2f4f1}
+.catamount strong{font-size:17px}.catamount small,.row small{font-size:12px}
+.bar,.itembar{height:7px;background:#edf0ed;margin-top:12px}.fill,.itemfill{background:var(--cat-color,var(--ref-green));border-radius:99px}
+.row{border-bottom:1px solid #edf0ed}.add{background:#e8f2eb;color:#46775b}
+.fab{right:20px;bottom:84px;width:58px;height:58px;border-radius:20px;background:var(--ref-green);box-shadow:0 8px 22px #2d684728}
+.reference-nav{position:fixed;z-index:18;bottom:0;left:50%;transform:translateX(-50%);width:min(100%,520px);height:66px;padding:7px 8px calc(7px + env(safe-area-inset-bottom));box-sizing:content-box;display:flex;align-items:center;justify-content:space-around;background:#fff;border-top:1px solid #e6eae6;box-shadow:0 -5px 20px #243a2a08}
+.reference-nav button{flex:1;min-width:0;height:52px;border:0;background:transparent;color:#89938c;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border-radius:14px;cursor:pointer}
+.reference-nav button span{display:grid;place-items:center;width:34px;height:28px;border-radius:10px}.reference-nav button svg{width:20px;height:20px;stroke:currentColor}.reference-nav button small{font-size:10px;font-weight:650}
+.reference-nav button.active{color:#416f55}.reference-nav button.active span{background:#e8f2eb}
+.nav-highlight{outline:2px solid #8db69b;outline-offset:3px;transition:outline-color .5s}
+@media(min-width:600px){.app{border-left:1px solid #edf0ed;border-right:1px solid #edf0ed}.reference-nav{border-left:1px solid #e6eae6;border-right:1px solid #e6eae6}}
+
 </style>
 </head>
 <body>
@@ -161,7 +195,7 @@ function render(){
  '<div class="monthbar"><button aria-label="Période précédente" onclick="shift(-1)">‹</button><div class="month">'+cycleLabel()+'</div><button aria-label="Période suivante" onclick="shift(1)">›</button></div><div class="swipehint">'+L.swipe+'</div>'+
  '<section class="hero"><div class="hero-layout"><div class="budget-ring" style="--progress:'+progress+'%" role="img" aria-label="'+L.remain+' '+eur(remaining)+'"><div class="budget-ring-inner"><span class="ring-label">'+L.remain+'</span><strong class="ring-value">'+eur(remaining)+'</strong></div></div><div class="hero-details"><div class="hero-kicker">'+L.periodLabel+'</div><div class="hero-progress-copy">'+preserved+'</div><div class="stats"><div class="stat"><small>'+L.income+'</small><b>'+eur(state.income)+'</b></div><div class="stat"><small>'+L.spent+'</small><b>'+eur(total())+'</b></div></div><button class="edit-income" onclick="openIncome()">'+uiIcon('edit')+'<span>'+L.editIncome+'</span></button></div></div></section>'+
  '<div class="sectionhead"><h2>'+(Number(state.budgetStartDay)===1?L.month:L.periodLabel)+'</h2><button class="customize-btn" onclick="openSettings()">'+uiIcon('settings')+'<span>'+L.settings+'</span></button></div><div class="cards">'+state.cats.map(cat).join('')+'</div>'+
- '<button class="reports-entry" onclick="openReports()"><span class="reports-entry-icon">'+uiIcon('chart')+'</span><span class="reports-entry-main"><strong>'+L.reports+'</strong><small>'+L.reportsSubtitle+'</small></span><span class="reports-entry-arrow">›</span></button>'+savingsCard()+'<div class="tip"><div class="tip-head"><span class="tip-icon">'+uiIcon('bulb')+'</span><span>'+L.tip+'</span></div><div class="tip-text">'+FINANCE_TIPS[lang][currentTip]+'</div></div>';
+ '<button class="reports-entry" onclick="openReports()"><span class="reports-entry-icon">'+uiIcon('chart')+'</span><span class="reports-entry-main"><strong>'+L.reports+'</strong><small>'+L.reportsSubtitle+'</small></span><span class="reports-entry-arrow">›</span></button>'+savingsCard()+'<div class="tip"><div class="tip-head"><span class="tip-icon">'+uiIcon('bulb')+'</span><span>'+L.tip+'</span></div><div class="tip-text">'+FINANCE_TIPS[lang][currentTip]+'</div></div>'+'<nav class="reference-nav" aria-label="Navigation principale"><button class="active" onclick="navTo(\'budget\',this)"><span>'+uiIcon('wallet')+'</span><small>Budget</small></button><button onclick="navTo(\'activity\',this)"><span>'+uiIcon('calendar')+'</span><small>Activité</small></button><button onclick="navTo(\'goals\',this)"><span>'+uiIcon('target')+'</span><small>Objectifs</small></button><button onclick="openReports()"><span>'+uiIcon('chart')+'</span><small>Stats</small></button><button onclick="navTo(\'assets\',this)"><span>'+uiIcon('layers')+'</span><small>Patrimoine</small></button></nav>';
  touch();
 }
 
@@ -441,6 +475,7 @@ function closeCalendar(){document.getElementById('calendarModal').classList.remo
 function calendarYear(v){calYear+=v;drawCalendar()}
 function drawCalendar(){document.getElementById('calTitle').textContent=L.calendar;document.getElementById('calYear').textContent=calYear;document.getElementById('calPrev').textContent='‹ '+L.prevYear;document.getElementById('calNext').textContent=L.nextYear+' ›';document.getElementById('calChoose').textContent=L.choose;let names=L.months;document.getElementById('monthGrid').innerHTML=names.map((m,i)=>{let active=Number(state.month.slice(0,4))===calYear&&Number(state.month.slice(5,7))===i+1;let label=Number(state.budgetStartDay)===1?m:(()=>{const a=calYear+'-'+String(i+1).padStart(2,'0');const r=cycleDates(a);return dateShort(r.start)+' → '+dateShort(r.end)})();return '<button class=\"month-choice '+(active?'active':'')+'\" onclick=\"chooseMonth('+i+')\">'+label+'</button>'}).join('')}
 function chooseMonth(i){state.month=calYear+'-'+String(i+1).padStart(2,'0');save();closeCalendar();render()}
+function navTo(which,button){document.querySelectorAll('.reference-nav button').forEach(b=>b.classList.toggle('active',b===button));if(which==='budget'){window.scrollTo({top:0,behavior:'smooth'});return}if(which==='activity'){openCalendar();return}if(which==='goals'||which==='assets'){const target=document.querySelector('.savings-card');if(target){target.scrollIntoView({behavior:'smooth',block:'start'});target.classList.add('nav-highlight');setTimeout(()=>target.classList.remove('nav-highlight'),900)}else{openSettings()}}}
 function touch(){let x0=null,a=document.querySelector('.monthbar');a.addEventListener('touchstart',e=>x0=e.touches[0].clientX,{passive:true});a.addEventListener('touchend',e=>{if(x0===null)return;let dx=e.changedTouches[0].clientX-x0;if(Math.abs(dx)>45)shift(dx<0?1:-1);x0=null},{passive:true})}
 document.querySelector('.fab').onclick=()=>openManage();render();checkCycleEnd();checkAnnualEnd();
 </script>
