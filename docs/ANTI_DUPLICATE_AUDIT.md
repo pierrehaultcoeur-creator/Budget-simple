@@ -361,3 +361,12 @@ Les contrôles intégrés du commit ci-dessus ont tous réussi : tests Python du
 - Mesures distinctes confirmées par le même rapport : 631 239 enregistrements, 0 ISIN dupliqué, 43 coupons suspects dont 34 non résolus, 4 276 échéances sentinelles (2 489 noms suggérant une perpétuité, 1 787 sans cet indice). Ces dernières valeurs restent des indicateurs d'audit, pas des classifications définitives.
 - Mise à jour du registre d'acceptation : critère 6 DONE; score de critères fermés 8/12 = 66,7 %. Les critères 7, 8, 10 et 12 restent OPEN.
 - Anti-doublon : aucun contrôle vert relancé manuellement; l'artefact d'audit et les runs CI existants ont été réutilisés. Aucun catalogue source supprimé ou remplacé par cette modification de comptage. PR #2 reste ouverte en brouillon, non fusionnée et non déployée.
+
+
+## Audit anti-doublon — test de non-affichage des coupons suspects (21 octobre 2026)
+- Audit préalable : relecture du registre d'acceptation, de `investissement.html`, du test `netlify/functions/bond-search.test.js` et des runs déjà présents. Aucun test vert antérieur n'a été relancé manuellement.
+- HEAD contrôlé : `71a58080cd5a2845a544136283d73e42ef6a0795`.
+- [Bond search CI #250](https://github.com/pierrehaultcoeur-creator/Budget-simple/actions/runs/39534699158) : SUCCESS. Le test vérifie qu'une fiche complète reste visible, qu'une fiche au coupon suspect est exclue, que la valeur brute suspecte n'est pas affichée et que le statut signale les fiches incomplètes exclues.
+- [ESMA FIRDS bulk bond import #63](https://github.com/pierrehaultcoeur-creator/Budget-simple/actions/runs/39534699167) : SUCCESS sur le même SHA; les tests hors ligne et l'audit ESMA passent.
+- Portée : preuve ajoutée sur le rendu de l'interface uniquement. Les 34 valeurs suspectes non résolues restent non résolues dans l'audit; elles ne sont pas déclarées corrigées et le critère 7 reste OPEN tant que la quarantaine n'est pas démontrée pour toutes les fiches et voies de rendu concernées.
+- Aucun catalogue source supprimé ou modifié. Aucun merge ni déploiement; PR #2 reste ouverte en brouillon.
