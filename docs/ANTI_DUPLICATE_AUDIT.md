@@ -394,3 +394,13 @@ Les contrôles intégrés du commit ci-dessus ont tous réussi : tests Python du
 - Tests ajoutés : la présence d'une source seule ou des métadonnées incomplètes ne résout pas le cas; l'interface ne doit pas afficher la valeur brute du coupon fixe suspect lorsque la fiche est affichée à partir des métadonnées du taux variable.
 - [Bond search CI #257](https://github.com/pierrehaultcoeur-creator/Budget-simple/actions/runs/39539160725) : PENDING; [ESMA audit #70](https://github.com/pierrehaultcoeur-creator/Budget-simple/actions/runs/39539160708) : IN_PROGRESS au moment de l'inscription. Aucun statut vert revendiqué.
 - Critères 7 et 8 maintenus OPEN; score 8/12 = 66,7 %. Aucun catalogue source modifié; PR #2 reste ouverte en brouillon, non fusionnée et non déployée.
+
+
+## Audit anti-doublon — résultats finaux des workflows sur HEAD documentaire (21 octobre 2026)
+- Contrôle avant action : relu le registre d'acceptation, le présent audit, le script `scripts/audit_bonds_catalog.py`, les tests de rendu UI et les runs associés au SHA `a42a3364666e50fd32fd7e24933739837fea1901`.
+- [Bond search CI #258](https://github.com/pierrehaultcoeur-creator/Budget-simple/actions/runs/39539260031) : SUCCESS sur le SHA exact `a42a3364666e50fd32fd7e24933739837fea1901`. Tests catalogue/index, complétude de l'index de noms, régressions de recherche et syntaxe JavaScript réussis.
+- [ESMA FIRDS bulk bond import #71](https://github.com/pierrehaultcoeur-creator/Budget-simple/actions/runs/39539260004) : SUCCESS sur le même SHA. Tests hors ligne, construction de l'aperçu isolé, audit du catalogue et publication de l'artefact réussis.
+- Ces runs remplacent les états en attente/en cours consignés plus haut pour les SHA `51d2c57` et `a42a336`; aucun rerun manuel n'a été lancé.
+- Le diagnostic corrigé distingue 3 valeurs brutes suspectes dont les métadonnées sourcées de taux variable sont complètes, et 31 cas suspects non résolus. Les tests prouvent les chemins couverts, mais ne constituent pas une validation contractuelle exhaustive des 31 cas ni de tous les coupons absents.
+- Prochaine tâche prioritaire : réduire un manque de preuve du critère 7 ou 8 avec une modification ciblée et une preuve nouvelle; ne pas refaire les tests déjà verts sans changement pertinent.
+- Score inchangé : 8/12 = 66,7 %. PR #2 reste ouverte en brouillon, non fusionnée et non déployée.
