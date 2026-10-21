@@ -266,6 +266,72 @@ html,body{background:var(--ref-bg);color:var(--ref-ink)}
 @media(max-width:420px){.top{padding:14px 15px}.app{padding-bottom:118px}.hero{margin-left:12px;margin-right:12px;padding:18px 14px 14px}.budget-ring{width:158px;height:158px}.ring-value{font-size:27px}.stats{gap:8px}.stat{padding:11px 10px}.stat b{font-size:16px}.cards{margin-left:12px;margin-right:12px}.sectionhead{margin-left:15px;margin-right:15px}.row{gap:6px}.expense-actions{gap:5px;margin-left:3px}.row-action{width:29px;height:30px}}
 @media(min-width:600px){.top,.monthbar{padding-left:22px;padding-right:22px}}
 
+
+/* Art direction v3 — remove generic iconography; typography and editorial accents lead. */
+:root{--ref-bg:#f4f5f1;--ref-card:#fff;--ref-line:#e5e9e2;--ref-ink:#354239;--ref-muted:#858f87;--ref-sage:#5f9276;--ref-gold:#b5a12f}
+body{font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;letter-spacing:-.012em}
+.top{padding-top:19px;padding-bottom:19px}
+.brand{font-size:24px;letter-spacing:-.075em}
+.brand span{font-weight:500;letter-spacing:-.04em}
+.hero{border-radius:27px;box-shadow:0 12px 32px #2f4b3510;padding-top:22px}
+.budget-ring{width:174px;height:174px;padding:7px;background:conic-gradient(var(--ref-gold) var(--progress),#e8ece5 0);transform:rotate(-8deg)}
+.budget-ring-inner{transform:rotate(8deg)}
+.ring-value{font-size:31px;font-weight:780;letter-spacing:-.065em}
+.hero-progress-copy{font-size:14px;letter-spacing:-.025em}
+.stat{border:1px solid #e7ebe5;background:#f7f8f5;border-radius:18px;padding:13px 14px}
+.stat small{font-size:12px}.stat b{font-size:19px;letter-spacing:-.04em}
+.sectionhead{margin-top:24px;margin-bottom:13px}
+.sectionhead h2{font-size:22px;letter-spacing:-.06em}
+.customize-btn{box-shadow:0 2px 6px #243a2a08}
+.cards{border-radius:24px;box-shadow:0 8px 26px #34463808}
+.card{padding:18px 17px 15px}
+.cathead{display:flex;gap:0;align-items:center}
+.category-icon{display:none!important}
+.catname{font-size:17px;font-weight:760;letter-spacing:-.045em;position:relative;padding-left:13px}
+.catname:before{content:"";position:absolute;left:0;top:50%;transform:translateY(-50%);height:22px;width:3px;border-radius:4px;background:var(--cat-color,#659779)}
+.catamount strong{font-size:18px;letter-spacing:-.045em}
+.catamount small{font-size:11px}
+.sub{margin-top:9px;font-size:12px}
+.row{padding:14px 0;gap:8px;align-items:center}
+.rowname b{font-size:14px;letter-spacing:-.025em}
+.rowname small{font-size:12px;margin-top:3px}
+.itembar{height:4px;margin-top:10px;max-width:100%;border-radius:8px}
+.money{font-size:14px;font-weight:700;letter-spacing:-.035em}
+.expense-actions{display:flex;gap:8px;margin-left:5px;align-items:center}
+.row-action.text-action{width:auto;height:auto;min-height:30px;padding:0 3px;border:0;border-radius:0;background:transparent;font-size:10px;font-weight:650;letter-spacing:0;color:#7b8b7e}
+.row-action.text-action.danger{color:#b17d78}
+.row-action.text-action:focus-visible{outline:2px solid #7ba88a;outline-offset:3px}
+.add{background:#f3f5ef;border:1px solid #e8ece4;color:#5f8068;border-radius:15px;padding:14px;font-weight:700;letter-spacing:-.02em}
+.fab{background:#5f9276!important;box-shadow:0 8px 20px #3b654a30}
+.reference-nav button{font-size:11px}
+.upvanta-marker{width:4px;height:34px;flex:0 0 4px;border-radius:6px;background:var(--item-color,#679779);margin:0 5px 0 2px}
+.upvanta-list-row{background:#fff;border:0;border-bottom:1px solid #e9ede7;border-radius:0;padding:15px 5px;gap:11px}
+.upvanta-list-row:last-of-type{border-bottom:0}
+.upvanta-row-main strong{font-size:14px;letter-spacing:-.025em}
+.upvanta-row-main small{font-size:11px}
+.upvanta-list-row>b{font-size:14px;letter-spacing:-.03em}
+.upvanta-goal{background:#fff;border:1px solid #e5e9e2;border-radius:21px;box-shadow:0 6px 20px #34463808}
+.upvanta-goal-cover{height:112px;position:relative;display:flex;align-items:flex-end;justify-content:space-between;padding:15px 17px;background:linear-gradient(115deg,hsl(var(--goal-hue) 24% 83%),hsl(calc(var(--goal-hue) + 18) 26% 58%));color:#fff}
+.goal-cover-kicker{font-size:9px;font-weight:800;letter-spacing:.2em;text-transform:uppercase}
+.goal-cover-mark{font-size:44px;font-weight:300;line-height:.85;letter-spacing:-.09em;opacity:.9}
+.upvanta-goal-cover svg{display:none}
+.upvanta-goal-body{padding:17px}
+.upvanta-goal-body>strong{font-size:17px;letter-spacing:-.04em}
+.upvanta-goal-amount{font-size:24px;letter-spacing:-.055em}
+.upvanta-panel{border-radius:23px;box-shadow:0 8px 26px #34463808}
+@media(max-width:420px){
+ .top{padding:15px 15px}
+ .budget-ring{width:160px;height:160px}
+ .ring-value{font-size:28px}
+ .card{padding:16px 13px 13px}
+ .catname{font-size:16px}
+ .row{gap:6px}
+ .expense-actions{gap:6px;margin-left:1px}
+ .row-action.text-action{font-size:9px;padding:0 2px}
+ .money{font-size:12px}
+ .upvanta-goal-cover{height:96px}
+}
+
 </style>
 </head>
 <body>
@@ -415,7 +481,7 @@ function savingsCard(){
   }).join('');
   return '<section class="savings-card"><div class="savings-head"><span class="savings-icon">'+uiIcon('broom')+'</span><span>'+L.savingsTitle+'</span></div><div class="savings-total">'+eur(total)+'</div><div class="savings-note">'+L.savingsAnnual+' · '+L.savingsTotalNote+'</div><div class="savings-list">'+rows+'</div></section>';
 }
-function cat(c){let B=c.items.reduce((a,i)=>a+(isVariable(c,i)?0:bud(c,i)),0),X=c.items.reduce((a,i)=>a+sp(c,i),0),FX=c.items.reduce((a,i)=>a+(isVariable(c,i)?0:sp(c,i)),0),VX=X-FX,P=B?Math.min(100,FX/B*100):0;return '<section class="card" data-category="'+c.id+'"><div class="cathead"><div class="category-icon">'+uiIcon(categoryIcon(c))+'</div><div class="catname">'+labelFor(c)+'</div><div class="catamount"><strong>'+eur(X)+'</strong><small>'+(B?eur(B):L.none)+'</small></div></div>'+(B?'<div class="bar"><div class="fill '+(FX>B?'over':'')+'" style="width:'+P+'%"></div></div>':'')+'<div class="sub"><span>'+(B?L.planned+' '+eur(B):L.free)+'</span><span>'+(B?(FX>B?L.over:L.left+' '+eur(B-FX)):'')+(VX>0?(B?' · ':'')+eur(VX)+' '+L.variableSpent:'')+'</span></div>'+c.items.map((i,n)=>item(c,i,n)).join('')+'<button class="add" onclick="openExpenseByRef(\''+c.id+'\',null)">'+L.add+'</button></section>'}
+function cat(c){let B=c.items.reduce((a,i)=>a+(isVariable(c,i)?0:bud(c,i)),0),X=c.items.reduce((a,i)=>a+sp(c,i),0),FX=c.items.reduce((a,i)=>a+(isVariable(c,i)?0:sp(c,i)),0),VX=X-FX,P=B?Math.min(100,FX/B*100):0;return '<section class="card" data-category="'+c.id+'"><div class="cathead"><div class="catname">'+labelFor(c)+'</div><div class="catamount"><strong>'+eur(X)+'</strong><small>'+(B?eur(B):L.none)+'</small></div></div>'+(B?'<div class="bar"><div class="fill '+(FX>B?'over':'')+'" style="width:'+P+'%"></div></div>':'')+'<div class="sub"><span>'+(B?L.planned+' '+eur(B):L.free)+'</span><span>'+(B?(FX>B?L.over:L.left+' '+eur(B-FX)):'')+(VX>0?(B?' · ':'')+eur(VX)+' '+L.variableSpent:'')+'</span></div>'+c.items.map((i,n)=>item(c,i,n)).join('')+'<button class="add" onclick="openExpenseByRef(\''+c.id+'\',null)">'+L.add+'</button></section>'}
 function item(c,i,n){let b=bud(c,i),x=sp(c,i),v=isVariable(c,i),p=b?Math.min(100,x/b*100):0,variableInfo=v?(b?L.variableRow+' · '+L.variableIndicative+' '+eur(b):L.variableRow):'';return '<div class="row" onclick="openExpenseByRef(\''+c.id+'\',\''+i.id+'\')" style="cursor:pointer"><div class="rowname"><b>'+labelFor(i)+'</b><small>'+(v?variableInfo:(L.planned+' '+eur(b)))+'</small>'+(v?'':'<div class="itembar"><div class="itemfill '+(x>b&&b?'over':'')+'" style="width:'+p+'%"></div></div>')+'</div><div class="money">'+eur(x)+'</div><div class="expense-actions"><button class="row-action" aria-label="'+L.edit+'" onclick="event.stopPropagation();openExpenseByRef(\''+c.id+'\',\''+i.id+'\')">'+uiIcon('edit')+'</button><button class="row-action danger" aria-label="'+L.delete+'" onclick="event.stopPropagation();deleteExpenseByRef(\''+c.id+'\',\''+i.id+'\')">'+uiIcon('trash')+'</button></div></div>'}
 function openExpenseByRef(catId,itemId){let ci=state.cats.findIndex(c=>c.id===catId);if(ci<0)return;let ii=itemId===null?-1:state.cats[ci].items.findIndex(i=>i.id===itemId);if(itemId!==null&&ii<0)return;openExpense(ci,ii)}
 function deleteExpenseByRef(catId,itemId){let ci=state.cats.findIndex(c=>c.id===catId);if(ci<0)return;let ii=state.cats[ci].items.findIndex(i=>i.id===itemId);if(ii<0)return;deleteExpense(ci,ii)}
