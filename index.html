@@ -213,6 +213,59 @@ body{background:#f5eee5;color:var(--ref-ink);font-family:Inter,Roboto,"Helvetica
 .asset-round{background:#e4efe6;color:#648c70}.upvanta-section~.fab{display:none}
 @media(max-width:420px){.upvanta-section{padding-left:14px;padding-right:14px}.upvanta-list-row{gap:8px;padding:10px}.upvanta-round{width:34px;height:34px;flex-basis:34px}.upvanta-goal-cover{height:88px}}
 
+
+/* Reference-led polish: circular balance, sage month rail, category-specific icon colors. */
+:root{--ref-bg:#f5f5f1;--ref-card:#fff;--ref-line:#e6e9e3;--ref-ink:#37423a;--ref-muted:#8c958d;--ref-sage:#619b7c;--ref-gold:#b7a52f}
+html,body{background:var(--ref-bg);color:var(--ref-ink)}
+.app{max-width:560px;padding:0 0 118px}
+.top{margin:0;padding:17px 18px;background:var(--ref-sage);color:#fff;border-bottom:1px solid #ffffff25}
+.brand,.brand span{color:#fff}.brand{font-weight:800;letter-spacing:-.055em}.brand span{opacity:.78}
+.calendar-btn,.lang{background:transparent;border:1px solid #ffffff5c;color:#fff;border-radius:14px}
+.calendar-btn .ui-icon{stroke:#fff}.lang-caret{color:#fff}
+.monthbar{margin:0;padding:13px 18px;background:var(--ref-sage);color:#fff;border-bottom:1px solid #ffffff24}
+.monthbar button{color:#fff;background:#ffffff22;border-radius:50%;width:36px;height:36px;font-size:24px}
+.month{color:#fff;font-size:17px}.year{color:#e3efe7;font-size:12px}
+.swipehint{margin:0;padding:9px 0 12px;background:var(--ref-bg);font-size:11px;color:#969e97}
+.hero{margin:0 15px 17px;padding:20px 16px 15px;background:#fff;border:1px solid var(--ref-line);border-radius:25px;box-shadow:0 5px 22px #243a2a07;color:var(--ref-ink)}
+.budget-ring{display:grid;width:166px;height:166px;aspect-ratio:1;margin:0 auto 14px;padding:8px;border-radius:50%;background:conic-gradient(var(--ref-gold) var(--progress),#e6e9e2 0);box-shadow:none}
+.budget-ring:before{content:none}
+.budget-ring-inner{height:100%;width:100%;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:3px;text-align:center}
+.ring-label{font-size:12px;color:#8c958d;font-weight:650;letter-spacing:0;text-transform:none}
+.ring-value{font-size:29px;color:#3f7858;letter-spacing:-.05em;line-height:1.15}
+.hero-kicker{text-align:center;color:#8c958d;font-size:14px;text-transform:none;letter-spacing:0;font-weight:750;margin:0 0 5px}
+.hero-progress-copy{text-align:center;color:#5b8c70;font-size:13px;line-height:1.4;font-weight:750;margin:0 0 16px}
+.stats{display:flex;gap:10px}
+.stat{background:#f5f7f4;border:1px solid #e9eee8;border-radius:17px;padding:12px 13px;min-width:0}
+.stat small{font-size:11px;color:#8c958d;font-weight:650}.stat b{font-size:17px;color:#3f4941;display:block;margin-top:4px;white-space:nowrap}
+.edit-income{margin-top:11px;background:#e7f0e9;color:#4f7d60;border:0;border-radius:13px;padding:11px;font-size:12px}
+.sectionhead{margin:21px 18px 11px}.sectionhead h2{font-size:18px;color:#3b463e;letter-spacing:-.035em}
+.customize-btn{background:#fff;border:1px solid #e4e8e2;color:#64816c;border-radius:13px}
+.cards{display:grid;gap:0;margin:0 15px;background:#fff;border:1px solid var(--ref-line);border-radius:20px;overflow:hidden}
+.card{background:transparent;border:0;border-radius:0;box-shadow:none;padding:14px 13px 12px;border-bottom:1px solid #edf0eb}
+.card:last-child{border-bottom:0}
+.cathead{gap:10px}.category-icon{width:39px;height:39px;border-radius:50%;background:var(--cat-tint,#e6f1e9);color:var(--cat-color,#5a9875)}
+.category-icon .ui-icon{width:20px;height:20px;stroke:currentColor;stroke-width:1.8}
+.card[data-category="home"]{--cat-color:#c3a02d;--cat-tint:#f8efd4}
+.card[data-category="daily"]{--cat-color:#4d9b6d;--cat-tint:#e3f1e7}
+.card[data-category="transport"]{--cat-color:#358ac2;--cat-tint:#e0eff9}
+.card[data-category="subs"]{--cat-color:#875fc1;--cat-tint:#eee6fa}
+.card[data-category="fun"]{--cat-color:#d25357;--cat-tint:#f9e5e5}
+.card[data-category="beauty"]{--cat-color:#d9873f;--cat-tint:#fbeddc}
+.catname{font-size:15px;font-weight:750}.catamount strong{font-size:16px}.catamount small{font-size:11px}
+.sub{font-size:11px;color:#8c958d;margin-top:7px}
+.bar,.itembar{height:5px;background:#ecefe9;margin-top:9px}.fill,.itemfill{background:var(--cat-color,#619b7c);border-radius:99px}.fill.over,.itemfill.over{background:#cb5c59}
+.row{gap:8px;padding:11px 0;border-bottom:1px solid #eff1ed}
+.rowname b{font-size:13px;color:#343d36}.rowname small{font-size:11px;color:#929a93}.money{font-size:13px;white-space:nowrap}
+.row-action{width:32px;height:32px;border:1px solid #edf0eb;background:#fff;border-radius:11px;color:#8b958c;display:grid;place-items:center}.row-action .ui-icon{width:15px;height:15px}.row-action.danger{color:#b46a67}
+.add{background:#f1eee5;color:#68806a;border:1px solid #e9e8dc;border-radius:12px;padding:12px;margin-top:10px;font-size:13px}
+.reports-entry,.savings-card,.tip{margin-left:15px;margin-right:15px}
+.reference-nav{max-width:560px;background:#fff;border-top:1px solid #e6e9e3}
+.reference-nav button.active{background:#f4e7d5;color:#3d473e}
+.fab{bottom:84px;right:max(18px,calc((100vw - 560px)/2 + 18px));background:#619b7c!important;border-radius:50%;width:56px;height:56px;box-shadow:0 5px 15px #385b4124}
+.reference-tabs,.account-balance{display:none!important}
+@media(max-width:420px){.top{padding:14px 15px}.app{padding-bottom:118px}.hero{margin-left:12px;margin-right:12px;padding:18px 14px 14px}.budget-ring{width:158px;height:158px}.ring-value{font-size:27px}.stats{gap:8px}.stat{padding:11px 10px}.stat b{font-size:16px}.cards{margin-left:12px;margin-right:12px}.sectionhead{margin-left:15px;margin-right:15px}.row{gap:6px}.expense-actions{gap:5px;margin-left:3px}.row-action{width:29px;height:30px}}
+@media(min-width:600px){.top,.monthbar{padding-left:22px;padding-right:22px}}
+
 </style>
 </head>
 <body>
@@ -269,8 +322,8 @@ function render(){
  const preserved=L.preserved.replace('💰 ','').replace('{p}',progress);
  document.getElementById('app').innerHTML='<div class="top"><div class="brand">'+L.brand+' <span>'+L.tag+'</span></div><div class="top-actions"><button class="calendar-btn" aria-label="'+L.calendar+'" onclick="openCalendar()">'+uiIcon('calendar')+'</button><div class="lang-wrap"><button class="lang" onclick="toggleLangMenu(event)">'+L.lang+' <span class="lang-caret">⌄</span></button><div id="langMenu" class="lang-menu">'+['fr','pt','en'].map(k=>'<button class="lang-option'+(lang===k?' active':'')+'" onclick="setLang(\''+k+'\',event)">'+T[k].lang+'</button>').join('')+'</div></div></div></div>'+
  '<div class="monthbar"><button aria-label="Période précédente" onclick="shift(-1)">‹</button><div class="month">'+cycleLabel()+'</div><button aria-label="Période suivante" onclick="shift(1)">›</button></div><div class="swipehint">'+L.swipe+'</div>'+
- '<section class="hero"><div class="account-balance"><small>Solde disponible</small><strong>'+eur(remaining)+'</strong><span>'+preserved+'</span></div><div class="stats"><div class="stat"><small>'+L.income+'</small><b>'+eur(state.income)+'</b></div><div class="stat"><small>'+L.spent+'</small><b>'+eur(total())+'</b></div></div><button class="edit-income" onclick="openIncome()">'+uiIcon('edit')+'<span>'+L.editIncome+'</span></button></section>'+
- '<div class="reference-tabs"><button class="selected" onclick="referenceTab(\'expenses\',this)">DÉPENSES</button><button onclick="referenceTab(\'available\',this)">DISPONIBLE</button><button onclick="referenceTab(\'income\',this)">BUDGET REVENUS</button></div><div class="sectionhead"><h2>'+(Number(state.budgetStartDay)===1?L.month:L.periodLabel)+'</h2><button class="customize-btn" onclick="openSettings()">'+uiIcon('settings')+'<span>'+L.settings+'</span></button></div><div class="cards">'+state.cats.map(cat).join('')+'</div>'+
+ '<section class="hero"><div class="budget-ring" style="--progress:'+progress+'%" role="img" aria-label="'+L.remain+' '+eur(remaining)+'"><div class="budget-ring-inner"><span class="ring-label">'+L.remain+'</span><strong class="ring-value">'+eur(remaining)+'</strong></div></div><div class="hero-kicker">'+L.periodLabel+'</div><div class="hero-progress-copy">'+preserved+'</div><div class="stats"><div class="stat"><small>'+L.income+'</small><b>'+eur(state.income)+'</b></div><div class="stat"><small>'+L.spent+'</small><b>'+eur(total())+'</b></div></div><button class="edit-income" onclick="openIncome()">'+uiIcon('edit')+'<span>'+L.editIncome+'</span></button></section>'+
+ '<div class="sectionhead"><h2>'+(Number(state.budgetStartDay)===1?L.month:L.periodLabel)+'</h2><button class="customize-btn" onclick="openSettings()">'+uiIcon('settings')+'<span>'+L.settings+'</span></button></div><div class="cards">'+state.cats.map(cat).join('')+'</div>'+
  '<button class="reports-entry" onclick="openReports()"><span class="reports-entry-icon">'+uiIcon('chart')+'</span><span class="reports-entry-main"><strong>'+L.reports+'</strong><small>'+L.reportsSubtitle+'</small></span><span class="reports-entry-arrow">›</span></button>'+savingsCard()+'<div class="tip"><div class="tip-head"><span class="tip-icon">'+uiIcon('bulb')+'</span><span>'+L.tip+'</span></div><div class="tip-text">'+FINANCE_TIPS[lang][currentTip]+'</div></div>'+'<nav class="reference-nav" aria-label="Navigation principale"><button class="active" onclick="navTo(\'budget\',this)"><span>'+uiIcon('wallet')+'</span><small>Budget</small></button><button onclick="navTo(\'activity\',this)"><span>'+uiIcon('calendar')+'</span><small>Activité</small></button><button onclick="navTo(\'goals\',this)"><span>'+uiIcon('target')+'</span><small>Objectifs</small></button><button onclick="openReports()"><span>'+uiIcon('chart')+'</span><small>Stats</small></button><button onclick="navTo(\'assets\',this)"><span>'+uiIcon('layers')+'</span><small>Patrimoine</small></button></nav>';
  touch();
 }
@@ -362,7 +415,7 @@ function savingsCard(){
   }).join('');
   return '<section class="savings-card"><div class="savings-head"><span class="savings-icon">'+uiIcon('broom')+'</span><span>'+L.savingsTitle+'</span></div><div class="savings-total">'+eur(total)+'</div><div class="savings-note">'+L.savingsAnnual+' · '+L.savingsTotalNote+'</div><div class="savings-list">'+rows+'</div></section>';
 }
-function cat(c){let B=c.items.reduce((a,i)=>a+(isVariable(c,i)?0:bud(c,i)),0),X=c.items.reduce((a,i)=>a+sp(c,i),0),FX=c.items.reduce((a,i)=>a+(isVariable(c,i)?0:sp(c,i)),0),VX=X-FX,P=B?Math.min(100,FX/B*100):0;return '<section class="card"><div class="cathead"><div class="category-icon">'+uiIcon(categoryIcon(c))+'</div><div class="catname">'+labelFor(c)+'</div><div class="catamount"><strong>'+eur(X)+'</strong><small>'+(B?eur(B):L.none)+'</small></div></div>'+(B?'<div class="bar"><div class="fill '+(FX>B?'over':'')+'" style="width:'+P+'%"></div></div>':'')+'<div class="sub"><span>'+(B?L.planned+' '+eur(B):L.free)+'</span><span>'+(B?(FX>B?L.over:L.left+' '+eur(B-FX)):'')+(VX>0?(B?' · ':'')+eur(VX)+' '+L.variableSpent:'')+'</span></div>'+c.items.map((i,n)=>item(c,i,n)).join('')+'<button class="add" onclick="openExpenseByRef(\''+c.id+'\',null)">'+L.add+'</button></section>'}
+function cat(c){let B=c.items.reduce((a,i)=>a+(isVariable(c,i)?0:bud(c,i)),0),X=c.items.reduce((a,i)=>a+sp(c,i),0),FX=c.items.reduce((a,i)=>a+(isVariable(c,i)?0:sp(c,i)),0),VX=X-FX,P=B?Math.min(100,FX/B*100):0;return '<section class="card" data-category="'+c.id+'"><div class="cathead"><div class="category-icon">'+uiIcon(categoryIcon(c))+'</div><div class="catname">'+labelFor(c)+'</div><div class="catamount"><strong>'+eur(X)+'</strong><small>'+(B?eur(B):L.none)+'</small></div></div>'+(B?'<div class="bar"><div class="fill '+(FX>B?'over':'')+'" style="width:'+P+'%"></div></div>':'')+'<div class="sub"><span>'+(B?L.planned+' '+eur(B):L.free)+'</span><span>'+(B?(FX>B?L.over:L.left+' '+eur(B-FX)):'')+(VX>0?(B?' · ':'')+eur(VX)+' '+L.variableSpent:'')+'</span></div>'+c.items.map((i,n)=>item(c,i,n)).join('')+'<button class="add" onclick="openExpenseByRef(\''+c.id+'\',null)">'+L.add+'</button></section>'}
 function item(c,i,n){let b=bud(c,i),x=sp(c,i),v=isVariable(c,i),p=b?Math.min(100,x/b*100):0,variableInfo=v?(b?L.variableRow+' · '+L.variableIndicative+' '+eur(b):L.variableRow):'';return '<div class="row" onclick="openExpenseByRef(\''+c.id+'\',\''+i.id+'\')" style="cursor:pointer"><div class="rowname"><b>'+labelFor(i)+'</b><small>'+(v?variableInfo:(L.planned+' '+eur(b)))+'</small>'+(v?'':'<div class="itembar"><div class="itemfill '+(x>b&&b?'over':'')+'" style="width:'+p+'%"></div></div>')+'</div><div class="money">'+eur(x)+'</div><div class="expense-actions"><button class="row-action" aria-label="'+L.edit+'" onclick="event.stopPropagation();openExpenseByRef(\''+c.id+'\',\''+i.id+'\')">'+uiIcon('edit')+'</button><button class="row-action danger" aria-label="'+L.delete+'" onclick="event.stopPropagation();deleteExpenseByRef(\''+c.id+'\',\''+i.id+'\')">'+uiIcon('trash')+'</button></div></div>'}
 function openExpenseByRef(catId,itemId){let ci=state.cats.findIndex(c=>c.id===catId);if(ci<0)return;let ii=itemId===null?-1:state.cats[ci].items.findIndex(i=>i.id===itemId);if(itemId!==null&&ii<0)return;openExpense(ci,ii)}
 function deleteExpenseByRef(catId,itemId){let ci=state.cats.findIndex(c=>c.id===catId);if(ci<0)return;let ii=state.cats[ci].items.findIndex(i=>i.id===itemId);if(ii<0)return;deleteExpense(ci,ii)}
