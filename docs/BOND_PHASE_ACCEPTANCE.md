@@ -33,9 +33,9 @@ Cette méthode est volontairement stricte. Les métriques de couverture des donn
 
 ## Score mesuré
 
-- Critères DONE : 7 / 12.
-- **Score de critères fermés : 58,3 %**.
-- Critères OPEN : 5 / 12.
+- Critères DONE : 8 / 12.
+- **Score de critères fermés : 66,7 %**.
+- Critères OPEN : 4 / 12.
 - Le score de 41,7 % est un décompte strict des critères ci-dessus; ce n'est ni le pourcentage d'obligations présentes, ni une estimation du temps ou de l'effort restant.
 
 ## Couverture du catalogue — indicateurs distincts
@@ -65,8 +65,8 @@ Ces ratios mesurent la présence/exploitabilité des champs, pas la vérificatio
 - Bond search CI #242 (`39474736280`) : SUCCESS sur ce SHA. Tests offline, intégrité de l'index des noms, tests de régression de recherche et syntaxe JavaScript réussis.
 - ESMA FIRDS bulk bond import #55 (`39474736336`) : SUCCESS sur le même SHA. Tests hors ligne, génération isolée de l'aperçu et audit, puis dépôt de l'artefact réussis.
 - Bond search CI #241 (`39474687062`) : CANCELLED avant les étapes de vérification d'index et de recherche; remplacé par #242 sur le HEAD plus récent, il n'est pas compté comme test échoué.
-- Critères fermés : 7/12 = 58,3 %. Les critères 4 et 5 sont désormais DONE sur la base des workflows verts et des régressions du filtre des fiches complètes. Le score ne signifie ni que 58,3 % des obligations sont vérifiées, ni que 58,3 % du temps est écoulé.
-- Restent ouverts : réconciliation des overrides fixes (6), coupons suspects non résolus (7), classification des coupons absents (8), qualification exhaustive des échéances sentinelles (10) et provenance complète de la PR (12).
+- Critères fermés : 8/12 = 66,7 %. Les critères 4, 5 et 6 sont désormais DONE sur la base des workflows verts et des régressions du filtre des fiches complètes. Le score ne signifie ni que 58,3 % des obligations sont vérifiées, ni que 58,3 % du temps est écoulé.
+- Restent ouverts : coupons suspects non résolus (7), classification des coupons absents (8), qualification exhaustive des échéances sentinelles (10) et provenance complète de la PR (12).
 - Anti-doublon : aucun test relancé manuellement; résultats des runs existants réutilisés. PR #2 reste ouverte en brouillon, non fusionnée et non déployée.
 
 
