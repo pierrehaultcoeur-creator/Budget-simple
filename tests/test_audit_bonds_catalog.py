@@ -204,10 +204,20 @@ class BondCatalogueAuditTests(unittest.TestCase):
                 "couponRate": None,
                 "couponRateStatus": "SUSPICIOUS_SOURCE_VALUE",
             },
+            {
+                "isin": "US5949181052",
+                "cfi": "DAVSGR",
+                "couponRateRaw": "786",
+                "couponRate": "7.86",
+                "couponRateStatus": "SUSPICIOUS_SOURCE_VALUE",
+            },
         ])
-        self.assertEqual(report["suspiciousCouponCount"], 2)
+        self.assertEqual(report["suspiciousCouponCount"], 3)
         self.assertEqual(report["verifiedCouponOverrideCount"], 2)
-        self.assertEqual(report["unresolvedSuspiciousCouponCount"], 1)
+        self.assertEqual(report["unresolvedSuspiciousCouponCount"], 2)
+        self.assertEqual(report["quarantinedSuspiciousCouponCount"], 1)
+        self.assertEqual(report["unquarantinedSuspiciousCouponCount"], 1)
+        self.assertEqual(report["unquarantinedSuspiciousCouponSamples"][0]["isin"], "US5949181052")
         self.assertEqual(
             report["verifiedCouponOverrides"][0]["couponRate"],
             "3.375",
@@ -248,6 +258,8 @@ class BondCatalogueAuditTests(unittest.TestCase):
         self.assertEqual(report["suspiciousCouponCount"], 3)
         self.assertEqual(report["verifiedFloatingRateCouponResolutionCount"], 1)
         self.assertEqual(report["unresolvedSuspiciousCouponCount"], 2)
+        self.assertEqual(report["quarantinedSuspiciousCouponCount"], 1)
+        self.assertEqual(report["unquarantinedSuspiciousCouponCount"], 0)
         self.assertEqual(
             report["verifiedFloatingRateCouponResolutions"][0]["floatingRateSource"],
             "https://example.org/final-terms.pdf",
