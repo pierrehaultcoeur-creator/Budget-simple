@@ -2,6 +2,19 @@ name: Build ESMA bond catalogue
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - feature/bond-search-index
+    paths:
+      - '.github/workflows/bonds-catalog.yml'
+      - 'scripts/bonds_catalog.py'
+      - 'scripts/bond_coupon_overrides.json'
+      - 'scripts/split_bonds_catalog.py'
+      - 'scripts/audit_bonds_catalog.py'
+      - 'tests/test_bonds_catalog.py'
+      - 'tests/test_split_bonds_catalog.py'
+      - 'tests/test_audit_bonds_catalog.py'
+      - 'tests/test_committed_name_indexes.py'
   schedule:
     # Sundays at 10:30 UTC, after ESMA's weekly full-file publication window.
     - cron: "30 10 * * 0"
@@ -19,15 +32,19 @@ jobs:
     timeout-minutes: 45
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
+        with:
+          # Runs may wait behind another catalogue build while the branch advances.
+          # Resolve the branch at job start instead of checking out the stale event SHA.
+          ref: ${{ github.ref_name }}
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: "3.12"
 
       - name: Run offline parser regression test
-        run: python -m unittest tests.test_bonds_catalog
+        run: python -m unittest tests.test_bonds_catalog tests.test_split_bonds_catalog tests.test_audit_bonds_catalog tests.test_committed_name_indexes
 
       - name: Build catalogue from ESMA
         run: python scripts/bonds_catalog.py
@@ -49,6 +66,31 @@ jobs:
           assert all(r.get("cfi", "").startswith("D") for r in data["records"])
           print(f"Validated {len(isins)} unique debt instruments.")
           PY
+          python scripts/audit_bonds_catalog.py data/bonds-catalog.json > /tmp/bond-catalog-quality-report.json
+          cat /tmp/bond-catalog-quality-report.json
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json
+          report = json.load(open("/tmp/bond-catalog-quality-report.json", encoding="utf-8"))
+          assert report["duplicateIsins"] == 0, "Duplicate ISINs found in the ESMA catalogue"
+          assert report["invalidIsinChecksumAmongShaped"] == 0, "ISIN checksum failures found in the ESMA catalogue"
+          assert report["unclassifiedCfiCount"] == 0, "Unclassified CFI groups found; review classifications before publication"
+          assert report["invalidCfiFormatCount"] == 0, "Malformed CFI codes found in the ESMA catalogue"
+          print("## ESMA catalogue quality audit")
+          print(f"- Records: **{report['recordCount']:,}**")
+          print(f"- Unique ISINs: **{report['uniqueNonEmptyIsins']:,}**; duplicates: **{report['duplicateIsins']:,}**")
+          print(f"- ISIN checksum failures: **{report['invalidIsinChecksumAmongShaped']:,}**")
+          print(f"- Missing coupons: **{report['missingFieldCounts']['couponRate']:,}**")
+          print(f"- Coupon source fields: **{report['couponSourceFieldCounts']}**")
+          print(f"- Missing coupons by CFI group: **{report['missingCouponCountsByCfiGroup']}**")
+          print(f"- Missing coupons by CFI/source field: **{report['missingCouponSourceFieldCountsByCfi']}**")
+          print(f"- Missing coupons with floating-rate field by CFI group: **{report['missingCouponWithFloatingFieldByCfiGroup']}**")
+          print(f"- Missing coupons without floating-rate field by CFI group: **{report['missingCouponWithoutFloatingFieldByCfiGroup']}**")
+          print(f"- Missing/sentinel maturities: **{report['missingFieldCounts']['maturityDate']:,}** / **{report['sentinelMaturityCount']:,} sentinels**")
+          print(f"- Conventional bonds (CFI DB): **{report['conventionalBondCount']:,}**")
+          print(f"- Related debt instruments: **{report['relatedDebtCount']:,}**")
+          print(f"- Structured-product CFI groups: **{report['structuredProductCount']:,}**")
+          print(f"- Suspicious raw coupon values: **{report['suspiciousCouponCount']:,}**")
+          PY
           python scripts/split_bonds_catalog.py data/bonds-catalog.json data/bonds-catalog
           rm data/bonds-catalog.json
           python - <<'PY'
@@ -58,10 +100,106 @@ jobs:
           assert manifest["recordCount"] > 0
           assert manifest["partCount"] == len(manifest["parts"])
           assert all(part["bytes"] < 100 * 1024 * 1024 for part in manifest["parts"])
-          print(f"Validated {manifest['recordCount']} records in {manifest['partCount']} shards.")
+          assert sum(item["entries"] for item in manifest.get("isinIndexes", [])) == manifest["recordCount"]
+          assert all(item["bytes"] < 100 * 1024 * 1024 for item in manifest.get("isinIndexes", []))
+          assert all((Path("data/bonds-catalog") / item["file"]).exists() for item in manifest.get("isinIndexes", []))
+          shard_names = {part["file"] for part in manifest["parts"]}
+          # Recompute both lookup structures from the actual shards. Shape-only
+          # checks cannot detect a stale index that silently omits valid results.
+          from scripts.split_bonds_catalog import trigrams
+          shard_isins = {}
+          expected_name_index = {}
+          searchable_fields = ("name", "shortName", "short_name", "issuer", "instrumentName", "nameOfFinancialInstrument")
+          for part in manifest["parts"]:
+              payload = json.loads((Path("data/bonds-catalog") / part["file"]).read_text(encoding="utf-8"))
+              records = payload.get("records", [])
+              shard_isins[part["file"]] = {str(record.get("isin") or "").upper() for record in records}
+              for record in records:
+                  searchable = " ".join(str(record.get(field) or "") for field in searchable_fields)
+                  for gram in trigrams(searchable):
+                      expected_name_index.setdefault(gram, set()).add(part["file"])
+          indexed_isins = 0
+          for item in manifest.get("isinIndexes", []):
+              index_path = Path("data/bonds-catalog") / item["file"]
+              index = json.loads(index_path.read_text(encoding="utf-8"))
+              assert isinstance(index, dict), f"ISIN index is not an object: {item['file']}"
+              assert len(index) == item["entries"], f"ISIN index entry count mismatch: {item['file']}"
+              for isin, shard in index.items():
+                  assert shard in shard_names, f"ISIN index references unknown shard: {isin} -> {shard}"
+                  assert isin in shard_isins[shard], f"Stale or incorrect ISIN index entry: {isin} -> {shard}"
+                  indexed_isins += 1
+          assert indexed_isins == manifest["recordCount"], "ISIN index total does not match catalogue record count"
+          name_indexes = manifest.get("nameIndexes", [])
+          assert manifest.get("hasSearchableNames") == bool(name_indexes), "Name-index manifest flag does not match generated indexes"
+          assert all(item["bytes"] < 100 * 1024 * 1024 for item in name_indexes)
+          # The runtime deliberately falls back to a full shard scan when index
+          # metadata is malformed. Catch the same metadata errors during catalogue
+          # generation so a broken manifest cannot be published unnoticed.
+          name_prefixes = [item.get("prefix") for item in name_indexes]
+          name_index_files = [item.get("file") for item in name_indexes]
+          assert all(isinstance(prefix, str) and len(prefix) == 1 and prefix.isascii()
+                     and prefix.isalnum() and prefix == prefix.lower()
+                     for prefix in name_prefixes), "Invalid name-index prefix"
+          assert len(name_prefixes) == len(set(name_prefixes)), "Duplicate name-index prefixes"
+          assert all(filename == f"name-index-{prefix}.json"
+                     for prefix, filename in zip(name_prefixes, name_index_files)), "Name-index filename does not match prefix"
+          assert len(name_index_files) == len(set(name_index_files)), "Duplicate name-index filenames"
+          isin_index_files = {item["file"] for item in manifest.get("isinIndexes", [])}
+          assert not (set(name_index_files) & shard_names), "Name index overlaps catalogue shard"
+          assert not (set(name_index_files) & isin_index_files), "Name index overlaps ISIN index"
+          assert "manifest.json" not in name_index_files, "Manifest cannot be a name index"
+          indexed_trigrams = 0
+          for item in name_indexes:
+              index_path = Path("data/bonds-catalog") / item["file"]
+              assert index_path.exists(), f"Missing name index file: {item['file']}"
+              index = json.loads(index_path.read_text(encoding="utf-8"))
+              assert isinstance(index, dict), f"Name index is not an object: {item['file']}"
+              assert len(index) == item["trigrams"], f"Name-index trigram count mismatch: {item['file']}"
+              for gram, files in index.items():
+                  assert len(gram) == 3, f"Invalid trigram {gram!r} in {item['file']}"
+                  assert gram.isascii() and gram.isalnum() and gram == gram.lower(), f"Name trigram crosses token boundaries or is not normalized: {gram!r}"
+                  assert isinstance(files, list) and files, f"Empty shard list for trigram {gram!r}"
+                  assert set(files) <= shard_names, f"Name index references unknown shards for {gram!r}"
+                  assert set(files) == expected_name_index.get(gram, set()), f"Stale or incomplete name index for trigram {gram!r}"
+                  indexed_trigrams += 1
+          assert {gram for gram in expected_name_index} == {
+              gram for item in name_indexes
+              for gram in json.loads((Path("data/bonds-catalog") / item["file"]).read_text(encoding="utf-8"))
+          }, "Name index is missing one or more trigrams from the catalogue"
+          print(f"Validated {manifest['recordCount']} records, {manifest['partCount']} shards, {indexed_isins} ISIN index entries across {len(manifest.get('isinIndexes', []))} indexes, and {indexed_trigrams} name trigrams across {len(name_indexes)} name indexes.")
+          PY
+
+      - name: Upload catalogue quality audit
+        uses: actions/upload-artifact@v7
+        with:
+          name: bond-catalog-quality-report
+          path: /tmp/bond-catalog-quality-report.json
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Test exact and partial ISIN search
+        run: node --test netlify/functions/bond-search.test.js
+
+      - name: Check inline JavaScript syntax
+        run: |
+          python - <<'PY'
+          import re
+          import subprocess
+          from pathlib import Path
+          for html in ("index.html", "investissement.html"):
+              source = Path(html).read_text(encoding="utf-8")
+              scripts = re.findall(r"<script\b[^>]*>(.*?)</script>", source, re.I | re.S)
+              for number, script in enumerate(scripts, 1):
+                  if not script.strip():
+                      continue
+                  target = Path("/tmp") / f"{Path(html).stem}-{number}.js"
+                  target.write_text(script, encoding="utf-8")
+                  subprocess.run(["node", "--check", str(target)], check=True)
+                  print(f"JavaScript syntax OK: {html} script {number}")
           PY
 
       - name: Commit catalogue shards only when changed
+        if: github.event_name != 'pull_request'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -70,5 +208,22 @@ jobs:
             echo "Catalogue unchanged; no commit needed."
           else
             git commit -m "Update ESMA bond catalogue"
+            # Human/code commits can land while the full catalogue is downloading.
+            # Rebase our generated shards onto the latest branch before pushing.
+            git fetch origin "$GITHUB_REF_NAME"
+            # The generated manifest changes on every build (timestamp/source publication).
+            # If a code commit lands during the download, preserve this run's manifest
+            # while replaying the catalogue commit on top of the latest branch.
+            if ! git rebase "origin/$GITHUB_REF_NAME"; then
+              if git diff --name-only --diff-filter=U | grep -qx "data/bonds-catalog/manifest.json"; then
+                git checkout --theirs data/bonds-catalog/manifest.json
+                git add data/bonds-catalog/manifest.json
+                GIT_EDITOR=true git rebase --continue
+              else
+                git rebase --abort
+                echo "Rebase conflict outside generated manifest; refusing automatic resolution."
+                exit 1
+              fi
+            fi
             git push
           fi

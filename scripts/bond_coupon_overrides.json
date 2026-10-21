@@ -1,0 +1,52 @@
+{
+  "GR0118017657": {
+    "couponRate": "3.375",
+    "reason": "Athens Exchange's official listing notice identifies this exact ISIN and confirms the fixed annual coupon of 3.375%.",
+    "source": "https://www.athexgroup.gr/en/documents/10180/4959576/HELLENIC%20REPUBLIC%20-%20LISTING%20OF%20NEW%20BOND%2015%20-%2002%20-%202018/03f99d76-75e7-47c7-90ab-4b2fae7904d0"
+  },
+  "GR0118019679": {
+    "couponRate": "1.875",
+    "reason": "Athens Exchange's official listing notice identifies this exact ISIN and states a fixed annual interest rate of 1.875%.",
+    "source": "https://www.athexgroup.gr/en/documents/10180/5315048/G.G.B.%20LISTING%20%2023%20-%2007%20-%202019/01e1eb06-5c88-4d50-b5ed-3e8148b2a222"
+  },
+  "XS1722899918": {
+    "couponRate": "1.125",
+    "reason": "Börse Stuttgart identifies this exact ISIN and reports an interest rate of 1.125%.",
+    "source": "https://www.boerse-stuttgart.de/en/products/bonds/stuttgart/a19snf-fingrid-oyj-eo-medium-term-notes-2017-27"
+  },
+  "XS3262577961": {
+    "couponRate": "4.375",
+    "reason": "Cbonds identifies this exact ISIN and the Development Bank of Japan issue with a 4.375% coupon.",
+    "source": "https://cbonds.com/bonds/2049953/"
+  },
+  "GR0114031561": {
+    "couponRate": "3.45",
+    "reason": "Athens Exchange's official listing notice identifies this exact ISIN and confirms the fixed annual coupon of 3.450%.",
+    "source": "https://www.athexgroup.gr/documents/10180/5315048/HELLENIC%2BREPUBLIC%2B-%2BLISTING%2BOF%2BNEW%2BBOND%2B05%2B-%2B02%2B-%2B2019/4bf5c10e-4523-4093-98a7-2f9c615b0c9d?version=1.0"
+  },
+  "GR0128010676": {
+    "couponRate": "2.000",
+    "reason": "The ESMA raw coupon value (365) conflicts with the exact-ISIN issue identification. The Greek Public Debt Management Agency lists this ISIN in the 2012 new-bond series at 2.000%, and Euronext Athens' official forced-sale table identifies the same ISIN and 2.000% coupon.",
+    "source": "https://athens.euronext.com/en/documents/10180/6544045/TABLE%20-%20GREEK%20GOV.%20BONDS%27%20FORCED%20SALE%2006%20-%2006%20-%202022/5c3ceb9a-bb3e-48c4-a705-3840dda842aa"
+  },
+  "GR0128011682": {
+    "couponRate": "2.000",
+    "reason": "The ESMA raw coupon value (365) conflicts with the exact-ISIN issue identification. The Greek Public Debt Management Agency lists this ISIN in the 2012 new-bond series at 2.000%, and Euronext Athens' official forced-sale table identifies the same ISIN and 2.000% coupon.",
+    "source": "https://athens.euronext.com/en/documents/10180/6544045/TABLE%20-%20GREEK%20GOV.%20BONDS%27%20FORCED%20SALE%2006%20-%2006%20-%202022/5c3ceb9a-bb3e-48c4-a705-3840dda842aa"
+  },
+  "GR0128012698": {
+    "couponRate": "2.000",
+    "reason": "The ESMA raw coupon value (365) conflicts with the exact-ISIN issue identification. The Greek Public Debt Management Agency lists this ISIN in the 2012 new-bond series at 2.000%, and Euronext Athens' official forced-sale table identifies the same ISIN and 2.000% coupon.",
+    "source": "https://athens.euronext.com/en/documents/10180/6544045/TABLE%20-%20GREEK%20GOV.%20BONDS%27%20FORCED%20SALE%2006%20-%2006%20-%202022/5c3ceb9a-bb3e-48c4-a705-3840dda842aa"
+  },
+  "GR0128013704": {
+    "couponRate": "2.000",
+    "reason": "The ESMA raw coupon value (365) conflicts with the exact-ISIN issue identification. The Greek Public Debt Management Agency lists this ISIN in the 2012 new-bond series at 2.000%, and Euronext Athens' official forced-sale table identifies the same ISIN and 2.000% coupon.",
+    "source": "https://athens.euronext.com/en/documents/10180/6544045/TABLE%20-%20GREEK%20GOV.%20BONDS%27%20FORCED%20SALE%2006%20-%2006%20-%202022/5c3ceb9a-bb3e-48c4-a705-3840dda842aa"
+  },
+  "GR0128014710": {
+    "couponRate": "2.000",
+    "reason": "The ESMA raw coupon value (365) conflicts with the exact-ISIN issue identification. The Greek Public Debt Management Agency lists this ISIN in the 2012 new-bond series at 2.000%, and Euronext Athens' official forced-sale table identifies the same ISIN and 2.000% coupon.",
+    "source": "https://athens.euronext.com/en/documents/10180/6544045/TABLE%20-%20GREEK%20GOV.%20BONDS%27%20FORCED%20SALE%2006%20-%2006%20-%202022/5c3ceb9a-bb3e-48c4-a705-3840dda842aa"
+  }
+}

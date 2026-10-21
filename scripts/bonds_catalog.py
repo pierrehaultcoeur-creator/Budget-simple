@@ -7,8 +7,10 @@ Standard library only; intended for GitHub Actions.
 """
 from __future__ import annotations
 
+import hashlib
 import io
 import json
+import math
 import os
 import re
 import sys
@@ -24,13 +26,21 @@ API = (
     "https://registers.esma.europa.eu/solr/"
     "esma_registers_firds_files/select"
 )
-OUT = Path("data/bonds-catalog.json")
+OUT = Path(os.environ.get("BONDS_CATALOG_OUT", "data/bonds-catalog.json"))
 USER_AGENT = "Budget-Simplement-Bond-Catalog/1.0"
 ISIN_RE = re.compile(r"^[A-Z]{2}[A-Z0-9]{9}[0-9]$")
 FILE_RE = re.compile(
     r"FULINS_D_(\d{8})_(\d+)of(\d+)\.zip$", re.IGNORECASE
 )
 MIN_RECORDS = int(os.environ.get("BONDS_MIN_RECORDS", "1"))
+LOOKBACK_DAYS = int(os.environ.get("BONDS_LOOKBACK_DAYS", "21"))
+if LOOKBACK_DAYS < 1:
+    raise ValueError("BONDS_LOOKBACK_DAYS must be at least 1")
+
+OVERRIDES_PATH = Path(__file__).resolve().parent / "bond_coupon_overrides.json"
+COUPON_OVERRIDES = json.loads(OVERRIDES_PATH.read_text(encoding="utf-8"))
+FLOATING_RATE_OVERRIDES_PATH = Path(__file__).resolve().parent / "bond_floating_rate_overrides.json"
+FLOATING_RATE_OVERRIDES = json.loads(FLOATING_RATE_OVERRIDES_PATH.read_text(encoding="utf-8"))
 
 
 def http_get(url: str, timeout: int = 180) -> bytes:
@@ -167,23 +177,83 @@ def parse_xml(xml_bytes: bytes) -> list[dict]:
                 node.clear()
                 continue
 
+            maturity, maturity_raw, maturity_status = normalized_maturity(debt)
+            fixed_coupon_raw = first_descendant_text(debt, "Fxd") if debt is not None else None
+            interest_rate_raw = first_descendant_text(debt, "IntrstRate") if debt is not None else None
+            floating_rate_element = next(
+                (element for element in debt.iter() if xml_local_name(element.tag) == "Fltg"),
+                None,
+            ) if debt is not None else None
+            floating_rate_raw = (
+                (
+                    first_descendant_text(floating_rate_element, "ISIN")
+                    or first_descendant_text(floating_rate_element, "Indx")
+                    or first_descendant_text(floating_rate_element, "Nm")
+                    or (floating_rate_element.text or "").strip() or None
+                )
+                if floating_rate_element is not None else None
+            )
+            floating_rate_term = first_descendant_text(floating_rate_element, "Term") if floating_rate_element is not None else None
+            floating_rate_spread = first_descendant_text(floating_rate_element, "BsisPtSprd") if floating_rate_element is not None else None
+            floating_rate_override = FLOATING_RATE_OVERRIDES.get(isin)
+            if floating_rate_override:
+                # Some ESMA records put a floating-rate margin in Fxd and omit
+                # the nested Fltg structure. Only an exact-ISIN, source-verified
+                # override may repair that metadata; never turn the margin into
+                # a fixed coupon.
+                floating_rate_raw = floating_rate_override["referenceRate"]
+                floating_rate_term = floating_rate_override["term"]
+                floating_rate_spread = str(floating_rate_override["spreadBps"])
+            coupon_raw = fixed_coupon_raw or interest_rate_raw
+            coupon_source_field = (
+                "Fxd" if fixed_coupon_raw else
+                "IntrstRate" if interest_rate_raw else
+                None
+            )
+            coupon, coupon_status = normalized_coupon(coupon_raw)
+            coupon_source = None
+            coupon_source_reason = None
+            # A floating-rate marker makes a numeric Fxd/IntrstRate value
+            # ambiguous: it may be a reference or spread, not a fixed annual
+            # coupon. Hide it unless a separate, verified fixed-coupon override
+            # is available for an instrument without floating-rate metadata.
+            if floating_rate_element is not None or floating_rate_override:
+                coupon = None
+                coupon_status = "FLOATING_RATE_REFERENCE"
+            override = COUPON_OVERRIDES.get(isin)
+            if override and floating_rate_element is None and not floating_rate_override:
+                coupon = str(override["couponRate"])
+                coupon_status = "VERIFIED_OVERRIDE"
+                coupon_source = override["source"]
+                coupon_source_reason = override["reason"]
+            cfi_group, instrument_type = classify_cfi(cfi)
             record = {
                 "isin": isin,
                 "name": direct_child_text(general, "FullNm"),
                 "shortName": direct_child_text(general, "ShrtNm"),
                 "cfi": cfi,
+                "cfiGroup": cfi_group,
+                "instrumentType": instrument_type,
                 "currency": direct_child_text(general, "NtnlCcy"),
-                "maturityDate": (
-                    first_descendant_text(debt, "MtrtyDt") if debt is not None else None
-                ),
-                "couponRate": (
-                    first_descendant_text(debt, "Fxd")
-                    or first_descendant_text(debt, "IntrstRate")
-                    if debt is not None else None
-                ),
+                "maturityDate": maturity,
+                "maturityDateRaw": maturity_raw,
+                "maturityDateStatus": maturity_status,
+                "couponRate": coupon,
+                "couponRateRaw": coupon_raw,
+                "couponRateStatus": coupon_status,
+                "couponSourceField": coupon_source_field,
+                "floatingRateFieldPresent": floating_rate_element is not None or floating_rate_override is not None,
+                "floatingRateRaw": floating_rate_raw,
+                "floatingRateTerm": floating_rate_term,
+                "floatingRateSpreadBps": floating_rate_spread,
+                "couponRateSource": coupon_source,
+                "couponRateSourceReason": coupon_source_reason,
                 "issuerLei": first_descendant_text(node, "Issr"),
                 "marketMic": first_descendant_text(trading, "Id") if trading is not None else None,
             }
+            if floating_rate_override:
+                record["floatingRateSource"] = floating_rate_override["source"]
+                record["floatingRateSourceReason"] = floating_rate_override["reason"]
             records.append(record)
             node.clear()
     except ET.ParseError as exc:
@@ -191,13 +261,95 @@ def parse_xml(xml_bytes: bytes) -> list[dict]:
     return records
 
 
+MATURITY_SENTINELS = {"9999-12-31", "9999-12-30", "0000-00-00"}
+CFI_GROUP_LABELS = {
+    "DA": "Titre adossé à des actifs (ABS)",
+    "DB": "Obligation (bond)",
+    "DC": "Obligation convertible",
+    "DD": "Certificat représentatif de dette",
+    "DW": "Obligation avec bons de souscription",
+    "DT": "Medium-term note",
+    "DS": "Produit structuré avec protection du capital",
+    "DE": "Produit structuré sans protection du capital",
+    "DG": "Titre adossé à des créances hypothécaires (MBS)",
+    "DN": "Obligation municipale",
+    "DY": "Autre instrument de dette",
+    "DM": "Autre instrument de dette",
+}
+
+
+def classify_cfi(cfi: str | None) -> tuple[str | None, str]:
+    code = str(cfi or "").strip().upper()
+    group = code[:2] if len(code) >= 2 and code.startswith("D") else None
+    return group, CFI_GROUP_LABELS.get(group, "Instrument de dette — groupe CFI à vérifier")
+
+
+def normalized_coupon(raw: str | None) -> tuple[str | None, str | None]:
+    """Accept ESMA coupon percentages only when plausibly expressed as percentages.
+
+    ESMA reporting instructions define this field as a percentage (e.g. 3.375
+    means 3.375%). Values above 100 are withheld from the usable coupon field
+    and retained verbatim for audit; they are never silently rescaled.
+    """
+    if raw is None or not str(raw).strip():
+        return None, None
+    value = str(raw).strip().replace(",", ".")
+    try:
+        number = float(value)
+    except ValueError:
+        return None, "INVALID_SOURCE_VALUE"
+    # float() accepts NaN and infinities; they are malformed source values,
+    # not ordinary numeric outliers. Never let them acquire a misleading
+    # suspicious-but-numeric status.
+    if not math.isfinite(number):
+        return None, "INVALID_SOURCE_VALUE"
+    if not (-100 <= number <= 100):
+        return None, "SUSPICIOUS_SOURCE_VALUE"
+    return value, "SOURCE_PERCENTAGE"
+
+
+def normalized_maturity(debt: ET.Element | None) -> tuple[str | None, str | None, str | None]:
+    """Keep source maturity data, but expose only valid dates as usable maturities."""
+    raw = first_descendant_text(debt, "MtrtyDt") if debt is not None else None
+    if not raw:
+        return None, None, None
+    if raw in MATURITY_SENTINELS:
+        return None, raw, "SENTINEL_UNSPECIFIED"
+
+    try:
+        if "T" in raw:
+            parsed = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+            if parsed.date().isoformat() != raw[:10]:
+                raise ValueError("invalid ISO date component")
+        else:
+            parsed_date = date.fromisoformat(raw)
+            if parsed_date.isoformat() != raw:
+                raise ValueError("date must use YYYY-MM-DD format")
+    except ValueError:
+        return None, raw, "INVALID_SOURCE_VALUE"
+
+    return raw, raw, "SOURCE_DATE"
+
 def completeness(record: dict) -> int:
-    return sum(value not in (None, "") for value in record.values())
+    # Count only meaningful catalogue fields. Raw sentinel values and quality
+    # flags are provenance, not additional financial-data completeness.
+    fields = ("isin", "name", "shortName", "cfi", "currency", "maturityDate", "couponRate", "issuerLei", "marketMic")
+    return sum(record.get(field) not in (None, "") for field in fields)
+
+
+def source_file_provenance(item: dict, archive_data: bytes) -> dict:
+    """Fingerprint one exact ESMA archive so a generated catalogue is reproducible."""
+    return {
+        "filename": item["filename"],
+        "url": item["url"],
+        "bytes": len(archive_data),
+        "sha256": hashlib.sha256(archive_data).hexdigest(),
+    }
 
 
 def build_catalogue() -> dict:
     today = date.today()
-    files = query_esma_files(today - timedelta(days=21), today)
+    files = query_esma_files(today - timedelta(days=LOOKBACK_DAYS), today)
     publication = choose_complete_publication(files)
     publication_date = publication[0]["date"]
     print(f"Selected FULINS_D publication {publication_date}: {len(publication)} part(s)")
@@ -205,10 +357,12 @@ def build_catalogue() -> dict:
     deduplicated: dict[str, dict] = {}
     downloaded_bytes = 0
     xml_count = 0
+    source_files = []
     for item in publication:
         print(f"Downloading {item['filename']}")
         archive_data = http_get(item["url"])
         downloaded_bytes += len(archive_data)
+        source_files.append(source_file_provenance(item, archive_data))
         try:
             with zipfile.ZipFile(io.BytesIO(archive_data)) as archive:
                 xml_names = [n for n in archive.namelist() if n.lower().endswith(".xml")]
@@ -240,6 +394,7 @@ def build_catalogue() -> dict:
         "recordCount": len(records),
         "xmlFileCount": xml_count,
         "downloadedBytes": downloaded_bytes,
+        "sourceFiles": source_files,
         "records": records,
     }
 

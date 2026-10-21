@@ -1,6 +1,14 @@
 name: ESMA FIRDS bulk bond import
 
 on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/esma-firds-bulk-import.yml'
+      - 'scripts/bonds_catalog.py'
+      - 'scripts/audit_bonds_catalog.py'
+      - 'tests/**'
   workflow_dispatch:
     inputs:
       lookback_days:
@@ -26,38 +34,45 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Run offline regression tests
-        run: |
-          python engine/test-esma-firds-bulk-fetch-v37.py
-          python engine/test-bond-bulk-ingestion-v36.py
+      - name: Run existing offline regression tests
+        run: python -m unittest discover -s tests -v
 
-      - name: Discover and download latest complete ESMA debt reference files
+      - name: Build isolated ESMA catalogue preview and audit it
         env:
-          LOOKBACK_DAYS: ${{ inputs.lookback_days || '21' }}
+          BONDS_LOOKBACK_DAYS: ${{ inputs.lookback_days || '21' }}
+          BONDS_CATALOG_OUT: run-v38-esma-audit/bond-catalog-preview.json
         run: |
-          python engine/esma-firds-bulk-fetch-v37.py --days "$LOOKBACK_DAYS" --out data/esma-firds-full
+          mkdir -p run-v38-esma-audit
+          python scripts/bonds_catalog.py
+          python scripts/audit_bonds_catalog.py run-v38-esma-audit/bond-catalog-preview.json > run-v38-esma-audit/audit-report.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
 
-      - name: Run ingestion audit without modifying the canonical master
-        shell: bash
-        run: |
-          shopt -s nullglob
-          files=(data/esma-firds-full/FULINS_D_*.zip)
-          if (( ${#files[@]} == 0 )); then
-            echo 'No verified FULINS_D ZIP files found.' >&2
-            exit 2
-          fi
-          python engine/bond-bulk-ingestion-v36.py \
-            --master data/bond-master-reconciled-v34.json \
-            --firds "${files[@]}" \
-            --out run-v38-esma-audit
+          catalogue_path = Path("run-v38-esma-audit/bond-catalog-preview.json")
+          report_path = Path("run-v38-esma-audit/audit-report.json")
+          catalogue = json.loads(catalogue_path.read_text(encoding="utf-8"))
+          report = json.loads(report_path.read_text(encoding="utf-8"))
+          records = catalogue.get("records")
+          if not isinstance(records, list) or not records:
+              raise SystemExit("ESMA preview is empty or has no records array.")
+          isins = [record.get("isin") for record in records if isinstance(record, dict)]
+          if len(isins) != len(records) or any(not isin for isin in isins):
+              raise SystemExit("ESMA preview contains a malformed record or missing ISIN.")
+          if len(set(isins)) != len(isins):
+              raise SystemExit("ESMA preview contains duplicate ISINs.")
+          if catalogue.get("recordCount") != len(records):
+              raise SystemExit("Catalogue recordCount does not match records length.")
+          if report.get("recordCount") != len(records):
+              raise SystemExit("Audit recordCount does not match catalogue records.")
+          print(f"Validated isolated preview: {len(records)} unique ISINs; canonical catalogue unchanged.")
+          PY
 
-      - name: Upload fetch manifest and ingestion audit
+      - name: Upload ESMA preview and audit report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: esma-firds-bond-audit-${{ github.run_number }}
           if-no-files-found: warn
           retention-days: 30
-          path: |
-            data/esma-firds-full/
-            run-v38-esma-audit/
+          path: run-v38-esma-audit/

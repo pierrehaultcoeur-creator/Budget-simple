@@ -1,3 +1,4 @@
+import hashlib
 import importlib.util
 import pathlib
 import unittest
@@ -9,6 +10,188 @@ SPEC.loader.exec_module(module)
 
 
 class ParserTests(unittest.TestCase):
+    def test_cfi_groups_distinguish_bonds_from_structured_products(self):
+        self.assertEqual(module.classify_cfi("DBVUPN"), ("DB", "Obligation (bond)"))
+        self.assertEqual(
+            module.classify_cfi("DEXXXX"),
+            ("DE", "Produit structuré sans protection du capital"),
+        )
+        # Keep the parser's DY label aligned with the quality auditor's CFI
+        # taxonomy; DY is other debt instruments, not a money-market label.
+        self.assertEqual(
+            module.classify_cfi("DYXXXX"),
+            ("DY", "Autre instrument de dette"),
+        )
+
+    def test_suspicious_coupon_is_withheld_not_rescaled(self):
+        self.assertEqual(module.normalized_coupon("3375"), (None, "SUSPICIOUS_SOURCE_VALUE"))
+        self.assertEqual(module.normalized_coupon("3.375"), ("3.375", "SOURCE_PERCENTAGE"))
+        self.assertEqual(module.normalized_coupon("NaN"), (None, "INVALID_SOURCE_VALUE"))
+        self.assertEqual(module.normalized_coupon("Infinity"), (None, "INVALID_SOURCE_VALUE"))
+        self.assertEqual(module.normalized_coupon("-Infinity"), (None, "INVALID_SOURCE_VALUE"))
+        self.assertEqual(module.normalized_coupon(None), (None, None))
+
+    def test_verified_coupon_override_corrects_display_value_and_preserves_source(self):
+        xml = b"""<Document>
+          <FinInstrm>
+            <FinInstrmGnlAttrbts>
+              <Id>GR0118017657</Id>
+              <FullNm>GGB 3.375 2/25 GREECE</FullNm>
+              <ClssfctnTp>DBFTGB</ClssfctnTp>
+              <NtnlCcy>EUR</NtnlCcy>
+            </FinInstrmGnlAttrbts>
+            <DebtInstrmAttrbts>
+              <MtrtyDt>2025-02-15</MtrtyDt>
+              <Fxd>3375</Fxd>
+            </DebtInstrmAttrbts>
+          </FinInstrm>
+        </Document>"""
+        records = module.parse_xml(xml)
+        self.assertEqual(len(records), 1)
+        record = records[0]
+        self.assertEqual(record["couponRate"], "3.375")
+        self.assertEqual(record["couponRateRaw"], "3375")
+        self.assertEqual(record["couponRateStatus"], "VERIFIED_OVERRIDE")
+        self.assertEqual(
+            record["couponRateSource"],
+            module.COUPON_OVERRIDES["GR0118017657"]["source"],
+        )
+        self.assertTrue(record["couponRateSourceReason"])
+
+    def test_floating_rate_metadata_blocks_fixed_coupon_override(self):
+        xml = b"""<Document>
+          <FinInstrm>
+            <FinInstrmGnlAttrbts>
+              <Id>GR0118017657</Id>
+              <FullNm>Ambiguous floating-rate instrument</FullNm>
+              <ClssfctnTp>DBFTGB</ClssfctnTp>
+            </FinInstrmGnlAttrbts>
+            <DebtInstrmAttrbts>
+              <Fxd>3375</Fxd>
+              <IntrstRate><Fltg>Y</Fltg></IntrstRate>
+            </DebtInstrmAttrbts>
+          </FinInstrm>
+        </Document>"""
+        record = module.parse_xml(xml)[0]
+        self.assertIsNone(record["couponRate"])
+        self.assertEqual(record["couponRateRaw"], "3375")
+        self.assertEqual(record["couponRateStatus"], "FLOATING_RATE_REFERENCE")
+        self.assertIsNone(record["couponRateSource"])
+        self.assertTrue(record["floatingRateFieldPresent"])
+
+    def test_floating_rate_metadata_blocks_even_verified_coupon_override(self):
+        xml = b"""<Document>
+          <FinInstrm>
+            <FinInstrmGnlAttrbts>
+              <Id>GR0118017657</Id>
+              <FullNm>Floating rate conflict fixture</FullNm>
+              <ClssfctnTp>DBFTGR</ClssfctnTp>
+            </FinInstrmGnlAttrbts>
+            <DebtInstrmAttrbts>
+              <Fxd>3375</Fxd>
+              <IntrstRate><Fltg><RefRate><Indx>EURIBOR</Indx></RefRate><Term>3M</Term><BsisPtSprd>125</BsisPtSprd></Fltg></IntrstRate>
+            </DebtInstrmAttrbts>
+          </FinInstrm>
+        </Document>"""
+        record = module.parse_xml(xml)[0]
+        self.assertIsNone(record["couponRate"])
+        self.assertEqual(record["couponRateRaw"], "3375")
+        self.assertEqual(record["couponRateStatus"], "FLOATING_RATE_REFERENCE")
+        self.assertTrue(record["floatingRateFieldPresent"])
+        self.assertIsNone(record["couponRateSource"])
+
+    def test_maturity_sentinel_is_not_a_real_maturity(self):
+        sentinel = module.ET.fromstring(
+            "<DebtInstrmAttrbts><MtrtyDt>9999-12-31</MtrtyDt></DebtInstrmAttrbts>"
+        )
+        self.assertEqual(
+            module.normalized_maturity(sentinel),
+            (None, "9999-12-31", "SENTINEL_UNSPECIFIED"),
+        )
+        real_date = module.ET.fromstring(
+            "<DebtInstrmAttrbts><MtrtyDt>2030-12-31</MtrtyDt></DebtInstrmAttrbts>"
+        )
+        self.assertEqual(
+            module.normalized_maturity(real_date),
+            ("2030-12-31", "2030-12-31", "SOURCE_DATE"),
+        )
+
+    def test_invalid_maturity_is_preserved_for_audit_but_not_exposed_as_a_date(self):
+        invalid_dates = ("2030-02-31", "2030-13-01", "not-a-date")
+        for raw in invalid_dates:
+            with self.subTest(raw=raw):
+                node = module.ET.fromstring(
+                    f"<DebtInstrmAttrbts><MtrtyDt>{raw}</MtrtyDt></DebtInstrmAttrbts>"
+                )
+                self.assertEqual(
+                    module.normalized_maturity(node),
+                    (None, raw, "INVALID_SOURCE_VALUE"),
+                )
+
+    def test_iso_datetime_maturity_is_validated_and_preserved(self):
+        raw = "2030-12-31T00:00:00Z"
+        node = module.ET.fromstring(
+            f"<DebtInstrmAttrbts><MtrtyDt>{raw}</MtrtyDt></DebtInstrmAttrbts>"
+        )
+        self.assertEqual(
+            module.normalized_maturity(node),
+            (raw, raw, "SOURCE_DATE"),
+        )
+
+    def test_sentinel_metadata_does_not_inflate_record_completeness(self):
+        real = {
+            "isin": "FR0000047607",
+            "name": "Example bond",
+            "maturityDate": "2030-12-31",
+            "couponRate": "3.25",
+        }
+        sentinel = {
+            "isin": "FR0000047607",
+            "name": "Example bond",
+            "maturityDate": None,
+            "maturityDateRaw": "9999-12-31",
+            "maturityDateStatus": "SENTINEL_UNSPECIFIED",
+            "couponRate": "3.25",
+        }
+        self.assertGreater(module.completeness(real), module.completeness(sentinel))
+
+    def test_coupon_provenance_distinguishes_fixed_interest_and_floating_fields(self):
+        xml = b"""<Document>
+          <FinInstrm>
+            <FinInstrmGnlAttrbts><Id>FR0000120271</Id><FullNm>Fixed coupon</FullNm><ClssfctnTp>DBFTFR</ClssfctnTp></FinInstrmGnlAttrbts>
+            <DebtInstrmAttrbts><Fxd>3.25</Fxd></DebtInstrmAttrbts>
+          </FinInstrm>
+          <FinInstrm>
+            <FinInstrmGnlAttrbts><Id>US0378331005</Id><FullNm>Floating rate</FullNm><ClssfctnTp>DBFTFR</ClssfctnTp></FinInstrmGnlAttrbts>
+            <DebtInstrmAttrbts><Fltg>Y</Fltg></DebtInstrmAttrbts>
+          </FinInstrm>
+        </Document>"""
+        records = module.parse_xml(xml)
+        self.assertEqual(len(records), 2)
+        self.assertEqual(records[0]["couponRate"], "3.25")
+        self.assertEqual(records[0]["couponSourceField"], "Fxd")
+        self.assertFalse(records[0]["floatingRateFieldPresent"])
+        self.assertIsNone(records[1]["couponRate"])
+        self.assertIsNone(records[1]["couponSourceField"])
+        self.assertTrue(records[1]["floatingRateFieldPresent"])
+        self.assertEqual(records[1]["floatingRateRaw"], "Y")
+
+    def test_nested_floating_rate_fields_are_detected_without_faking_coupon(self):
+        xml = b"""<Document>
+          <FinInstrm>
+            <FinInstrmGnlAttrbts><Id>US0378331005</Id><FullNm>Floating rate note</FullNm><ClssfctnTp>DBVUFR</ClssfctnTp></FinInstrmGnlAttrbts>
+            <DebtInstrmAttrbts><Fxd>305</Fxd><IntrstRate><Fltg><RefRate><Indx>EURIBOR</Indx></RefRate><Term>3M</Term><BsisPtSprd>125</BsisPtSprd></Fltg></IntrstRate></DebtInstrmAttrbts>
+          </FinInstrm>
+        </Document>"""
+        record = module.parse_xml(xml)[0]
+        self.assertIsNone(record["couponRate"])
+        self.assertEqual(record["couponRateRaw"], "305")
+        self.assertEqual(record["couponRateStatus"], "FLOATING_RATE_REFERENCE")
+        self.assertTrue(record["floatingRateFieldPresent"])
+        self.assertEqual(record["floatingRateRaw"], "EURIBOR")
+        self.assertEqual(record["floatingRateTerm"], "3M")
+        self.assertEqual(record["floatingRateSpreadBps"], "125")
+
     def test_debt_filter_and_fields(self):
         xml = (ROOT / "tests" / "sample_fulins.xml").read_bytes()
         records = module.parse_xml(xml)
@@ -19,7 +202,199 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(records[0]["currency"], "EUR")
         self.assertEqual(records[0]["maturityDate"], "2030-12-31")
         self.assertEqual(records[0]["couponRate"], "3.25")
+        self.assertEqual(records[0]["couponRateRaw"], "3.25")
+        self.assertEqual(records[0]["couponRateStatus"], "SOURCE_PERCENTAGE")
         self.assertEqual(records[0]["marketMic"], "XPAR")
+
+
+    def test_unverified_netcity_coupon_overrides_are_not_applied(self):
+        # The public CBI register confirms issue titles and coupons, but the
+        # accessible source text does not expose the exact ISIN. Keep both
+        # raw ESMA values and suppress the overrides until exact-ISIN evidence
+        # is available; do not turn a plausible name match into verified data.
+        cases = (
+            ("XS3420465927", "5468", "5.468", "2046-06-30"),
+            ("XS3420466065", "5611", "5.611", "2052-12-31"),
+        )
+        for isin, raw_coupon, coupon_text, maturity in cases:
+            with self.subTest(isin=isin):
+                self.assertNotIn(isin, module.COUPON_OVERRIDES)
+                xml = f"""<Document>
+                  <FinInstrm>
+                    <FinInstrmGnlAttrbts>
+                      <Id>{isin}</Id>
+                      <FullNm>Netcity Telecom S.A. {coupon_text} per cent Secured Amortising Bonds</FullNm>
+                      <ClssfctnTp>DBFXFR</ClssfctnTp>
+                      <NtnlCcy>EUR</NtnlCcy>
+                    </FinInstrmGnlAttrbts>
+                    <DebtInstrmAttrbts><Fxd>{raw_coupon}</Fxd><MtrtyDt>{maturity}</MtrtyDt></DebtInstrmAttrbts>
+                  </FinInstrm>
+                </Document>""".encode()
+                record = module.parse_xml(xml)[0]
+                self.assertIsNone(record["couponRate"])
+                self.assertEqual(record["couponRateRaw"], raw_coupon)
+                self.assertEqual(record["couponRateStatus"], "SUSPICIOUS_SOURCE_VALUE")
+                self.assertIsNone(record["couponRateSource"])
+
+
+    def test_verified_greek_coupon_overrides_keep_raw_esma_values(self):
+        cases = (
+            ("GR0128010676", "2023-02-24"),
+            ("GR0128011682", "2024-02-24"),
+            ("GR0128012698", "2025-02-24"),
+            ("GR0128013704", "2026-02-24"),
+            ("GR0128014710", "2027-02-24"),
+        )
+        for isin, maturity in cases:
+            with self.subTest(isin=isin):
+                xml = f"""<Document>
+                  <FinInstrm>
+                    <FinInstrmGnlAttrbts>
+                      <Id>{isin}</Id>
+                      <FullNm>Greek Government Bond</FullNm>
+                      <ClssfctnTp>DBFTGB</ClssfctnTp>
+                      <NtnlCcy>EUR</NtnlCcy>
+                    </FinInstrmGnlAttrbts>
+                    <DebtInstrmAttrbts><MtrtyDt>{maturity}</MtrtyDt><Fxd>365</Fxd></DebtInstrmAttrbts>
+                  </FinInstrm>
+                </Document>""".encode()
+                record = module.parse_xml(xml)[0]
+                self.assertEqual(record["couponRate"], "2.000")
+                self.assertEqual(record["couponRateRaw"], "365")
+                self.assertEqual(record["couponRateStatus"], "VERIFIED_OVERRIDE")
+                self.assertEqual(record["couponRateSource"], module.COUPON_OVERRIDES[isin]["source"])
+                self.assertTrue(record["couponRateSourceReason"])
+
+
+    def test_every_coupon_override_has_complete_provenance_and_valid_rate(self):
+        # Keep all manual corrections auditable; a single incomplete entry
+        # must fail CI instead of silently enriching catalogue records.
+        self.assertTrue(module.COUPON_OVERRIDES)
+        for isin, override in module.COUPON_OVERRIDES.items():
+            with self.subTest(isin=isin):
+                self.assertRegex(isin, module.ISIN_RE)
+                self.assertIsInstance(override, dict)
+                self.assertTrue(str(override.get("reason") or "").strip())
+                source = str(override.get("source") or "")
+                self.assertTrue(source.startswith("https://"), "Override needs an HTTPS source URL")
+                rate_text = str(override.get("couponRate") or "").strip()
+                self.assertRegex(rate_text, r"^-?\d+(?:\.\d+)?$")
+                rate = float(rate_text)
+                self.assertTrue(module.math.isfinite(rate))
+                self.assertGreaterEqual(rate, -100)
+                self.assertLessEqual(rate, 100)
+
+
+    def test_verified_floating_rate_override_preserves_margin_without_faking_fixed_coupon(self):
+        xml = b"""<Document>
+          <FinInstrm>
+            <FinInstrmGnlAttrbts>
+              <Id>NO0012654534</Id>
+              <FullNm>JYSKE BANK A-S Issue of NOK 400,000,000 Tier 2 Subordinated Floating Rate Notes due August 2032</FullNm>
+              <ShrtNm>Jyske Bank/VAR BD 20320831</ShrtNm>
+              <ClssfctnTp>DBVUGR</ClssfctnTp>
+              <NtnlCcy>NOK</NtnlCcy>
+            </FinInstrmGnlAttrbts>
+            <DebtInstrmAttrbts>
+              <MtrtyDt>2032-08-31</MtrtyDt>
+              <Fxd>305</Fxd>
+            </DebtInstrmAttrbts>
+          </FinInstrm>
+        </Document>"""
+        record = module.parse_xml(xml)[0]
+        override = module.FLOATING_RATE_OVERRIDES["NO0012654534"]
+        self.assertIsNone(record["couponRate"])
+        self.assertEqual(record["couponRateRaw"], "305")
+        self.assertEqual(record["couponRateStatus"], "FLOATING_RATE_REFERENCE")
+        self.assertEqual(record["couponSourceField"], "Fxd")
+        self.assertTrue(record["floatingRateFieldPresent"])
+        self.assertEqual(record["floatingRateRaw"], "NIBOR")
+        self.assertEqual(record["floatingRateTerm"], "3M")
+        self.assertEqual(record["floatingRateSpreadBps"], "305")
+        self.assertEqual(record["floatingRateSource"], override["source"])
+        self.assertTrue(record["floatingRateSourceReason"])
+
+    def test_verified_cairn_floating_rate_override_preserves_euribor_margin(self):
+        xml = b"""<Document>
+          <FinInstrm>
+            <FinInstrmGnlAttrbts>
+              <Id>XS1538267490</Id>
+              <FullNm>Cairn CLO VII Class D IM Removal and Replacement Non-Voting Notes</FullNm>
+              <ClssfctnTp>DBVUEU</ClssfctnTp>
+              <NtnlCcy>EUR</NtnlCcy>
+            </FinInstrmGnlAttrbts>
+            <DebtInstrmAttrbts>
+              <Fxd>342</Fxd>
+            </DebtInstrmAttrbts>
+          </FinInstrm>
+        </Document>"""
+        record = module.parse_xml(xml)[0]
+        override = module.FLOATING_RATE_OVERRIDES["XS1538267490"]
+        self.assertIsNone(record["couponRate"])
+        self.assertEqual(record["couponRateRaw"], "342")
+        self.assertEqual(record["couponRateStatus"], "FLOATING_RATE_REFERENCE")
+        self.assertEqual(record["couponSourceField"], "Fxd")
+        self.assertTrue(record["floatingRateFieldPresent"])
+        self.assertEqual(record["floatingRateRaw"], "EURIBOR")
+        self.assertEqual(record["floatingRateTerm"], "3M/6M")
+        self.assertEqual(record["floatingRateSpreadBps"], "342")
+        self.assertEqual(record["floatingRateSource"], override["source"])
+        self.assertTrue(record["floatingRateSourceReason"])
+
+
+    def test_verified_alhambra_class_a_floating_rate_override(self):
+        xml = b"""<Document>
+          <FinInstrm>
+            <FinInstrmGnlAttrbts>
+              <Id>XS2074549820</Id>
+              <FullNm>ALHAMBRA SME FUNDING 2019-1 DAC Class A Residential Mortgage Backed Floating Rate Notes 2028</FullNm>
+              <ClssfctnTp>DBVXFR</ClssfctnTp>
+              <NtnlCcy>EUR</NtnlCcy>
+            </FinInstrmGnlAttrbts>
+            <DebtInstrmAttrbts>
+              <MtrtyDt>2028-11-30</MtrtyDt>
+              <Fxd>200</Fxd>
+            </DebtInstrmAttrbts>
+          </FinInstrm>
+        </Document>"""
+        record = module.parse_xml(xml)[0]
+        override = module.FLOATING_RATE_OVERRIDES["XS2074549820"]
+        self.assertIsNone(record["couponRate"])
+        self.assertEqual(record["couponRateRaw"], "200")
+        self.assertEqual(record["couponRateStatus"], "FLOATING_RATE_REFERENCE")
+        self.assertEqual(record["couponSourceField"], "Fxd")
+        self.assertTrue(record["floatingRateFieldPresent"])
+        self.assertEqual(record["floatingRateRaw"], "EURIBOR")
+        self.assertEqual(record["floatingRateTerm"], "1M")
+        self.assertEqual(record["floatingRateSpreadBps"], "200")
+        self.assertEqual(record["floatingRateSource"], override["source"])
+        self.assertTrue(record["floatingRateSourceReason"])
+
+
+    def test_every_floating_rate_override_has_complete_provenance(self):
+        for isin, override in module.FLOATING_RATE_OVERRIDES.items():
+            with self.subTest(isin=isin):
+                self.assertRegex(isin, r"^[A-Z]{2}[A-Z0-9]{9}[0-9]$")
+                self.assertTrue(override["reason"].strip())
+                self.assertTrue(override["source"].startswith("https://"))
+                self.assertIn(override["referenceRate"], {"NIBOR", "EURIBOR", "SOFR", "SONIA"})
+                self.assertRegex(override["term"], r"^(?:1M|3M|6M|12M|3M/6M)$")
+                self.assertGreater(int(override["spreadBps"]), 0)
+
+
+    def test_source_file_provenance_records_exact_archive_fingerprint(self):
+        item = {
+            "filename": "FULINS_D_20261017_1of1.zip",
+            "url": "https://registers.esma.europa.eu/files/FULINS_D_20261017_1of1.zip",
+        }
+        archive = b"sample archive payload"
+        expected = {
+            "filename": item["filename"],
+            "url": item["url"],
+            "bytes": len(archive),
+            "sha256": hashlib.sha256(archive).hexdigest(),
+        }
+        self.assertEqual(module.source_file_provenance(item, archive), expected)
 
 
 if __name__ == "__main__":
