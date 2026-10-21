@@ -78,6 +78,9 @@ def audit_records(records: list[dict], coupon_overrides: dict | None = None) -> 
     verified_coupon_override_count = 0
     verified_coupon_overrides = []
     unresolved_suspicious_coupon_count = 0
+    quarantined_suspicious_coupon_count = 0
+    unquarantined_suspicious_coupon_count = 0
+    unquarantined_suspicious_coupon_samples = []
     verified_floating_rate_coupon_resolution_count = 0
     verified_floating_rate_coupon_resolutions = []
     sample_sentinels = []
@@ -288,6 +291,13 @@ def audit_records(records: list[dict], coupon_overrides: dict | None = None) -> 
                         "name": record.get("name"),
                     }
                     suspicious_coupon_records.append(detail)
+                    if status == "SUSPICIOUS_SOURCE_VALUE":
+                        if record.get("couponRate") in (None, ""):
+                            quarantined_suspicious_coupon_count += 1
+                        else:
+                            unquarantined_suspicious_coupon_count += 1
+                            if len(unquarantined_suspicious_coupon_samples) < 10:
+                                unquarantined_suspicious_coupon_samples.append(detail)
                     benchmark = str(record.get("floatingRateRaw") or "").strip().upper()
                     term = str(record.get("floatingRateTerm") or "").strip().upper()
                     try:
@@ -468,6 +478,9 @@ def audit_records(records: list[dict], coupon_overrides: dict | None = None) -> 
         "verifiedCouponOverrides": verified_coupon_overrides,
         "couponOverrideCoverage": coupon_override_coverage,
         "unresolvedSuspiciousCouponCount": unresolved_suspicious_coupon_count,
+        "quarantinedSuspiciousCouponCount": quarantined_suspicious_coupon_count,
+        "unquarantinedSuspiciousCouponCount": unquarantined_suspicious_coupon_count,
+        "unquarantinedSuspiciousCouponSamples": unquarantined_suspicious_coupon_samples,
         "verifiedFloatingRateCouponResolutionCount": verified_floating_rate_coupon_resolution_count,
         "verifiedFloatingRateCouponResolutions": verified_floating_rate_coupon_resolutions,
         "suspiciousCouponSamples": suspicious_coupon_samples,
