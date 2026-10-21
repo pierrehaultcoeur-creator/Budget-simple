@@ -332,6 +332,17 @@ body{font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;le
  .upvanta-goal-cover{height:96px}
 }
 
+
+/* Illustrated category badges — bespoke mini artwork, not stock glyphs. */
+.cathead{display:flex;align-items:center;gap:12px}
+.category-art{width:48px;height:48px;display:block;flex:0 0 48px;border-radius:16px;overflow:hidden;filter:drop-shadow(0 3px 3px #3143330a)}
+.category-art svg{display:block;width:100%;height:100%}
+.catname{padding-left:0}
+.catname:before{display:none}
+.card{padding:17px 15px 14px}
+.cathead .catamount{margin-left:auto}
+@media(max-width:420px){.category-art{width:44px;height:44px;flex-basis:44px;border-radius:14px}.cathead{gap:10px}.card{padding:15px 12px 13px}}
+
 </style>
 </head>
 <body>
@@ -480,6 +491,18 @@ function savingsCard(){
     return '<div class="savings-item"><div class="savings-item-top"><span class="savings-item-name">'+labelFor(x.i)+'</span><span class="savings-item-amount">'+eur(x.monthly)+'</span></div><div class="savings-item-meta">'+(x.usage==='stop'?L.savingsStop:L.savingsRare)+' · '+L.savingsMonthly+'</div>'+sinceText+'<div class="savings-actions"><button class="savings-btn" onclick="openExpenseByRef(\''+x.c.id+'\',\''+x.i.id+'\')">'+uiIcon('edit')+'<span>'+L.savingsEdit+'</span></button></div></div>';
   }).join('');
   return '<section class="savings-card"><div class="savings-head"><span class="savings-icon">'+uiIcon('broom')+'</span><span>'+L.savingsTitle+'</span></div><div class="savings-total">'+eur(total)+'</div><div class="savings-note">'+L.savingsAnnual+' · '+L.savingsTotalNote+'</div><div class="savings-list">'+rows+'</div></section>';
+}
+
+function categoryArtwork(c){
+ const art={
+ home:'<circle cx="24" cy="24" r="20" fill="#F5E7B8"/><path d="M12 23.5 24 13l12 10.5" fill="none" stroke="#B39232" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 22v14h16V22M21 36v-9h6v9" fill="none" stroke="#B39232" stroke-width="2.4" stroke-linejoin="round"/><path d="M10 38h28" stroke="#D1B45B" stroke-width="1.8" stroke-linecap="round"/>',
+ daily:'<circle cx="24" cy="24" r="20" fill="#DDEFE1"/><path d="M13 19h22l-2.5 17h-17L13 19Z" fill="#F8FCF8" stroke="#4F936B" stroke-width="2.2" stroke-linejoin="round"/><path d="M18 19c0-4 2.5-7 6-7s6 3 6 7M18 25h12M20 29h8" fill="none" stroke="#4F936B" stroke-width="2.2" stroke-linecap="round"/>',
+ transport:'<circle cx="24" cy="24" r="20" fill="#DCECF8"/><path d="M12 29 16 18h16l4 11" fill="#F8FCFF" stroke="#448AB8" stroke-width="2.2" stroke-linejoin="round"/><path d="M13 29h22v4H13z" fill="#A9D1EB" stroke="#448AB8" stroke-width="2"/><circle cx="18" cy="34" r="3" fill="#F8FCFF" stroke="#448AB8" stroke-width="2"/><circle cx="30" cy="34" r="3" fill="#F8FCFF" stroke="#448AB8" stroke-width="2"/><path d="M20 18v-4h8v4" stroke="#448AB8" stroke-width="2" fill="none" stroke-linecap="round"/>',
+ subs:'<circle cx="24" cy="24" r="20" fill="#ECE3F8"/><rect x="13" y="15" width="22" height="19" rx="4" fill="#FBF8FF" stroke="#8765B7" stroke-width="2.2"/><path d="M13 21h22" stroke="#8765B7" stroke-width="2.2"/><circle cx="18" cy="18" r="1" fill="#8765B7"/><circle cx="22" cy="18" r="1" fill="#8765B7"/><path d="m21 26 3 3 5-5" fill="none" stroke="#8765B7" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>',
+ fun:'<circle cx="24" cy="24" r="20" fill="#F8E1E0"/><path d="M24 35s-12-7.5-12-15a6.5 6.5 0 0 1 12-3.5A6.5 6.5 0 0 1 36 20c0 7.5-12 15-12 15Z" fill="#FFF8F7" stroke="#C96868" stroke-width="2.2" stroke-linejoin="round"/><path d="M17 23h4l2-4 3 9 2-5h3" fill="none" stroke="#C96868" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>',
+ beauty:'<circle cx="24" cy="24" r="20" fill="#F8E8D7"/><path d="M24 12c3 5 10 9 10 16a10 10 0 0 1-20 0c0-7 7-11 10-16Z" fill="#FFF9F1" stroke="#C78242" stroke-width="2.2" stroke-linejoin="round"/><path d="M20 28c1.5 3 6.5 3 8 0M22 22h.1M27 22h.1" fill="none" stroke="#C78242" stroke-width="2.2" stroke-linecap="round"/>'
+ };
+ return '<span class="category-art" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none">'+(art[c.id]||'<circle cx="24" cy="24" r="20" fill="#DDEFE1"/><path d="M16 24h16M24 16v16" stroke="#4F936B" stroke-width="2.4" stroke-linecap="round"/>')+'</svg></span>';
 }
 function cat(c){let B=c.items.reduce((a,i)=>a+(isVariable(c,i)?0:bud(c,i)),0),X=c.items.reduce((a,i)=>a+sp(c,i),0),FX=c.items.reduce((a,i)=>a+(isVariable(c,i)?0:sp(c,i)),0),VX=X-FX,P=B?Math.min(100,FX/B*100):0;return '<section class="card" data-category="'+c.id+'"><div class="cathead"><div class="catname">'+labelFor(c)+'</div><div class="catamount"><strong>'+eur(X)+'</strong><small>'+(B?eur(B):L.none)+'</small></div></div>'+(B?'<div class="bar"><div class="fill '+(FX>B?'over':'')+'" style="width:'+P+'%"></div></div>':'')+'<div class="sub"><span>'+(B?L.planned+' '+eur(B):L.free)+'</span><span>'+(B?(FX>B?L.over:L.left+' '+eur(B-FX)):'')+(VX>0?(B?' · ':'')+eur(VX)+' '+L.variableSpent:'')+'</span></div>'+c.items.map((i,n)=>item(c,i,n)).join('')+'<button class="add" onclick="openExpenseByRef(\''+c.id+'\',null)">'+L.add+'</button></section>'}
 function item(c,i,n){let b=bud(c,i),x=sp(c,i),v=isVariable(c,i),p=b?Math.min(100,x/b*100):0,variableInfo=v?(b?L.variableRow+' · '+L.variableIndicative+' '+eur(b):L.variableRow):'';return '<div class="row" onclick="openExpenseByRef(\''+c.id+'\',\''+i.id+'\')" style="cursor:pointer"><div class="rowname"><b>'+labelFor(i)+'</b><small>'+(v?variableInfo:(L.planned+' '+eur(b)))+'</small>'+(v?'':'<div class="itembar"><div class="itemfill '+(x>b&&b?'over':'')+'" style="width:'+p+'%"></div></div>')+'</div><div class="money">'+eur(x)+'</div><div class="expense-actions"><button class="row-action" aria-label="'+L.edit+'" onclick="event.stopPropagation();openExpenseByRef(\''+c.id+'\',\''+i.id+'\')">Modifier</button><button class="row-action danger text-action" aria-label="'+L.delete+'" onclick="event.stopPropagation();deleteExpenseByRef(\''+c.id+'\',\''+i.id+'\')">Suppr.</button></div></div>'}
