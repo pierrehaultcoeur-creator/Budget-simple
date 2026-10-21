@@ -2743,3 +2743,50 @@ test('investment page category filter narrows visible results and restores all c
   assert.doesNotMatch(page.elements.results.innerHTML, /Unknown category example/);
   assert.equal(requests, 1, 'Changing the filter must not issue another network search');
 });
+
+
+test('investment page quarantines all blocked coupon statuses without suppressing a complete floating-rate bond', async () => {
+  const payload = {
+    source: 'bond-master',
+    results: [
+      {
+        isin: 'FR0000000010', name: 'Suspicious coupon', instrumentCategory: 'conventional-bond',
+        currency: 'EUR', maturity: '2030-12-31', coupon: null,
+        couponStatus: 'SUSPICIOUS_SOURCE_VALUE', confidence: 'catalog-record'
+      },
+      {
+        isin: 'FR0000000028', name: 'Invalid coupon', instrumentCategory: 'conventional-bond',
+        currency: 'EUR', maturity: '2030-12-31', coupon: null,
+        couponStatus: 'INVALID_SOURCE_VALUE', confidence: 'catalog-record'
+      },
+      {
+        isin: 'FR0000000036', name: 'Unverified external coupon', instrumentCategory: 'conventional-bond',
+        currency: 'EUR', maturity: '2030-12-31', coupon: 4.5,
+        couponStatus: 'NOT_VERIFIED_EXTERNAL_SOURCE', confidence: 'catalog-record'
+      },
+      {
+        isin: 'FR0000000044', name: 'Complete floating-rate bond', instrumentCategory: 'conventional-bond',
+        currency: 'EUR', maturity: '2030-12-31', coupon: null,
+        couponStatus: 'FLOATING_RATE_REFERENCE', floatingRateRaw: 'EURIBOR',
+        floatingRateTerm: '6M', floatingRateSpreadBps: 125,
+        floatingRateFieldPresent: true, confidence: 'catalog-record'
+      }
+    ]
+  };
+  const page = loadInvestmentSearchPage(async url => {
+    if (!url.includes('/.netlify/functions/bond-search?')) {
+      throw new Error('Ordinary name search should call the public handler only: ' + url);
+    }
+    return { ok: true, json: async () => payload };
+  });
+
+  page.elements.q.value = 'coupon';
+  await page.doSearch();
+
+  assert.match(page.elements.results.innerHTML, /Complete floating-rate bond/);
+  assert.doesNotMatch(page.elements.results.innerHTML, /Suspicious coupon|Invalid coupon|Unverified external coupon/);
+  assert.doesNotMatch(page.elements.results.innerHTML, /4\.5 %/,
+    'A numeric coupon from an unverified external source must not be rendered');
+  assert.match(page.elements.status.textContent, /1 résultat\(s\) complet\(s\)/);
+  assert.match(page.elements.status.textContent, /3 fiche\(s\) exclue\(s\) car incomplète\(s\)/);
+});
