@@ -411,6 +411,71 @@ body{font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;le
 @media(min-width:560px){.onboarding-modal{align-items:center;padding:18px}.onboarding-sheet{border-radius:27px;max-height:90dvh;padding:22px}.onboarding-ring{width:82px;height:82px}}
 @media(max-width:360px){.onboarding-sheet{padding-left:14px;padding-right:14px}.onboarding-title{font-size:21px}.onboarding-sub-grid{gap:6px}.onboarding-sub-option{font-size:9px}}
 
+
+/* Onboarding visual rebuild: full-screen, centered ring and focused question card. */
+.onboarding-modal{inset:0;background:#f7f8f4;align-items:stretch;justify-content:center;padding:0;overflow:hidden}
+.onboarding-sheet{width:100%;height:100dvh;max-height:100dvh;overflow-y:auto;border-radius:0;padding:calc(12px + env(safe-area-inset-top)) 22px calc(18px + env(safe-area-inset-bottom));background:linear-gradient(180deg,#fbfcf9 0%,#f5f7f2 100%);box-shadow:none;animation:onboard-rise .24s ease-out;display:flex;flex-direction:column;box-sizing:border-box}
+.onboarding-top{min-height:42px;margin-bottom:12px}
+.onboarding-brand{font-size:17px;letter-spacing:-.055em}
+.onboarding-brand-mark{width:32px;height:32px;border-radius:11px;background:#fff;border:1px solid #edf0e9;box-shadow:0 3px 12px #344b390a}
+.onboarding-skip-all{font-size:11px;color:#758579}
+.onboarding-progress{height:3px;margin-bottom:0;background:#e7ebe4}
+.onboarding-progress span{background:linear-gradient(90deg,#c7b44c 0%,#6da082 100%)}
+.onboarding-balance{margin:clamp(14px,3.2vh,30px) 0 clamp(12px,2.7vh,24px);flex-shrink:0}
+.onboarding-ring{width:clamp(142px,39vw,178px);height:clamp(142px,39vw,178px);padding:8px;background:conic-gradient(#b8a43a var(--onboard-progress,0%),#e5e9e0 0);filter:drop-shadow(0 7px 15px #a99a3a12)}
+.onboarding-ring>div{background:#fbfcf9}
+.onboarding-ring strong{font-size:clamp(24px,6.3vw,30px);font-weight:800;color:#5f9276;letter-spacing:-.065em}
+.onboarding-ring small{font-size:10px;color:#929a90;margin-top:4px}
+#onboardingContent{width:100%;max-width:440px;margin:0 auto;background:#fff;border:1px solid #e8ece5;border-radius:25px;padding:21px 18px 16px;box-sizing:border-box;box-shadow:0 10px 30px #344d3809;flex-shrink:0}
+.onboarding-title{font-size:25px;line-height:1.08;letter-spacing:-.065em;color:#354238;font-weight:820;margin:0 0 7px}
+.onboarding-subtitle{font-size:12px;line-height:1.5;color:#929990;margin:0 0 17px}
+.onboarding-item-head{display:flex;align-items:center;gap:11px;margin:0 0 14px;padding:0 1px}
+.onboarding-category-art{width:43px;height:43px;flex:0 0 43px;border-radius:15px;background:#e5f0e6;color:#5b9270;box-shadow:inset 0 0 0 1px #dce9dd}
+.onboarding-category-art svg{width:23px;height:23px;stroke-width:1.8}
+.onboarding-item-head strong{font-size:14px;font-weight:800;letter-spacing:-.025em;color:#3d493f}
+.onboarding-item-head small{font-size:10px;color:#92998f;margin-top:4px}
+.onboarding-amount{height:68px;border:1px solid #e9ede6;border-radius:17px;background:#f9faf7;text-align:center;padding:12px;font-size:34px;font-weight:800;letter-spacing:-.07em;color:#b2a03b;outline:none;caret-color:#5f9276}
+.onboarding-amount::placeholder{color:#d8d8cc}
+.onboarding-amount:focus{background:#fff;border-color:#8db59a;box-shadow:0 0 0 3px #e8f2e9}
+.onboarding-field-help{text-align:center;color:#a0a69d;font-size:10px;margin:9px 0 4px}
+.onboarding-primary{height:49px;border-radius:15px;padding:13px;background:linear-gradient(135deg,#6b9e7e,#548969);color:#fff;font-size:13px;font-weight:800;letter-spacing:-.015em;box-shadow:0 6px 14px #568b6a26;margin-top:16px;cursor:pointer}
+.onboarding-primary:active{transform:scale(.99)}
+.onboarding-secondary{min-height:34px;color:#8d968c;padding:9px;font-size:10px;cursor:pointer}
+.onboarding-day-label{font-size:10px;color:#7c887e;margin:13px 0 7px}
+.onboarding-days{grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.onboarding-day{height:30px;border-radius:9px;background:#f2f4ef;color:#768176}
+.onboarding-day.active{background:#5f9276;box-shadow:0 3px 8px #5f927625}
+.onboarding-sub-grid{gap:9px}
+.onboarding-sub-option{min-height:83px;border:1px solid #e8ece5;border-radius:17px;background:#fcfdfb;font-size:10px;transition:background .15s,border-color .15s}
+.onboarding-sub-option .sub-art{width:34px;height:34px;border-radius:12px;background:#f0f3ed;font-size:15px}
+.onboarding-sub-option.active{border-color:#79a98a;background:#edf5ee;box-shadow:inset 0 0 0 1px #79a98a}
+.onboarding-choice-grid{gap:9px}
+.onboarding-choice{min-height:90px;border-radius:16px;padding:14px 12px}
+.onboarding-choice strong{font-size:12px;letter-spacing:-.02em}
+.onboarding-choice small{font-size:10px;line-height:1.45}
+.onboarding-footnote{margin-top:15px}
+@media(min-width:560px){
+ .onboarding-modal{align-items:center;padding:18px;background:#edf1eb}
+ .onboarding-sheet{width:min(100%,500px);height:auto;max-height:94dvh;border-radius:30px;padding:22px 25px 24px;box-shadow:0 24px 80px #263c2c24}
+ .onboarding-balance{margin:16px 0 18px}
+ #onboardingContent{padding:22px}
+}
+@media(max-height:700px){
+ .onboarding-balance{margin:10px 0 12px}
+ .onboarding-ring{width:124px;height:124px}
+ #onboardingContent{padding:17px 16px 12px}
+ .onboarding-title{font-size:22px}
+ .onboarding-amount{height:58px;font-size:30px}
+ .onboarding-primary{height:45px;margin-top:12px}
+}
+@media(max-width:360px){
+ .onboarding-sheet{padding-left:14px;padding-right:14px}
+ #onboardingContent{padding:17px 13px 13px;border-radius:22px}
+ .onboarding-title{font-size:23px}
+ .onboarding-sub-grid{gap:6px}
+ .onboarding-sub-option{font-size:9px}
+}
+
 </style>
 </head>
 <body>
@@ -825,16 +890,16 @@ function renderOnboardingStep(){
  const step=onboardingSteps[onboardingStep]||'done';p.style.width=Math.min(100,(onboardingStep/(onboardingSteps.length+Math.max(0,onboardingSelectedSubs.length-1)))*100)+'%';onboardingRenderRing();
  let title='',sub='',body='';
  if(step==='income'){title='Pour commencer';sub='Quel est le montant de tes revenus mensuels ?';body=onboardingItemStep('Mes revenus','Revenus nets par mois','income','home','Continuer')}
- else if(step==='rent'){title='Tes dépenses fixes';sub='Commençons par les dépenses qui reviennent chaque mois.';body=onboardingItemStep('Loyer','Montant mensuel','rent','home','Continuer',{day:true})}
+ else if(step==='rent'){title='Tes dépenses fixes';sub='Commençons par les dépenses qui reviennent chaque mois.';body=onboardingItemStep('Loyer','Montant mensuel','rent','home','Continuer')}
  else if(step==='netflix'||step==='spotify'||step==='basicfit'){const subName=step==='netflix'?'Netflix':step==='spotify'?'Spotify':'Basic Fit';const x=onboardingSubs.find(a=>a.name===subName);const existing=onboardingData.subscriptions[subName]||{amount:0,day:1};onboardingBillDay=existing.day||1;title='Tes abonnements';sub='Indique le montant mensuel de '+subName+'.';body='<div class="onboarding-item-head"><span class="onboarding-category-art" style="color:'+x.color+'">'+x.glyph+'</span><div><strong>'+subName+'</strong><small>Montant mensuel</small></div></div><input class="onboarding-amount" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0 €" value="'+(existing.amount||'')+'"><div class="onboarding-field-help">Tu pourras modifier ce montant plus tard</div><div class="onboarding-day-label">Jour du prélèvement (facultatif)</div><div class="onboarding-days">'+Array.from({length:31},(_,i)=>'<button class="onboarding-day'+(onboardingBillDay===i+1?' active':'')+'" onclick="onboardingSetDay('+(i+1)+')">'+(i+1)+'</button>').join('')+'</div><button class="onboarding-primary" onclick="onboardingSaveNamedSubscription(\''+subName+'\')">Valider</button><button class="onboarding-secondary" onclick="onboardingSkipNamedSubscription(\''+subName+'\')">Passer</button>'}
  else if(step==='subscriptions'){title='Tes abonnements';sub='Sélectionne les autres services que tu paies chaque mois.';body='<div class="onboarding-sub-grid">'+onboardingSubs.filter(x=>!['Netflix','Spotify','Basic Fit'].includes(x.name)).map((x,i)=>'<button class="onboarding-sub-option'+(onboardingSelectedSubs.includes(x.name)?' active':'')+'" onclick="onboardingToggleSubName(\''+x.name+'\')"><span class="sub-art" style="color:'+x.color+'">'+x.glyph+'</span><span>'+x.name+'</span></button>').join('')+'</div><button class="onboarding-primary" onclick="onboardingContinueSubs()">Continuer ('+onboardingSelectedSubs.length+')</button><button class="onboarding-secondary" onclick="onboardingSkipStep()">Je n’ai pas d’abonnement</button>'}
  else if(step==='subamount'){const x=onboardingSubs.find(a=>a.name===onboardingSelectedSubs[onboardingSubIndex]);if(!x){onboardingStep++;renderOnboardingStep();return}const existing=onboardingData.subscriptions[x.name]||{amount:0,day:1};onboardingBillDay=existing.day||1;title='Un abonnement à la fois';sub='Renseigne le montant mensuel de '+x.name+'.';body='<div class="onboarding-item-head"><span class="onboarding-category-art" style="color:'+x.color+'">'+x.glyph+'</span><div><strong>'+x.name+'</strong><small>Montant mensuel</small></div><button class="onboarding-secondary" style="margin-left:auto;width:auto" onclick="onboardingSkipSub()">Passer</button></div><input class="onboarding-amount" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0 €" value="'+(existing.amount||'')+'"><div class="onboarding-field-help">Tu pourras modifier ce montant plus tard</div><div class="onboarding-day-label">Jour du prélèvement (facultatif)</div><div class="onboarding-days">'+Array.from({length:31},(_,i)=>'<button class="onboarding-day'+(onboardingBillDay===i+1?' active':'')+'" onclick="onboardingSetDay('+(i+1)+')">'+(i+1)+'</button>').join('')+'</div><button class="onboarding-primary" onclick="onboardingSaveSubscription()">Valider</button><button class="onboarding-secondary" onclick="onboardingSkipSub()">Passer cet abonnement</button>'}
- else if(step==='transport'){title='Le transport';sub='Combien prévois-tu pour tes déplacements chaque mois ?';body=onboardingItemStep('Transport','Budget par mois','transport','transport','Suivant',{day:true})}
+ else if(step==='transport'){title='Le transport';sub='Combien prévois-tu pour tes déplacements chaque mois ?';body=onboardingItemStep('Transport','Budget par mois','transport','transport','Suivant')}
  else if(step==='groceries'){title='Les courses';sub='Définis une première estimation pour ton alimentation.';body=onboardingItemStep('Courses','Budget prévu par mois','groceries','daily','Valider',{frequency:true})}
  else if(step==='restaurants'){title='Les restaurants';sub='Prévois aussi tes repas à l’extérieur si tu le souhaites.';body=onboardingItemStep('Restaurants','Budget prévu par mois','restaurants','fun','Terminer',{frequency:true})}
  else {finishOnboarding();return}
  c.innerHTML='<h1 class="onboarding-title" id="onboardingTitle">'+title+'</h1><p class="onboarding-subtitle">'+sub+'</p>'+body;
- const inp=document.querySelector('#onboardingContent .onboarding-amount');if(inp){inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();const b=c.querySelector('.onboarding-primary');if(b)b.click()}})}
+ const inp=document.querySelector('#onboardingContent .onboarding-amount');if(inp){inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();const b=c.querySelector('.onboarding-primary');if(b)b.click()}});if(step!=='subscriptions'){inp.focus({preventScroll:true});}}
 }
 function onboardingSetDay(day){onboardingBillDay=day;document.querySelectorAll('.onboarding-day').forEach((b,i)=>b.classList.toggle('active',i+1===day));}
 function onboardingSetFrequency(key,value){const current=document.querySelector('#onboardingContent .onboarding-amount');if(current)onboardingData[key]=Math.max(0,Number(current.value)||0);onboardingFrequency[key]=value;renderOnboardingStep();const inp=document.querySelector('#onboardingContent .onboarding-amount');if(inp){inp.focus();inp.setSelectionRange?.(0,inp.value.length)}}
