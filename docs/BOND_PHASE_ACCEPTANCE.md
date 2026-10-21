@@ -96,3 +96,11 @@ Ces ratios mesurent la présence/exploitabilité des champs, pas la vérificatio
 - Le rapport compte 38 731 coupons absents au total, dont 7 566 dans le groupe CFI DB. La présence seule d'un champ de taux variable ne suffit pas : la grande majorité des coupons absents reste non classifiée à ce stade.
 - Critère 8 maintenu OPEN; score inchangé à 8/12 = 66,7 %. La classification exhaustive des coupons absents et la preuve source pour chaque cas restent à faire.
 - Anti-doublon : le run Bond search #254 sur le commit intermédiaire a été CANCELLED quand un commit documentaire plus récent est arrivé; il a été remplacé par #255, SUCCESS, sur le HEAD final. Aucun run vert antérieur n'a été relancé manuellement.
+
+## Mesure actualisée — 21 octobre 2026, coupons suspects qualifiés par taux variable sourcé
+- HEAD de code contrôlé : `51d2c572af1e60110a13faedf4e9551f61aa6394`.
+- Correction de mesure : un coupon brut numériquement suspect n'est plus compté comme non résolu lorsque le catalogue le classe explicitement comme référence de taux variable et qu'une source dédiée, un indice reconnu, une périodicité et un spread exploitable sont tous présents.
+- L'audit précédent comptait 34 cas non résolus; la revue de l'artefact identifie 3 cas avec métadonnées de taux variable sourcées et complètes, laissant 31 valeurs suspectes non résolues. Les 9 overrides fixes qui portent une valeur brute suspecte restent traités séparément; les 10 overrides du registre incluent aussi un cas dont la valeur brute n'est pas un outlier.
+- Régressions ajoutées pour les métadonnées complètes vs incomplètes et pour empêcher l'affichage de la valeur brute suspecte quand la fiche est rendue comme taux variable.
+- [Bond search CI #257](https://github.com/pierrehaultcoeur-creator/Budget-simple/actions/runs/39539160725) et [ESMA audit #70](https://github.com/pierrehaultcoeur-creator/Budget-simple/actions/runs/39539160708) : en cours au moment de cette mesure; ne comptent pas encore comme preuves de réussite.
+- Critères 7 et 8 restent OPEN; score maintenu à 8/12 = 66,7 % jusqu'à obtention des runs et preuve de couverture complète.

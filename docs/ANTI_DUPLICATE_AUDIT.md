@@ -386,3 +386,11 @@ Les contrôles intégrés du commit ci-dessus ont tous réussi : tests Python du
 - Mesure : 38 731 coupons absents (7 566 en CFI DB); seulement 3 fiches avec coupon absent passent les contrôles structurels de métadonnées de taux variable (2 DB, 1 DM). Ce résultat ne prouve pas que le taux est confirmé contractuellement. Le critère 8 reste OPEN et le score reste 8/12 = 66,7 %.
 - Correction documentaire : une ancienne phrase du registre indiquait par erreur 41,7 % alors que le tableau et les preuves indiquaient 8/12 = 66,7 %; la phrase a été harmonisée.
 - Anti-doublon : le run CI #254 CANCELLED sur un commit intermédiaire a été remplacé par #255 SUCCESS sur le HEAD final; aucun contrôle vert précédent n'a été répété manuellement. Catalogue source inchangé; PR #2 reste ouverte en brouillon, non fusionnée et non déployée.
+
+## Audit anti-doublon — résolution des faux « non résolus » par taux variable sourcé (21 octobre 2026)
+- Audit préalable : réutilisation de l'artefact ESMA #68 déjà téléchargé; inspection des 43 valeurs brutes suspectes et des tests existants. Aucun run vert précédent n'a été relancé manuellement.
+- HEAD de code : `51d2c572af1e60110a13faedf4e9551f61aa6394`.
+- Correction : le rapport distingue désormais les overrides de coupon fixe des cas où le champ fixe brut est en réalité la marge d'un taux variable, qualifié par source dédiée et métadonnées complètes. Les trois cas `NO0012654534`, `XS1538267490` et `XS2074549820` disposent d'une source de taux variable, d'un indice reconnu, d'une périodicité et d'un spread; ils ne sont plus comptés comme valeurs non résolues. Les 31 autres outliers non résolus restent quarantinés.
+- Tests ajoutés : la présence d'une source seule ou des métadonnées incomplètes ne résout pas le cas; l'interface ne doit pas afficher la valeur brute du coupon fixe suspect lorsque la fiche est affichée à partir des métadonnées du taux variable.
+- [Bond search CI #257](https://github.com/pierrehaultcoeur-creator/Budget-simple/actions/runs/39539160725) : PENDING; [ESMA audit #70](https://github.com/pierrehaultcoeur-creator/Budget-simple/actions/runs/39539160708) : IN_PROGRESS au moment de l'inscription. Aucun statut vert revendiqué.
+- Critères 7 et 8 maintenus OPEN; score 8/12 = 66,7 %. Aucun catalogue source modifié; PR #2 reste ouverte en brouillon, non fusionnée et non déployée.
