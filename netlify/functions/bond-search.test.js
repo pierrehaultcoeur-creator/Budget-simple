@@ -2659,6 +2659,50 @@ test('investment page explains when an invalid source maturity is withheld', asy
     'The invalid source date must never be shown as a maturity');
 });
 
+test('investment page excludes a fiche with a suspicious withheld fixed coupon', async () => {
+  const payload = {
+    source: 'bond-master',
+    results: [
+      {
+        isin: 'FR0000000010',
+        name: 'Complete verified bond',
+        instrumentCategory: 'conventional-bond',
+        currency: 'EUR',
+        maturity: '2030-12-31',
+        coupon: 3.25,
+        couponStatus: 'SOURCE_PERCENTAGE',
+        confidence: 'catalog-record'
+      },
+      {
+        isin: 'FR0000000028',
+        name: 'Suspicious coupon bond',
+        instrumentCategory: 'conventional-bond',
+        currency: 'EUR',
+        maturity: '2030-12-31',
+        coupon: null,
+        couponStatus: 'SUSPICIOUS_SOURCE_VALUE',
+        couponSourceValue: '3375',
+        confidence: 'catalog-record'
+      }
+    ]
+  };
+  const page = loadInvestmentSearchPage(async url => {
+    if (!url.includes('/.netlify/functions/bond-search?')) {
+      throw new Error('Ordinary name search should call the public handler only: ' + url);
+    }
+    return { ok: true, json: async () => payload };
+  });
+
+  page.elements.q.value = 'bond';
+  await page.doSearch();
+
+  assert.match(page.elements.results.innerHTML, /Complete verified bond/);
+  assert.doesNotMatch(page.elements.results.innerHTML, /Suspicious coupon bond|3375/,
+    'A suspicious raw coupon must be withheld and the incomplete fiche excluded from visible results');
+  assert.match(page.elements.status.textContent, /1 résultat\(s\) complet\(s\)/);
+  assert.match(page.elements.status.textContent, /1 fiche\(s\) exclue\(s\) car incomplète\(s\)/);
+});
+
 test('investment page category filter narrows visible results and restores all categories without another search', async () => {
   let requests = 0;
   const page = loadInvestmentSearchPage(async url => {
