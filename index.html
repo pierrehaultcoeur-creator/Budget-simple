@@ -486,6 +486,84 @@ body{font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;le
 .catamount strong{font-size:18px;letter-spacing:-.05em}
 @media(max-width:420px){.category-art{width:52px;height:52px;flex-basis:52px;border-radius:16px}.cathead{gap:10px}.catname{font-size:15px}}
 
+
+/* Home-screen composition pass: match the reference hierarchy, not just its palette. */
+:root{--up-bg:#f6f2e9;--up-card:#fffefa;--up-sage:#67977b;--up-sage-dark:#3f6f55;--up-gold:#b6a13d;--up-muted:#89928a}
+body{background:var(--up-bg)}
+.app{padding-bottom:calc(91px + env(safe-area-inset-bottom))}
+.top{padding:17px 20px 15px;background:var(--up-sage);color:#fff;border-bottom:1px solid #ffffff22}
+.brand{font-size:25px;letter-spacing:-.065em;font-weight:850}
+.brand span{font-size:11px;letter-spacing:-.02em;color:#e2eee5}
+.top-actions button{border:1px solid #ffffff50;background:#ffffff12;color:#fff;border-radius:15px}
+.monthbar{background:var(--up-sage);color:#fff;padding:11px 18px 18px;border-radius:0 0 23px 23px}
+.monthbar button{width:39px;height:39px;border-radius:50%;background:#ffffff20;color:#fff}
+.month{font-size:18px;line-height:1.1;font-weight:800;letter-spacing:-.035em}
+.swipehint{background:#f5f2ea;color:#969c94;font-size:11px;padding:9px 12px;margin:0;text-align:center}
+.hero{margin:0 14px 19px;padding:19px 16px 15px;background:#fffefa;border:1px solid #ebe8dd;border-radius:28px;box-shadow:0 10px 28px #4d59460a;display:flex;flex-direction:column;align-items:center;text-align:center;gap:0}
+.budget-ring{width:clamp(158px,45vw,184px);padding:7px;background:conic-gradient(var(--up-gold) var(--progress),#e7e8df var(--progress));margin:0 auto 11px}
+.budget-ring:before{inset:7px;background:#fffefa}
+.budget-ring-inner{gap:5px}
+.ring-label{font-size:10px;letter-spacing:0;text-transform:none;font-weight:750;color:#8a938b}
+.ring-value{font-size:clamp(25px,7vw,31px);color:var(--up-sage-dark);letter-spacing:-.065em}
+.hero-kicker{font-size:12px;letter-spacing:0;text-transform:none;font-weight:800;color:#879188;margin:3px 0 5px}
+.hero-progress-copy{font-size:12px;line-height:1.4;color:var(--up-sage-dark);font-weight:750;margin:0 auto 15px;max-width:320px}
+.stats{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.stat{background:#f5f5f0;border:1px solid #e9ebe4;border-radius:17px;padding:11px 13px;text-align:left}
+.stat small{font-size:11px;color:#8b948c;font-weight:700}
+.stat b{font-size:19px;margin-top:4px;color:#3f4941}
+.edit-income{margin-top:10px;padding:8px 12px;width:auto;align-self:stretch;background:transparent;border:1px solid #e8ece5;color:#6c8271;font-size:11px}
+.sectionhead{margin:21px 18px 10px;gap:10px;align-items:center}
+.sectionhead h2{font-size:23px;line-height:1;letter-spacing:-.065em;color:#354238;margin:0}
+.customize-btn{padding:9px 12px;border:1px solid #e7e9e1;border-radius:999px;background:#fffefa;color:#708375;font-size:11px}
+.cards{display:grid;gap:0;margin:0 14px;background:#fffefa;border:1px solid #e9e7df;border-radius:24px;overflow:hidden;box-shadow:0 6px 20px #344b3907}
+.card{border-radius:0;padding:15px 14px 13px;box-shadow:none;border-bottom:1px solid #eeeee7;background:transparent}
+.card:last-child{border-bottom:0}
+.cathead{gap:10px}
+.category-art{width:45px;height:45px;flex-basis:45px;border-radius:15px;box-shadow:inset 0 0 0 1px #ffffffa8,0 3px 8px #374b3709}
+.catname{font-size:15px;font-weight:800;letter-spacing:-.045em;color:#3e493f}
+.catamount strong{font-size:16px;color:#3f4941}
+.catamount small{font-size:10px;color:#969b92}
+.sub{margin-top:6px;font-size:10px;color:#939990}
+.bar{height:4px;margin-top:8px;background:#edeFE9}
+.fill{background:linear-gradient(90deg,#83ae91,#5e9274)}
+.row{grid-template-columns:minmax(0,1fr) auto auto;column-gap:7px;padding:10px 0;border-bottom:1px solid #f0f0eb}
+.rowname b{font-size:13px;font-weight:750;color:#3f4941}
+.rowname small{font-size:10px;color:#999e95}
+.itembar{height:4px;margin-top:7px;background:#eeefe9}
+.itemfill{background:#91b39a}
+.money{font-size:12px;color:#404a42}
+.row-action{width:29px;height:29px;flex-basis:29px}
+.add{margin-top:10px;padding:11px;background:#f2f4ed;color:#68806c;border:1px solid #e9ece3;border-radius:14px;font-size:12px}
+.reference-nav{height:59px;padding:5px 7px calc(5px + env(safe-area-inset-bottom));background:#fffefa;box-shadow:0 -5px 18px #33472e08}
+.reference-nav button{height:48px;border-radius:12px;gap:2px}
+.reference-nav button span{height:25px}
+.reference-nav button svg{width:19px;height:19px}
+.reference-nav button small{font-size:9px}
+.reference-nav button.active{background:#f4e9d5;color:#3f4d42}
+.reference-nav button.active span{background:transparent}
+.fab{width:54px;height:54px;right:15px;bottom:calc(73px + env(safe-area-inset-bottom));box-shadow:0 5px 16px #5d92752b}
+.reports-entry,.tip{margin-left:14px;margin-right:14px}
+@media(max-width:420px){
+ .top{padding:14px 16px 12px}
+ .brand{font-size:23px}
+ .top-actions button{min-width:44px}
+ .monthbar{padding:10px 14px 15px}
+ .hero{margin-left:12px;margin-right:12px;padding:17px 13px 13px;border-radius:25px;margin-bottom:16px}
+ .budget-ring{width:clamp(150px,43vw,170px);margin-bottom:9px}
+ .hero-progress-copy{font-size:11px;margin-bottom:12px}
+ .stat{padding:10px 11px}
+ .stat b{font-size:18px}
+ .sectionhead{margin:19px 16px 10px}
+ .sectionhead h2{font-size:22px}
+ .cards{margin-left:12px;margin-right:12px;border-radius:22px}
+ .card{padding:13px 12px 11px}
+ .category-art{width:42px;height:42px;flex-basis:42px;border-radius:14px}
+ .catname{font-size:14px}
+ .catamount strong{font-size:15px}
+ .row{column-gap:5px;padding:9px 0}
+ .row-action{width:27px;height:27px;flex-basis:27px}
+}
+
 </style>
 </head>
 <body>
