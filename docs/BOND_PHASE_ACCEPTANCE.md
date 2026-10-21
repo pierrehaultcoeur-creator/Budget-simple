@@ -1,7 +1,7 @@
 # Phase obligations — registre d'acceptation et mesure d'avancement
 
 Date de référence : 21 octobre 2026  
-HEAD de référence : `85fbc5436081a282e82e155febc1580c14a3f52f`  
+HEAD de code contrôlé : `71a58080cd5a2845a544136283d73e42ef6a0795`  
 PR #2 : ouverte en brouillon, non fusionnée.
 
 ## Méthode de calcul
@@ -24,7 +24,7 @@ Cette méthode est volontairement stricte. Les métriques de couverture des donn
 | 4 | Batterie CI de recherche verte sur le HEAD de référence | DONE | Bond search CI #39474736280 SUCCESS sur le HEAD `3f756a2a2c00d920c80349e1486849b8a913e00c`; tests catalogue/index, régressions de recherche et syntaxe JavaScript réussis |
 | 5 | Une fiche obligataire ne s'affiche que si tous les champs essentiels requis sont exploitables; sinon elle est exclue des résultats | DONE | `investissement.html` applique `isDisplayEligible` avant le rendu; les régressions couvrent les fiches complètes/incomplètes et l'exclusion de la fiche ESMA incomplète. Bond search CI #39474736280 SUCCESS sur le HEAD de référence |
 | 6 | Tous les overrides de coupon fixe présents dans le registre sont retrouvés et confirmés dans l'audit du catalogue | DONE | ESMA bulk import #39477842942 SUCCESS sur le HEAD courant; rapport artefact : registre 10, correspondances exactes 10, absentes 0, divergences 0. Test dédié de couverture du registre ajouté et CI #39477842905 SUCCESS |
-| 7 | Chaque coupon suspect est sourcé ou mis en quarantaine et exclu des fiches éligibles | OPEN | 43 valeurs suspectes détectées, 34 encore non résolues; le comportement d'exclusion au niveau de la fiche entière n'est pas garanti |
+| 7 | Chaque coupon suspect est sourcé ou mis en quarantaine et exclu des fiches éligibles | OPEN | Test UI sur le HEAD `71a58080cd5a2845a544136283d73e42ef6a0795` : une fiche à coupon suspect est exclue et la valeur brute n'est pas rendue; CI #39534699158 SUCCESS. 34 valeurs restent non résolues et l'exclusion n'est pas encore prouvée pour toutes les fiches/voies de rendu.
 | 8 | Chaque coupon absent est classé (taux variable, valeur non applicable, donnée inconnue) et les fiches non conformes sont exclues | OPEN | 38 731 coupons absents tous groupes CFI confondus; 9 051 dans DA, 7 566 dans DB, et les autres groupes détaillés dans le rapport. Absence de coupon ne signifie pas toujours erreur, donc classification requise |
 | 9 | Les corrections de taux variables sont documentées par ISIN exact et ont des tests de non-confusion marge/coupon | DONE | Jyske `NO0012654534`, Cairn `XS1538267490`, Alhambra `XS2074549820` : sources et régressions présentes; le workflow catalogue du SHA de référence a réussi |
 | 10 | Les échéances sentinelles sont qualifiées et exclues des fiches éligibles; les perpétuelles sont distinguées des données invalides | OPEN | 4 276 dates sentinelles; 2 489 noms suggèrent une perpétuité, 1 787 restent à qualifier. Le champ est masqué par l'interface mais le classement exhaustif n'est pas terminé |
@@ -79,3 +79,11 @@ Ces ratios mesurent la présence/exploitabilité des champs, pas la vérificatio
 - Régressions ajoutées : couverture du registre (ISIN absent ou divergence), et comptage d'un override appliqué à une valeur brute qui n'est pas suspecte.
 - Critère 6 fermé; score recalculé à 8/12 = 66,7 %, contre 7/12 = 58,3 % à la mesure précédente. Restent ouverts : coupons suspects (7), coupons absents (8), échéances sentinelles (10) et provenance complète de la PR (12).
 - Anti-doublon : réutilisation du rapport artefact et des tests CI du SHA courant; aucun re-run manuel, aucune modification du catalogue source dans cette tâche documentaire. PR #2 reste ouverte en brouillon, non fusionnée et non déployée.
+
+
+## Mesure actualisée — 21 octobre 2026, régression UI des coupons suspects
+- HEAD de code contrôlé : `71a58080cd5a2845a544136283d73e42ef6a0795`.
+- [Bond search CI #39534699158](https://github.com/pierrehaultcoeur-creator/Budget-simple/actions/runs/39534699158) : SUCCESS. Le nouveau test de rendu confirme qu'une fiche avec coupon suspect est exclue des résultats, que sa valeur brute n'apparaît pas, et qu'une fiche complète reste visible.
+- [ESMA FIRDS bulk bond import #39534699167](https://github.com/pierrehaultcoeur-creator/Budget-simple/actions/runs/39534699167) : SUCCESS sur le même SHA.
+- Critère 7 maintenu OPEN : le test prouve un chemin UI ciblé, mais les 34 valeurs suspectes non résolues et la couverture de toutes les voies de rendu nécessitent encore une preuve complète. Le score reste 8/12 = 66,7 %.
+- Anti-doublon : runs verts existants réutilisés; aucun rerun manuel. Aucun catalogue source modifié. PR #2 reste ouverte en brouillon, non fusionnée et non déployée.
