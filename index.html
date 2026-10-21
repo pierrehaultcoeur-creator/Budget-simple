@@ -137,6 +137,45 @@ body{background:var(--ref-bg);color:#354039}
 .nav-highlight{outline:2px solid #8db69b;outline-offset:3px;transition:outline-color .5s}
 @media(min-width:600px){.app{border-left:1px solid #edf0ed;border-right:1px solid #edf0ed}.reference-nav{border-left:1px solid #e6eae6;border-right:1px solid #e6eae6}}
 
+
+/* Design alignment pass: match the reference app's warm ivory, ink typography,
+   multicolour category marks, fine budget rails and compact navigation. */
+:root{--ref-green:#648c70;--ref-ink:#302b27;--ref-paper:#f5eee5;--ref-card:#fffaf4;--ref-line:#e7ddd1;--ref-muted:#93887d;--ref-red:#c74d55;--ref-orange:#ed7b4e;--ref-blue:#3599c8;--ref-teal:#259d9a;--ref-purple:#8a57b8}
+body{background:#f5eee5;color:var(--ref-ink);font-family:Inter,Roboto,"Helvetica Neue",system-ui,sans-serif}
+.app{background:var(--ref-paper);max-width:520px;padding:0 13px 106px;box-shadow:none}
+.top{background:#f5eee5;color:var(--ref-ink);margin:0 -13px;padding:15px 17px 12px;min-height:58px;border-bottom:1px solid #e6dcd0}
+.brand{color:var(--ref-ink);font-size:19px;letter-spacing:-.04em}.brand span{color:#8d8176;font-size:12px}
+.calendar-btn,.lang{color:var(--ref-ink);background:#fffaf4;border:1px solid #e7ddd1;box-shadow:none;border-radius:12px}
+.monthbar{background:#f5eee5;color:var(--ref-ink);margin:0 -13px;padding:11px 17px 13px;border:0;border-bottom:1px solid #e6dcd0}
+.monthbar button{background:#ece2d6;color:#665b51;width:34px;height:34px;border-radius:50%;font-size:23px}
+.month{color:var(--ref-ink);font-size:17px}.year{color:#8e8277;font-size:12px}.swipehint{color:#9d9288;margin:9px 0 13px;font-size:11px}
+.hero{background:#fffaf4;color:var(--ref-ink);border:1px solid var(--ref-line);border-radius:18px;padding:17px 15px;margin-bottom:17px;box-shadow:0 3px 12px #54402b09}
+.hero-layout{display:flex;flex-direction:column;align-items:stretch;gap:13px}
+.budget-ring{width:138px;height:138px;align-self:center;padding:7px;background:conic-gradient(#d4a64d var(--progress),#eee5d9 0)}
+.ring-label{font-size:12px;color:#8d8277}.ring-value{font-size:25px;color:#5d8166}
+.hero-details{width:100%;text-align:center}.hero-kicker{color:#8d8277;font-size:14px}.hero-progress-copy{color:#648c70;font-size:13px}
+.stats{gap:9px;margin-top:13px}.stat{background:#f4eee6;border:1px solid #eee4d8;border-radius:12px;padding:10px 12px;color:var(--ref-ink)}.stat small{color:#8e8277;font-size:11px}.stat b{font-size:15px}
+.edit-income{background:#ece4d9;color:#62574c;border-radius:11px;margin-top:10px}
+.sectionhead{margin:19px 3px 10px}.sectionhead h2{font-size:17px;color:var(--ref-ink);letter-spacing:-.02em}.customize-btn{background:#fffaf4;color:#76695e;border:1px solid var(--ref-line);border-radius:12px}
+.cards{gap:0;background:#fffaf4;border:1px solid var(--ref-line);border-radius:18px;overflow:hidden}
+.card{background:transparent;border:0;border-radius:0;padding:13px 13px 12px;box-shadow:none;border-bottom:1px solid #eee5da}
+.card:last-child{border-bottom:0}
+.cathead{gap:10px}.emoji{width:34px;height:34px;border-radius:50%;background:var(--cat-tint,#e9f3ec);color:var(--cat-color,#648c70);font-size:0}
+.emoji svg{width:19px;height:19px;stroke:currentColor}
+.card:nth-child(6n+1){--cat-color:#568e55;--cat-tint:#e4efdf}.card:nth-child(6n+2){--cat-color:#eb7c4d;--cat-tint:#fbe5d8}.card:nth-child(6n+3){--cat-color:#c94f56;--cat-tint:#f7dfe0}.card:nth-child(6n+4){--cat-color:#3299c8;--cat-tint:#dceef7}.card:nth-child(6n+5){--cat-color:#8b58b9;--cat-tint:#eee2f7}.card:nth-child(6n){--cat-color:#239b98;--cat-tint:#d9f0ec}
+.catname{font-size:14px;font-weight:750}.catamount strong{font-size:15px}.catamount small{font-size:11px;color:#9a8e83}
+.bar,.itembar{height:5px;background:#e9e0d6;margin-top:11px;border-radius:2px}.fill,.itemfill{background:var(--cat-color,#648c70);border-radius:2px}
+.sub{font-size:11px;color:#9a8e83}.row{border-color:#eee5da}.add{background:#eee5da;color:#5d7561;border-radius:10px}
+.reports-entry,.savings-card,.tip{border-radius:16px;box-shadow:none;background:#fffaf4;border-color:var(--ref-line)}
+.reports-entry-icon,.savings-icon{border-radius:50%;background:#eee5da;color:#648c70}
+.tip{background:#f0e9df;color:#554d43}.tip-text{border-color:#dfd4c8;color:#675b4e}.tip-head{font-size:14px}
+.fab{right:18px;bottom:83px;width:54px;height:54px;border-radius:50%;background:#648c70;box-shadow:0 5px 15px #385b4124}
+.reference-nav{background:#fffaf4;border-top:1px solid #e7ddd1;box-shadow:0 -3px 12px #51402c08;height:58px;padding:5px 7px calc(5px + env(safe-area-inset-bottom))}
+.reference-nav button{color:#92877c;height:48px;border-radius:9px;gap:2px}
+.reference-nav button span{height:25px;width:33px;border-radius:8px}.reference-nav button svg{width:18px;height:18px}
+.reference-nav button small{font-size:9px;color:inherit}.reference-nav button.active{color:#302b27;background:#f4e7d5}.reference-nav button.active span{background:transparent}
+@media(min-width:600px){.app{border-left:1px solid #e7ddd1;border-right:1px solid #e7ddd1}.reference-nav{border-left:1px solid #e7ddd1;border-right:1px solid #e7ddd1}}
+
 </style>
 </head>
 <body>
