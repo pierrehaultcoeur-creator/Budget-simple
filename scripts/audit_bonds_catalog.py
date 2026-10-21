@@ -86,6 +86,8 @@ def audit_records(records: list[dict], coupon_overrides: dict | None = None) -> 
     missing_coupon_by_cfi_group = Counter()
     missing_coupon_with_floating_field_by_cfi_group = Counter()
     missing_coupon_without_floating_field_by_cfi_group = Counter()
+    missing_coupon_with_complete_floating_rate_by_cfi_group = Counter()
+    missing_coupon_with_incomplete_floating_rate_by_cfi_group = Counter()
     missing_coupon_samples = []
     # Inspectable sample for conventional bonds missing coupon and floating-rate data.
     missing_coupon_without_floating_field_samples = []
@@ -129,11 +131,29 @@ def audit_records(records: list[dict], coupon_overrides: dict | None = None) -> 
             group = cfi[:2] if CFI_RE.fullmatch(cfi) else "UNKNOWN"
             missing_coupon_by_cfi_group[group] += 1
             missing_coupon_source_field_counts_by_cfi[f"{group}:{source_field}"] += 1
-            floating_present = bool(record.get("floatingRateFieldPresent"))
+            floating_present = record.get("floatingRateFieldPresent") is True
+            benchmark = str(record.get("floatingRateRaw") or "").strip().upper()
+            term = str(record.get("floatingRateTerm") or "").strip().upper()
+            spread_raw = record.get("floatingRateSpreadBps")
+            try:
+                spread = float(spread_raw)
+            except (TypeError, ValueError):
+                spread = math.nan
+            floating_rate_complete = (
+                floating_present
+                and benchmark in {"NIBOR", "EURIBOR", "SOFR", "SONIA"}
+                and term in {"1M", "3M", "6M", "12M", "3M/6M"}
+                and math.isfinite(spread)
+                and spread >= 0
+            )
             if floating_present:
                 missing_coupon_with_floating_field_by_cfi_group[group] += 1
             else:
                 missing_coupon_without_floating_field_by_cfi_group[group] += 1
+            if floating_rate_complete:
+                missing_coupon_with_complete_floating_rate_by_cfi_group[group] += 1
+            else:
+                missing_coupon_with_incomplete_floating_rate_by_cfi_group[group] += 1
             if len(missing_coupon_samples) < 30:
                 missing_coupon_samples.append({
                     "isin": isin,
@@ -431,6 +451,8 @@ def audit_records(records: list[dict], coupon_overrides: dict | None = None) -> 
         "missingCouponSourceFieldCountsByCfi": dict(sorted(missing_coupon_source_field_counts_by_cfi.items())),
         "missingCouponWithFloatingFieldByCfiGroup": dict(sorted(missing_coupon_with_floating_field_by_cfi_group.items())),
         "missingCouponWithoutFloatingFieldByCfiGroup": dict(sorted(missing_coupon_without_floating_field_by_cfi_group.items())),
+        "missingCouponWithCompleteFloatingRateByCfiGroup": dict(sorted(missing_coupon_with_complete_floating_rate_by_cfi_group.items())),
+        "missingCouponWithIncompleteFloatingRateByCfiGroup": dict(sorted(missing_coupon_with_incomplete_floating_rate_by_cfi_group.items())),
         "missingCouponSamples": missing_coupon_samples,
         "missingCouponWithoutFloatingFieldSamples": missing_coupon_without_floating_field_samples,
         "sentinelMaturityPerpetualNameHintCount": sentinel_perpetual_name_hints,
