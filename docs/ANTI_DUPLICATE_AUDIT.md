@@ -370,3 +370,11 @@ Les contrôles intégrés du commit ci-dessus ont tous réussi : tests Python du
 - [ESMA FIRDS bulk bond import #63](https://github.com/pierrehaultcoeur-creator/Budget-simple/actions/runs/39534699167) : SUCCESS sur le même SHA; les tests hors ligne et l'audit ESMA passent.
 - Portée : preuve ajoutée sur le rendu de l'interface uniquement. Les 34 valeurs suspectes non résolues restent non résolues dans l'audit; elles ne sont pas déclarées corrigées et le critère 7 reste OPEN tant que la quarantaine n'est pas démontrée pour toutes les fiches et voies de rendu concernées.
 - Aucun catalogue source supprimé ou modifié. Aucun merge ni déploiement; PR #2 reste ouverte en brouillon.
+
+## Audit anti-doublon — classification diagnostique des coupons absents (21 octobre 2026)
+- Audit préalable : relus le registre d'acceptation, le code d'audit, les tests existants de coupon manquant et les derniers runs. Le test qui distinguait seulement la présence du champ de taux variable a été remplacé par un test plus précis; aucun test déjà vert n'a été relancé manuellement.
+- HEAD de code : `509428ca2c9bf5373c1d90622a8e066da4d67048`.
+- Changement : le rapport distingue désormais les coupons absents avec métadonnées de taux variable complètes (indice reconnu, périodicité et spread numérique non négatif) de ceux dont les métadonnées restent incomplètes. La présence du champ seule n'est pas assimilée à une classification validée.
+- Tests sur ce HEAD : [Bond search CI #254](https://github.com/pierrehaultcoeur-creator/Budget-simple/actions/runs/39536916768) est encore PENDING; [ESMA FIRDS bulk bond import #67](https://github.com/pierrehaultcoeur-creator/Budget-simple/actions/runs/39536916706) est encore IN_PROGRESS. Aucun résultat n'est déclaré réussi avant leur conclusion.
+- Critère 8 maintenu OPEN; score maintenu à 8/12 = 66,7 %. Cette amélioration est une mesure diagnostique, pas la classification contractuelle exhaustive des coupons absents.
+- Aucun catalogue source modifié. PR #2 reste ouverte en brouillon, non fusionnée et non déployée.
