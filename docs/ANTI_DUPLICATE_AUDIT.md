@@ -378,3 +378,11 @@ Les contrôles intégrés du commit ci-dessus ont tous réussi : tests Python du
 - Tests sur ce HEAD : [Bond search CI #254](https://github.com/pierrehaultcoeur-creator/Budget-simple/actions/runs/39536916768) est encore PENDING; [ESMA FIRDS bulk bond import #67](https://github.com/pierrehaultcoeur-creator/Budget-simple/actions/runs/39536916706) est encore IN_PROGRESS. Aucun résultat n'est déclaré réussi avant leur conclusion.
 - Critère 8 maintenu OPEN; score maintenu à 8/12 = 66,7 %. Cette amélioration est une mesure diagnostique, pas la classification contractuelle exhaustive des coupons absents.
 - Aucun catalogue source modifié. PR #2 reste ouverte en brouillon, non fusionnée et non déployée.
+
+## Résultat final — diagnostic des coupons absents (21 octobre 2026)
+- HEAD documentaire contrôlé : `c1bd704dbf47a8d444d39530c32f8062b68665e0`.
+- [Bond search CI #255](https://github.com/pierrehaultcoeur-creator/Budget-simple/actions/runs/39536987068) : SUCCESS sur le HEAD final.
+- [ESMA FIRDS bulk bond import #68](https://github.com/pierrehaultcoeur-creator/Budget-simple/actions/runs/39536987069) : SUCCESS sur le HEAD final. L'artefact d'audit a été téléchargé et inspecté.
+- Mesure : 38 731 coupons absents (7 566 en CFI DB); seulement 3 fiches avec coupon absent passent les contrôles structurels de métadonnées de taux variable (2 DB, 1 DM). Ce résultat ne prouve pas que le taux est confirmé contractuellement. Le critère 8 reste OPEN et le score reste 8/12 = 66,7 %.
+- Correction documentaire : une ancienne phrase du registre indiquait par erreur 41,7 % alors que le tableau et les preuves indiquaient 8/12 = 66,7 %; la phrase a été harmonisée.
+- Anti-doublon : le run CI #254 CANCELLED sur un commit intermédiaire a été remplacé par #255 SUCCESS sur le HEAD final; aucun contrôle vert précédent n'a été répété manuellement. Catalogue source inchangé; PR #2 reste ouverte en brouillon, non fusionnée et non déployée.

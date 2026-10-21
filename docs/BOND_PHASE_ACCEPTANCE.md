@@ -36,7 +36,7 @@ Cette méthode est volontairement stricte. Les métriques de couverture des donn
 - Critères DONE : 8 / 12.
 - **Score de critères fermés : 66,7 %**.
 - Critères OPEN : 4 / 12.
-- Le score de 41,7 % est un décompte strict des critères ci-dessus; ce n'est ni le pourcentage d'obligations présentes, ni une estimation du temps ou de l'effort restant.
+- Le score de 66,7 % est un décompte strict des critères ci-dessus; ce n'est ni le pourcentage d'obligations présentes, ni une estimation du temps ou de l'effort restant.
 
 ## Couverture du catalogue — indicateurs distincts
 
@@ -87,3 +87,12 @@ Ces ratios mesurent la présence/exploitabilité des champs, pas la vérificatio
 - [ESMA FIRDS bulk bond import #39534699167](https://github.com/pierrehaultcoeur-creator/Budget-simple/actions/runs/39534699167) : SUCCESS sur le même SHA.
 - Critère 7 maintenu OPEN : le test prouve un chemin UI ciblé, mais les 34 valeurs suspectes non résolues et la couverture de toutes les voies de rendu nécessitent encore une preuve complète. Le score reste 8/12 = 66,7 %.
 - Anti-doublon : runs verts existants réutilisés; aucun rerun manuel. Aucun catalogue source modifié. PR #2 reste ouverte en brouillon, non fusionnée et non déployée.
+
+## Mesure actualisée — 21 octobre 2026, diagnostic des coupons absents
+- HEAD de code et de documentation contrôlé : `c1bd704dbf47a8d444d39530c32f8062b68665e0`.
+- [Bond search CI #255](https://github.com/pierrehaultcoeur-creator/Budget-simple/actions/runs/39536987068) : SUCCESS. Tests hors ligne, intégrité/complétude de l'index des noms, régressions de recherche et syntaxe JavaScript réussis.
+- [ESMA FIRDS bulk bond import #68](https://github.com/pierrehaultcoeur-creator/Budget-simple/actions/runs/39536987069) : SUCCESS. Tests hors ligne, aperçu isolé et rapport d'audit générés; artefact `esma-firds-bond-audit-68` inspecté.
+- Le rapport distingue désormais les coupons absents dont les métadonnées de taux variable satisfont les règles structurelles (indice reconnu, périodicité autorisée, spread numérique non négatif) de ceux dont les métadonnées restent incomplètes. Dans l'aperçu audité, 3 fiches satisfont ces règles structurelles (2 CFI DB, 1 CFI DM); ce n'est pas une validation contractuelle ni une classification exhaustive.
+- Le rapport compte 38 731 coupons absents au total, dont 7 566 dans le groupe CFI DB. La présence seule d'un champ de taux variable ne suffit pas : la grande majorité des coupons absents reste non classifiée à ce stade.
+- Critère 8 maintenu OPEN; score inchangé à 8/12 = 66,7 %. La classification exhaustive des coupons absents et la preuve source pour chaque cas restent à faire.
+- Anti-doublon : le run Bond search #254 sur le commit intermédiaire a été CANCELLED quand un commit documentaire plus récent est arrivé; il a été remplacé par #255, SUCCESS, sur le HEAD final. Aucun run vert antérieur n'a été relancé manuellement.
