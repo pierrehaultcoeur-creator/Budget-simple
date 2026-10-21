@@ -197,7 +197,7 @@ function savingsCard(){
   const rows=list.map(x=>{
     const since=monthsSince(x.reviewAt);
     const sinceText=since>=1 ? '<div class="savings-item-meta">'+L.savingsSince+' : '+eur(x.monthly*since)+'</div>' : '';
-    return '<div class="savings-item"><div class="savings-item-top"><span class="savings-item-name">'+labelFor(x.i)+'</span><span class="savings-item-amount">'+eur(x.monthly)+'</span></div><div class="savings-item-meta">'+(x.usage==='stop'?L.savingsStop:L.savingsRare)+' · '+L.savingsMonthly+'</div>'+sinceText+'<div class="savings-actions"><button class="savings-btn" onclick="openExpenseByRef(\''+x.c.id+'\',\''+x.i.id+'\')">'+uiIcon('edit')+'<span>'+L.savingsEdit+'</button></div></div>';
+    return '<div class="savings-item"><div class="savings-item-top"><span class="savings-item-name">'+labelFor(x.i)+'</span><span class="savings-item-amount">'+eur(x.monthly)+'</span></div><div class="savings-item-meta">'+(x.usage==='stop'?L.savingsStop:L.savingsRare)+' · '+L.savingsMonthly+'</div>'+sinceText+'<div class="savings-actions"><button class="savings-btn" onclick="openExpenseByRef(\''+x.c.id+'\',\''+x.i.id+'\')">'+uiIcon('edit')+'<span>'+L.savingsEdit+'</span></button></div></div>';
   }).join('');
   return '<section class="savings-card"><div class="savings-head"><span class="savings-icon">'+uiIcon('broom')+'</span><span>'+L.savingsTitle+'</span></div><div class="savings-total">'+eur(total)+'</div><div class="savings-note">'+L.savingsAnnual+' · '+L.savingsTotalNote+'</div><div class="savings-list">'+rows+'</div></section>';
 }
