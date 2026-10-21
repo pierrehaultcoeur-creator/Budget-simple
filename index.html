@@ -564,6 +564,63 @@ body{background:var(--up-bg)}
  .row-action{width:27px;height:27px;flex-basis:27px}
 }
 
+
+/* Reference-inspired first impression and compact budget dashboard. */
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 18px 12px}
+.brand{display:flex;flex-direction:column;gap:1px;font-size:24px;line-height:1;letter-spacing:-.065em}
+.brand:before{content:"Bonjour Pierre";font-size:13px;letter-spacing:-.025em;font-weight:800;color:#fff;margin-bottom:3px}
+.brand span{font-size:10px;letter-spacing:0;font-weight:500;color:#e3eee6}
+.top-actions{gap:8px}
+.top-actions button{height:42px;min-width:42px;border-radius:14px}
+.monthbar{padding:9px 14px 13px}
+.monthbar button{width:35px;height:35px}
+.month{font-size:17px}
+.swipehint{padding:7px 10px;font-size:10px}
+.hero{padding:14px 14px 12px;gap:0}
+.budget-ring{width:clamp(140px,38vw,158px);margin-bottom:7px;padding:6px}
+.budget-ring:before{inset:6px}
+.ring-label{font-size:9px}
+.ring-value{font-size:clamp(23px,6vw,28px)}
+.hero-kicker{font-size:11px;margin:2px 0 4px}
+.hero-progress-copy{font-size:11px;margin-bottom:10px}
+.stat{padding:8px 11px;border-radius:14px}
+.stat small{font-size:10px}
+.stat b{font-size:17px;margin-top:3px}
+.edit-income{margin-top:7px;padding:7px 10px;font-size:10px}
+.sectionhead{margin-top:16px;margin-bottom:8px}
+.cards{margin-bottom:12px}
+.category-art{width:43px;height:43px;flex-basis:43px}
+.onboarding-modal{background:#f6f2e9;align-items:stretch;padding:0}
+.onboarding-sheet{width:100%;height:100dvh;max-height:100dvh;overflow-y:auto;border-radius:0;padding:calc(16px + env(safe-area-inset-top)) 22px max(22px,env(safe-area-inset-bottom));display:flex;flex-direction:column;box-shadow:none;animation:none}
+.onboarding-top{margin-bottom:12px}
+.onboarding-progress{margin-bottom:12px}
+.onboarding-balance{margin:0 0 10px}
+.onboarding-ring{width:76px;height:76px}
+.onboarding-ring strong{font-size:15px}
+.onboarding-title{font-size:25px}
+.onboarding-subtitle{font-size:13px}
+.onboarding-welcome{display:flex;flex:1;flex-direction:column;justify-content:center;min-height:0;padding:0 0 14px}
+.welcome-art{width:100%;height:min(34vh,270px);min-height:190px;margin:2px auto 12px;display:grid;place-items:center;overflow:hidden;border-radius:25px;background:radial-gradient(ellipse at 52% 66%,#dce8d5 0%,#edf0e3 44%,#f6f2e9 74%);position:relative}
+.welcome-art svg{height:100%;max-width:100%;width:auto;max-height:280px}
+.welcome-kicker{font-size:12px;color:#758b78;font-weight:750;margin:0 0 5px}
+.welcome-title{font-family:Georgia,serif;font-size:clamp(36px,10vw,47px);line-height:1;letter-spacing:-.065em;color:#315d49;margin:0 0 11px;font-weight:700}
+.welcome-copy{font-size:14px;line-height:1.5;color:#717a70;margin:0 0 15px;max-width:330px}
+.welcome-benefits{display:grid;gap:9px;margin:0 0 15px}
+.welcome-benefit{display:flex;align-items:center;gap:10px;font-size:12px;color:#667267}
+.welcome-benefit span{width:29px;height:29px;display:grid;place-items:center;border-radius:10px;background:#e5eee3;color:#548367;font-weight:800}
+.welcome-actions{margin-top:auto}
+@media(max-width:420px){
+ .top{padding:11px 15px 10px}
+ .brand{font-size:22px}
+ .brand:before{font-size:12px}
+ .monthbar{padding:8px 12px 11px}
+ .hero{padding:13px 12px 11px;margin-bottom:13px}
+ .budget-ring{width:clamp(132px,36vw,148px)}
+ .sectionhead h2{font-size:21px}
+ .onboarding-sheet{padding-left:19px;padding-right:19px}
+ .welcome-art{height:31vh;min-height:175px}
+}
+
 </style>
 </head>
 <body>
@@ -968,7 +1025,7 @@ function deleteUpvantaAsset(i){if(!confirm('Supprimer cet avoir ?'))return;const
 /* First-run guided budget setup. Answers are written into the existing budget model. */
 let onboardingStep=0,onboardingData={},onboardingSelectedSubs=[],onboardingSubIndex=0,onboardingBillDay=1,onboardingFrequency={groceries:'variable',restaurants:'variable'};
 const onboardingSubs=[{name:'Netflix',glyph:'N',color:'#c94b4b'},{name:'Spotify',glyph:'●',color:'#4e9664'},{name:'Disney+',glyph:'D+',color:'#6477b7'},{name:'Prime Video',glyph:'prime',color:'#4a9bb0'},{name:'YouTube Premium',glyph:'▶',color:'#c94b4b'},{name:'Apple Music',glyph:'♫',color:'#b45e8e'},{name:'Basic Fit',glyph:'B',color:'#e5a34a'},{name:'Amazon Prime',glyph:'a',color:'#6b91b4'},{name:'Autre abonnement',glyph:'+',color:'#748a78'}];
-const onboardingSteps=['income','rent','subscriptions','subamount','transport','groceries','restaurants'];
+const onboardingSteps=['welcome','income','rent','subscriptions','subamount','transport','groceries','restaurants'];
 function onboardingOpen(){const modal=document.getElementById('onboardingModal');if(!modal)return;modal.classList.add('show');modal.setAttribute('aria-hidden','false');onboardingStep=0;onboardingData={income:0,rent:0,transport:0,groceries:0,restaurants:0,subscriptions:{}};onboardingSelectedSubs=[];onboardingSubIndex=0;onboardingFrequency={groceries:'variable',restaurants:'variable'};renderOnboardingStep();}
 function onboardingClose(){const m=document.getElementById('onboardingModal');m.classList.remove('show');m.setAttribute('aria-hidden','true');}
 function onboardingRemaining(){return Math.max(0,(Number(onboardingData.income)||0)-(Number(onboardingData.rent)||0)-(Number(onboardingData.transport)||0)-(Number(onboardingData.groceries)||0)-(Number(onboardingData.restaurants)||0)-Object.values(onboardingData.subscriptions||{}).reduce((a,x)=>a+(Number(x.amount)||0),0));}
@@ -979,6 +1036,10 @@ function renderOnboardingStep(){
  const c=document.getElementById('onboardingContent'),p=document.getElementById('onboardingProgress');if(!c)return;
  const step=onboardingSteps[onboardingStep]||'done';p.style.width=Math.min(100,(onboardingStep/(onboardingSteps.length+Math.max(0,onboardingSelectedSubs.length-1)))*100)+'%';onboardingRenderRing();
  let title='',sub='',body='';
+ if(step==='welcome'){
+  c.innerHTML='<div class="onboarding-welcome"><div class="welcome-art" aria-hidden="true"><svg viewBox="0 0 340 260" fill="none"><ellipse cx="171" cy="224" rx="126" ry="15" fill="#b5c5a9" opacity=".28"/><path d="M15 222C35 178 57 158 88 149c-1 40-21 67-73 73Z" fill="#9bb59a"/><path d="M30 218c19-29 34-48 58-66" stroke="#668c70" stroke-width="2.5" stroke-linecap="round"/><path d="M30 218c-5-43 7-75 37-91 18 37 5 69-37 91Z" fill="#6f957b"/><path d="M34 211c8-36 17-58 33-81" stroke="#456f57" stroke-width="2.5" stroke-linecap="round"/><path d="M285 220c-1-39 18-69 45-75 8 39-7 62-45 75Z" fill="#d5c58b"/><path d="M289 217c14-31 25-48 39-65" stroke="#a68e4e" stroke-width="2.5" stroke-linecap="round"/><path d="M253 219c-5-46 8-79 40-95 17 40 2 71-40 95Z" fill="#7c9e7f"/><path d="M260 213c10-35 19-58 32-80" stroke="#52775e" stroke-width="2.5" stroke-linecap="round"/><path d="M68 221c0-55 27-92 67-98 16 48-8 80-67 98Z" fill="#547f65"/><path d="M76 216c19-35 36-59 56-82" stroke="#3c664e" stroke-width="2.5" stroke-linecap="round"/><path d="M85 222c4-35 25-59 54-61 3 33-17 53-54 61Z" fill="#c9b66e"/><path d="M93 217c16-22 29-35 43-47" stroke="#9b8c4d" stroke-width="2" stroke-linecap="round"/><g transform="rotate(-8 191 143)"><rect x="139" y="45" width="99" height="164" rx="17" fill="#b3b49d" opacity=".25"/><rect x="132" y="35" width="101" height="169" rx="16" fill="#fffdf5" stroke="#d9d9c8" stroke-width="2"/><rect x="171" y="42" width="25" height="4" rx="2" fill="#54755e"/><rect x="145" y="60" width="75" height="126" rx="8" fill="#f5f1e4"/><path d="M155 130 171 113l12 7 20-34" stroke="#88a88c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><rect x="154" y="145" width="10" height="26" rx="5" fill="#7b9b79"/><rect x="171" y="132" width="10" height="39" rx="5" fill="#b8a65d"/><rect x="188" y="116" width="10" height="55" rx="5" fill="#c6a44e"/><rect x="205" y="101" width="8" height="70" rx="4" fill="#6f9678"/><circle cx="181" cy="194" r="3" fill="#d8d8c7"/></g><path d="M105 216c-6-27 7-46 29-51 10 24-1 41-29 51Z" fill="#8dac88"/><path d="M110 211c9-20 16-31 24-41" stroke="#5c805e" stroke-width="2" stroke-linecap="round"/><path d="M228 221c-3-28 12-48 34-51 8 25-4 42-34 51Z" fill="#b5c7a6"/><path d="M232 216c10-20 18-31 28-40" stroke="#73916d" stroke-width="2" stroke-linecap="round"/></svg></div><p class="welcome-kicker">Ton budget, en toute simplicité</p><h1 class="welcome-title">Bienvenue sur Upvanta</h1><p class="welcome-copy">Un moyen simple et clair de reprendre le contrôle de ton budget, sans connecter ta banque.</p><div class="welcome-benefits"><div class="welcome-benefit"><span>↗</span> Visualise tes finances en un coup d’œil</div><div class="welcome-benefit"><span>◷</span> Suis tes dépenses sans te compliquer la vie</div><div class="welcome-benefit"><span>◇</span> Avance vers tes objectifs à ton rythme</div></div><div class="welcome-actions"><button class="onboarding-primary" onclick="onboardingStep=onboardingSteps.indexOf(\\'income\\');renderOnboardingStep()">Commencer</button><button class="onboarding-secondary" onclick="skipOnboarding()">Passer pour l’instant</button></div></div>';
+  return;
+ }
  if(step==='income'){title='Pour commencer';sub='Quel est le montant de tes revenus mensuels ?';body=onboardingItemStep('Mes revenus','Revenus nets par mois','income','home','Continuer')}
  else if(step==='rent'){title='Tes dépenses fixes';sub='Commençons par les dépenses qui reviennent chaque mois.';body=onboardingItemStep('Loyer','Montant mensuel','rent','home','Continuer')}
  else if(step==='subscriptions'){title='Tes abonnements';sub='Sélectionne les abonnements que tu paies réellement. Tu pourras compléter les montants ensuite.';body='<div class="onboarding-sub-grid">'+onboardingSubs.map((x,i)=>'<button class="onboarding-sub-option'+(onboardingSelectedSubs.includes(x.name)?' active':'')+'" onclick="onboardingToggleSubName(\''+x.name+'\')"><span class="sub-art" style="color:'+x.color+'">'+x.glyph+'</span><span>'+x.name+'</span></button>').join('')+'</div><button class="onboarding-primary" onclick="onboardingContinueSubs()">Continuer ('+onboardingSelectedSubs.length+')</button><button class="onboarding-secondary" onclick="onboardingSkipStep()">Je n’ai pas d’abonnement</button>'}
