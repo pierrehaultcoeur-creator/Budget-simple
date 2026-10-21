@@ -59,16 +59,28 @@ class BondCatalogueAuditTests(unittest.TestCase):
         self.assertEqual(report["couponSourceFieldCounts"], {"FXD": 1, "INTRSTRATE": 1, "NONE": 1})
         self.assertEqual(report["missingCouponSourceFieldCountsByCfi"], {"DB:NONE": 1, "DE:INTRSTRATE": 1})
 
-    def test_missing_coupon_audit_distinguishes_floating_field_presence(self):
+    def test_missing_coupon_audit_distinguishes_complete_from_incomplete_floating_metadata(self):
         report = module.audit_records([
-            {"isin": "FR0000047607", "cfi": "DBVUPN", "couponRate": None, "floatingRateFieldPresent": True, "floatingRateRaw": "Y"},
-            {"isin": "US0378331005", "cfi": "DBVUPN", "couponRate": None, "floatingRateFieldPresent": False},
-            {"isin": "GB0002634946", "cfi": "DEXXXX", "couponRate": None, "floatingRateFieldPresent": True},
+            {
+                "isin": "FR0000047607", "cfi": "DBVUPN", "couponRate": None,
+                "floatingRateFieldPresent": True, "floatingRateRaw": "EURIBOR",
+                "floatingRateTerm": "6M", "floatingRateSpreadBps": 125,
+            },
+            {
+                "isin": "US0378331005", "cfi": "DBVUPN", "couponRate": None,
+                "floatingRateFieldPresent": True, "floatingRateRaw": "Y",
+            },
+            {
+                "isin": "GB0002634946", "cfi": "DEXXXX", "couponRate": None,
+                "floatingRateFieldPresent": False,
+            },
         ])
         self.assertEqual(report["missingCouponCountsByCfiGroup"], {"DB": 2, "DE": 1})
-        self.assertEqual(report["missingCouponWithFloatingFieldByCfiGroup"], {"DB": 1, "DE": 1})
-        self.assertEqual(report["missingCouponWithoutFloatingFieldByCfiGroup"], {"DB": 1})
-        self.assertEqual(report["missingCouponSamples"][0]["floatingRateRaw"], "Y")
+        self.assertEqual(report["missingCouponWithFloatingFieldByCfiGroup"], {"DB": 2})
+        self.assertEqual(report["missingCouponWithoutFloatingFieldByCfiGroup"], {"DE": 1})
+        self.assertEqual(report["missingCouponWithCompleteFloatingRateByCfiGroup"], {"DB": 1})
+        self.assertEqual(report["missingCouponWithIncompleteFloatingRateByCfiGroup"], {"DB": 1, "DE": 1})
+        self.assertEqual(report["missingCouponSamples"][0]["floatingRateRaw"], "EURIBOR")
 
     def test_cfi_groups_are_not_all_mislabeled_as_conventional_bonds(self):
         report = module.audit_records([
