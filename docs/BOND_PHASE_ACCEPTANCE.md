@@ -1,7 +1,7 @@
 # Phase obligations — registre d'acceptation et mesure d'avancement
 
-Date de référence : 20 octobre 2026  
-HEAD de référence : `3f756a2a2c00d920c80349e1486849b8a913e00c`  
+Date de référence : 21 octobre 2026  
+HEAD de référence : `85fbc5436081a282e82e155febc1580c14a3f52f`  
 PR #2 : ouverte en brouillon, non fusionnée.
 
 ## Méthode de calcul
@@ -23,7 +23,7 @@ Cette méthode est volontairement stricte. Les métriques de couverture des donn
 | 3 | Recherche, endpoint et index existent et ont passé leurs tests sur le code de recherche inchangé | DONE | Les index ISIN/noms, `netlify/functions/bond-search.js` et l'interface existent; les runs de recherche précédents sont verts et aucun code de recherche/UI n'a changé dans le commit de référence |
 | 4 | Batterie CI de recherche verte sur le HEAD de référence | DONE | Bond search CI #39474736280 SUCCESS sur le HEAD `3f756a2a2c00d920c80349e1486849b8a913e00c`; tests catalogue/index, régressions de recherche et syntaxe JavaScript réussis |
 | 5 | Une fiche obligataire ne s'affiche que si tous les champs essentiels requis sont exploitables; sinon elle est exclue des résultats | DONE | `investissement.html` applique `isDisplayEligible` avant le rendu; les régressions couvrent les fiches complètes/incomplètes et l'exclusion de la fiche ESMA incomplète. Bond search CI #39474736280 SUCCESS sur le HEAD de référence |
-| 6 | Tous les overrides de coupon fixe présents dans le registre sont retrouvés et confirmés dans l'audit du catalogue | OPEN | Le rapport indique 9 overrides fixes vérifiés alors que le registre comporte 10 entrées; réconcilier cet écart ISIN par ISIN |
+| 6 | Tous les overrides de coupon fixe présents dans le registre sont retrouvés et confirmés dans l'audit du catalogue | DONE | ESMA bulk import #39477842942 SUCCESS sur le HEAD courant; rapport artefact : registre 10, correspondances exactes 10, absentes 0, divergences 0. Test dédié de couverture du registre ajouté et CI #39477842905 SUCCESS |
 | 7 | Chaque coupon suspect est sourcé ou mis en quarantaine et exclu des fiches éligibles | OPEN | 43 valeurs suspectes détectées, 34 encore non résolues; le comportement d'exclusion au niveau de la fiche entière n'est pas garanti |
 | 8 | Chaque coupon absent est classé (taux variable, valeur non applicable, donnée inconnue) et les fiches non conformes sont exclues | OPEN | 38 731 coupons absents tous groupes CFI confondus; 9 051 dans DA, 7 566 dans DB, et les autres groupes détaillés dans le rapport. Absence de coupon ne signifie pas toujours erreur, donc classification requise |
 | 9 | Les corrections de taux variables sont documentées par ISIN exact et ont des tests de non-confusion marge/coupon | DONE | Jyske `NO0012654534`, Cairn `XS1538267490`, Alhambra `XS2074549820` : sources et régressions présentes; le workflow catalogue du SHA de référence a réussi |
@@ -40,13 +40,13 @@ Cette méthode est volontairement stricte. Les métriques de couverture des donn
 
 ## Couverture du catalogue — indicateurs distincts
 
-Rapports d'audit produits par les workflows précédents Build ESMA #39465765263 et ESMA FIRDS bulk import #39465777991, publication ESMA 20261017. Validation actuelle du workflow isolé : ESMA FIRDS bulk bond import #39474736336 SUCCESS sur le HEAD `3f756a2a2c00d920c80349e1486849b8a913e00c` :
+Rapports d'audit de la publication ESMA 20261017. Validation courante : ESMA FIRDS bulk bond import #39477842942 SUCCESS sur le HEAD `85fbc5436081a282e82e155febc1580c14a3f52f` :
 
 - 631 239 enregistrements; 631 239 ISIN uniques et valides.
 - Coupon présent : 592 508 / 631 239 = 93,86 %.
 - Échéance présente : 626 963 / 631 239 = 99,32 %.
 - Obligations classiques CFI DB : 81 526; coupon exploitable 90,72 %; échéance exploitable 97,16 %; les deux simultanément exploitables 72 002 / 81 526 = 88,32 %.
-- 43 valeurs de coupon suspectes; 34 non résolues selon l'audit fixe du coupon.
+- 10 overrides de coupon fixe sur 10 réconciliés ISIN par ISIN (0 absent, 0 divergence); 43 valeurs de coupon suspectes, dont 34 non résolues.
 - 4 276 échéances sentinelles, dont la qualification reste à terminer.
 
 Ces ratios mesurent la présence/exploitabilité des champs, pas la vérification contractuelle de chaque instrument. Les taux variables sont suivis séparément du champ coupon fixe.
@@ -68,3 +68,14 @@ Ces ratios mesurent la présence/exploitabilité des champs, pas la vérificatio
 - Critères fermés : 7/12 = 58,3 %. Les critères 4 et 5 sont désormais DONE sur la base des workflows verts et des régressions du filtre des fiches complètes. Le score ne signifie ni que 58,3 % des obligations sont vérifiées, ni que 58,3 % du temps est écoulé.
 - Restent ouverts : réconciliation des overrides fixes (6), coupons suspects non résolus (7), classification des coupons absents (8), qualification exhaustive des échéances sentinelles (10) et provenance complète de la PR (12).
 - Anti-doublon : aucun test relancé manuellement; résultats des runs existants réutilisés. PR #2 reste ouverte en brouillon, non fusionnée et non déployée.
+
+
+## Mesure actualisée — 21 octobre 2026, réconciliation des overrides de coupon
+- HEAD de code contrôlé : `85fbc5436081a282e82e155febc1580c14a3f52f`.
+- [Bond search CI #39477842905](https://github.com/pierrehaultcoeur-creator/Budget-simple/actions/runs/39477842905) : SUCCESS sur le HEAD courant; tests catalogue/index, complétude de l'index des noms, régressions de recherche et syntaxe JavaScript réussis.
+- [ESMA FIRDS bulk bond import #39477842942](https://github.com/pierrehaultcoeur-creator/Budget-simple/actions/runs/39477842942) : SUCCESS sur le même SHA; tests hors ligne et audit isolé du catalogue publiés en artefact.
+- Le rapport d'audit de l'artefact donne `verifiedCouponOverrideCount=10` et `couponOverrideCoverage.registryCount=10, matchedCount=10, missingCount=0, mismatchCount=0`. Les 10 ISIN du registre correspondent au statut `VERIFIED_OVERRIDE`, à la valeur corrigée et à la source attendues.
+- Cause de l'ancien écart : le rapport ne comptait les overrides vérifiés que dans la branche de coupons suspects. Il omettait donc les overrides appliqués dont la valeur brute ne tombait pas dans cette catégorie. Le comptage est maintenant indépendant de la suspicion de la valeur brute; les valeurs suspectes non résolues restent comptées séparément.
+- Régressions ajoutées : couverture du registre (ISIN absent ou divergence), et comptage d'un override appliqué à une valeur brute qui n'est pas suspecte.
+- Critère 6 fermé; score recalculé à 8/12 = 66,7 %, contre 7/12 = 58,3 % à la mesure précédente. Restent ouverts : coupons suspects (7), coupons absents (8), échéances sentinelles (10) et provenance complète de la PR (12).
+- Anti-doublon : réutilisation du rapport artefact et des tests CI du SHA courant; aucun re-run manuel, aucune modification du catalogue source dans cette tâche documentaire. PR #2 reste ouverte en brouillon, non fusionnée et non déployée.
