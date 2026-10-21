@@ -104,3 +104,13 @@ Ces ratios mesurent la présence/exploitabilité des champs, pas la vérificatio
 - Régressions ajoutées pour les métadonnées complètes vs incomplètes et pour empêcher l'affichage de la valeur brute suspecte quand la fiche est rendue comme taux variable.
 - [Bond search CI #257](https://github.com/pierrehaultcoeur-creator/Budget-simple/actions/runs/39539160725) et [ESMA audit #70](https://github.com/pierrehaultcoeur-creator/Budget-simple/actions/runs/39539160708) : en cours au moment de cette mesure; ne comptent pas encore comme preuves de réussite.
 - Critères 7 et 8 restent OPEN; score maintenu à 8/12 = 66,7 % jusqu'à obtention des runs et preuve de couverture complète.
+
+
+## Mesure actualisée — 21 octobre 2026, confirmation des workflows après correction des coupons suspects
+- HEAD de code et documentation validé : `a42a3364666e50fd32fd7e24933739837fea1901`.
+- [Bond search CI #258](https://github.com/pierrehaultcoeur-creator/Budget-simple/actions/runs/39539260031) : SUCCESS sur le SHA exact; tests de catalogue/index, recherche, index des noms et syntaxe JavaScript réussis.
+- [ESMA FIRDS bulk bond import #71](https://github.com/pierrehaultcoeur-creator/Budget-simple/actions/runs/39539260004) : SUCCESS sur le même SHA; tests offline, aperçu isolé, audit et artefact réussis.
+- Le diagnostic des 43 valeurs brutes suspectes compte maintenant 3 cas justifiés par des métadonnées sourcées de taux variable complètes et 31 cas non résolus. Les 10 overrides fixes vérifiés du registre restent réconciliés (10/10).
+- Critère 7 maintenu OPEN : les tests ciblés confirment le rejet des coupons suspects dans les voies couvertes, mais la preuve exhaustive pour tous les cas/voies de rendu n'est pas terminée. Critère 8 maintenu OPEN : la classification exhaustive des coupons absents n'est pas terminée.
+- Score strict inchangé : 8/12 = 66,7 %. Critères 7, 8, 10 et 12 restent ouverts. Ce pourcentage mesure les critères d'acceptation fermés, pas la proportion d'obligations validées.
+- Anti-doublon : aucun test vert relancé manuellement; états précédemment en attente/en cours remplacés par les résultats finaux ci-dessus. PR #2 reste ouverte en brouillon, non fusionnée et non déployée.
