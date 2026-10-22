@@ -659,6 +659,12 @@ body{background:var(--up-bg)}
 .category-art-fallback{width:44px;height:44px;flex:0 0 44px;display:grid;place-items:center;border-radius:14px;background:#edf1e9;color:#607e64;border:1px solid rgba(93,116,91,.10)}
 .category-art-fallback .ui-icon{width:20px;height:20px}
 @media(min-width:600px){.category-art-image,.category-art-fallback{width:46px;height:46px;flex-basis:46px}}
+
+.category-art-image{position:relative}
+.category-art-image .category-art-fallback-icon{position:absolute;inset:0;display:grid;place-items:center;color:#607e64;background:#edf1e9}
+.category-art-image img:not([src=""])+.category-art-fallback-icon{visibility:hidden}
+.category-art-image.logo-missing .category-art-fallback-icon{visibility:visible}
+.category-art-image img{position:relative;z-index:1}
 </style>
 </head>
 <body>
@@ -843,7 +849,7 @@ function categoryArtwork(c){
  const file=files[c.id];
  if(file){
   const alt=String(labelFor(c)||c.name||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  return '<span class="category-art category-art-image" aria-hidden="true"><img loading="lazy" decoding="async" src="assets/logos/'+file+'" alt="" width="48" height="48"></span>';
+  return '<span class="category-art category-art-image" aria-hidden="true"><img loading="lazy" decoding="async" src="assets/logos/'+file+'" alt="" width="48" height="48" onerror="this.remove();this.parentElement.classList.add(\'logo-missing\')"><span class="category-art-fallback-icon">'+uiIcon(categoryIcon(c))+'</span></span>';
  }
  const icon=categoryIcon(c);
  return '<span class="category-art category-art-fallback" aria-hidden="true">'+uiIcon(icon)+'</span>';
