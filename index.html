@@ -842,6 +842,14 @@ body{background:#f8f5ee!important}
 /* Language selector only: compact proportions matching the calendar control. */
 .top .lang{width:54px!important;height:44px!important;min-height:44px!important;max-height:44px!important;box-sizing:border-box!important;padding:0 7px!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:4px!important;border:1px solid #eae3d7!important;border-radius:15px!important;font-size:12px!important;font-weight:750!important;letter-spacing:.02em!important;line-height:1!important;box-shadow:none!important}
 .top .lang-caret{margin-left:0!important;font-size:13px!important;line-height:1!important;color:#8b9489!important}
+
+/* Language dropdown visibility fix only: keep menu above the header and give options readable contrast. */
+.top{position:relative!important;z-index:60!important;overflow:visible!important}
+.top-actions,.lang-wrap{position:relative!important;z-index:61!important;overflow:visible!important}
+.top .lang-menu{position:absolute!important;right:0!important;top:calc(100% + 8px)!important;min-width:145px!important;width:max-content!important;display:none;z-index:100!important;box-sizing:border-box!important;background:#fffdf8!important;color:#173f32!important;border:1px solid #eae3d7!important;border-radius:16px!important;padding:6px!important;box-shadow:0 12px 28px #173f321f!important}
+.top .lang-menu.show{display:block!important}
+.top .lang-option{display:block!important;width:100%!important;min-height:40px!important;box-sizing:border-box!important;padding:10px 12px!important;text-align:left!important;background:transparent!important;color:#173f32!important;border:0!important;border-radius:11px!important;font-size:13px!important;font-weight:650!important;line-height:1.25!important;opacity:1!important}
+.top .lang-option:hover,.top .lang-option.active{background:#edf2eb!important;color:#173f32!important}
 </style>
 </head>
 <body>
