@@ -652,6 +652,13 @@ body{background:var(--up-bg)}
  .welcome-actions .onboarding-primary{height:43px}
 }
 
+
+/* Upvanta category logos — integrated as first-class category artwork */
+.category-art-image{width:44px;height:44px;flex:0 0 44px;display:grid;place-items:center;overflow:hidden;border-radius:14px;background:#f8f6ee;border:1px solid rgba(93,116,91,.12);box-shadow:0 2px 7px rgba(45,58,42,.045)}
+.category-art-image img{display:block;width:100%;height:100%;object-fit:cover;object-position:center;border-radius:inherit}
+.category-art-fallback{width:44px;height:44px;flex:0 0 44px;display:grid;place-items:center;border-radius:14px;background:#edf1e9;color:#607e64;border:1px solid rgba(93,116,91,.10)}
+.category-art-fallback .ui-icon{width:20px;height:20px}
+@media(min-width:600px){.category-art-image,.category-art-fallback{width:46px;height:46px;flex-basis:46px}}
 </style>
 </head>
 <body>
@@ -811,17 +818,35 @@ function savingsCard(){
 }
 
 function categoryArtwork(c){
- const art={
- home:'<defs><linearGradient id="houseWall" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#FFF9E9"/><stop offset="1" stop-color="#E7D5A6"/></linearGradient><linearGradient id="houseRoof" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#B99042"/><stop offset="1" stop-color="#88672F"/></linearGradient><linearGradient id="pot" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#8EAC88"/><stop offset="1" stop-color="#5C8065"/></linearGradient></defs><ellipse cx="24" cy="41" rx="17" ry="3" fill="#B8AD8C" opacity=".28"/><path d="M12 21.5 25 10l13 11.5v15H12z" fill="url(#houseWall)"/><path d="M8.5 22 24.5 8 40 22l-3 3L24.5 13 11.5 25z" fill="url(#houseRoof)"/><path d="M21 36V25h7v11" fill="#9A7840"/><path d="M14.5 25h4v5h-4zM31 25h4v5h-4z" fill="#A9C3B2"/><path d="M14.5 25h4v5h-4zM31 25h4v5h-4z" stroke="#B99042" stroke-width=".8"/><path d="M7 39c-1-5 2-8 5-8 2 4 0 7-5 8Z" fill="#6F9670"/><path d="M8 39c0-4 1-6 4-8" stroke="#477354" stroke-width="1"/><path d="M36 40c0-5 3-8 6-7 1 4-1 7-6 7Z" fill="#719876"/><path d="M36 40c1-4 3-6 6-7" stroke="#477354" stroke-width="1"/>',
- daily:'<defs><linearGradient id="basket" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#7FA889"/><stop offset="1" stop-color="#4F8062"/></linearGradient></defs><ellipse cx="24" cy="41" rx="17" ry="3" fill="#93B49A" opacity=".3"/><path d="M13 22h23l-2.5 15H15.5z" fill="url(#basket)" stroke="#49785B" stroke-width="1.2"/><path d="M18 22c0-7 3-10 6-10s6 3 6 10" fill="none" stroke="#628F6C" stroke-width="2.6" stroke-linecap="round"/><path d="M16 27h17M17 32h15" stroke="#D5E5D5" stroke-width="1.2" opacity=".9"/><path d="M16 21c-3-3-2-7 1-9 4 1 5 5 2 9Z" fill="#6C9A6F"/><path d="M20 21c-1-5 2-8 5-8 2 4 0 7-5 8Z" fill="#9ABF86"/><path d="M25 21c0-5 4-7 7-5 0 4-3 6-7 5Z" fill="#4F8964"/><circle cx="29" cy="20" r="4.5" fill="#D7A64B"/><path d="M28 15c1-2 3-2 4-1" stroke="#668D57" stroke-width="1.5" stroke-linecap="round"/>',
- transport:'<defs><linearGradient id="carPaint" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#9FB8A0"/><stop offset=".55" stop-color="#688A76"/><stop offset="1" stop-color="#456553"/></linearGradient></defs><ellipse cx="24" cy="39.5" rx="18" ry="3" fill="#8BA497" opacity=".3"/><path d="m10 29 3-8c.5-1.5 2-2.5 4-2.5h12c2 0 3.5 1 4.5 3l4 7v6H10z" fill="url(#carPaint)"/><path d="m16 21 3-1h9l4 7H14z" fill="#DCE8DF"/><path d="M21 20v7M31 27h-17" stroke="#9FB8A0" stroke-width="1"/><path d="M9 29h29v5H9z" fill="#547460"/><path d="M11 30h4v2h-4zM33 30h3v2h-3z" fill="#E6C77D"/><circle cx="16" cy="35" r="3.5" fill="#394A42"/><circle cx="16" cy="35" r="1.5" fill="#D7D9CF"/><circle cx="31" cy="35" r="3.5" fill="#394A42"/><circle cx="31" cy="35" r="1.5" fill="#D7D9CF"/>',
- subs:'<defs><linearGradient id="subscriptionCard" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#F9F1DE"/><stop offset="1" stop-color="#E6D5AF"/></linearGradient></defs><ellipse cx="24" cy="40" rx="15" ry="3" fill="#B6A77F" opacity=".24"/><rect x="10" y="14" width="28" height="21" rx="4" fill="#B7A06D" opacity=".28" transform="rotate(-7 24 24)"/><rect x="9" y="13" width="28" height="21" rx="4" fill="url(#subscriptionCard)" stroke="#C8B27A" stroke-width="1.1"/><path d="M10 19h26" stroke="#C3AA6D" stroke-width="1.2"/><rect x="13" y="23" width="7" height="5" rx="1.5" fill="#8DAE96"/><path d="M25 24h8M25 28h5" stroke="#B09A65" stroke-width="1.5" stroke-linecap="round"/><circle cx="33" cy="14" r="5" fill="#658A6B"/><path d="m31 14 1.5 1.5 3-3" fill="none" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>',
- fun:'<defs><linearGradient id="funTicket" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#E7B78D"/><stop offset="1" stop-color="#C8875F"/></linearGradient></defs><ellipse cx="24" cy="40" rx="15" ry="3" fill="#BD9679" opacity=".25"/><path d="M12 16h24v7a3 3 0 0 0 0 6v5H12v-5a3 3 0 0 0 0-6z" fill="url(#funTicket)" stroke="#B97D56" stroke-width="1"/><path d="M24 17v2m0 3v2m0 3v2m0 3v2" stroke="#F9E5CF" stroke-width="1.4" stroke-linecap="round"/><path d="m17 24 2 2 4-5" fill="none" stroke="#FFF2DE" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="32" cy="18" r="4.5" fill="#F3D59D"/><path d="m32 15.5.8 1.7 1.8.3-1.3 1.3.3 1.8-1.6-.9-1.6.9.3-1.8-1.3-1.3 1.8-.3z" fill="#B98C39"/>',
- beauty:'<defs><linearGradient id="beautyBottle" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#E8C7A2"/><stop offset="1" stop-color="#C58E61"/></linearGradient></defs><ellipse cx="24" cy="40" rx="14" ry="3" fill="#C2A185" opacity=".24"/><rect x="17" y="19" width="14" height="19" rx="4" fill="url(#beautyBottle)" stroke="#B98255" stroke-width="1"/><rect x="20" y="14" width="8" height="6" rx="1.5" fill="#9A7953"/><rect x="21" y="11" width="6" height="4" rx="1" fill="#D8BE8D"/><rect x="19.5" y="24" width="9" height="7" rx="2" fill="#F8EADB" opacity=".9"/><path d="M22 26h5M22 28h4" stroke="#BE9369" stroke-width="1" stroke-linecap="round"/><path d="M11 34c-1-5 1-8 4-8 2 4 0 7-4 8Z" fill="#719875"/><path d="M12 34c1-4 2-6 4-8" stroke="#4F7658" stroke-width="1"/>'
+ const files={
+  home:'01-logement.png',
+  groceries:'02-courses-vie-quotidienne.png',
+  transport:'03-transport.png',
+  subscriptions:'04-abonnements.png',
+  leisure:'05-loisirs.png',
+  health:'06-sante-bien-etre.png',
+  children:'07-famille-enfants.png',
+  animals:'08-animaux.png',
+  travel:'09-voyage.png',
+  income:'10-revenus-salaire.png',
+  beauty:'11-beaute-soins-personnels.png',
+  sport:'12-sport-activite-physique.png',
+  house:'13-maison-travaux-decoration.png',
+  clothing:'14-vetements-chaussures.png',
+  technology:'15-technologie-informatique.png',
+  banking:'16-banking-bank-fees-international.png',
+  taxes:'17-impots-taxes-international.png',
+  gifts:'18-cadeaux.png',
+  education:'19-education-training.png',
+  savings:'20-epargne-savings.png'
  };
- const backgrounds={home:'#F2E8CD',daily:'#E2EEE1',transport:'#E2EBE2',subs:'#EEE8D8',fun:'#F3E4D7',beauty:'#F1E4D7'};
- const fallback='<ellipse cx="24" cy="40" rx="15" ry="3" fill="#B8C4B5" opacity=".25"/><circle cx="24" cy="24" r="13" fill="#E1EADF"/><path d="M17 24h14M24 17v14" stroke="#5F9276" stroke-width="2" stroke-linecap="round"/>';
- return '<span class="category-art" aria-hidden="true" style="--art-bg:'+(backgrounds[c.id]||'#E7EDE3')+'"><svg viewBox="0 0 48 48" fill="none">'+(art[c.id]||fallback)+'</svg></span>';
+ const file=files[c.id];
+ if(file){
+  const alt=String(labelFor(c)||c.name||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  return '<span class="category-art category-art-image" aria-hidden="true"><img loading="lazy" decoding="async" src="assets/logos/'+file+'" alt="" width="48" height="48"></span>';
+ }
+ const icon=categoryIcon(c);
+ return '<span class="category-art category-art-fallback" aria-hidden="true">'+uiIcon(icon)+'</span>';
 }
 function cat(c){let B=c.items.reduce((a,i)=>a+(isVariable(c,i)?0:bud(c,i)),0),X=c.items.reduce((a,i)=>a+sp(c,i),0),FX=c.items.reduce((a,i)=>a+(isVariable(c,i)?0:sp(c,i)),0),VX=X-FX,P=B?Math.min(100,FX/B*100):0;return '<section class="card" data-category="'+c.id+'"><div class="cathead">'+categoryArtwork(c)+'<div class="catname">'+labelFor(c)+'</div><div class="catamount"><strong>'+eur(X)+'</strong><small>'+(B?eur(B):L.none)+'</small></div></div>'+(B?'<div class="bar"><div class="fill '+(FX>B?'over':'')+'" style="width:'+P+'%"></div></div>':'')+'<div class="sub"><span>'+(B?L.planned+' '+eur(B):L.free)+'</span><span>'+(B?(FX>B?L.over:L.left+' '+eur(B-FX)):'')+(VX>0?(B?' · ':'')+eur(VX)+' '+L.variableSpent:'')+'</span></div>'+c.items.map((i,n)=>item(c,i,n)).join('')+'<button class="add" onclick="openExpenseByRef(\''+c.id+'\',null)">'+L.add+'</button></section>'}
 function item(c,i,n){let b=bud(c,i),x=sp(c,i),v=isVariable(c,i),p=b?Math.min(100,x/b*100):0,variableInfo=v?(b?L.variableRow+' · '+L.variableIndicative+' '+eur(b):L.variableRow):'';return '<div class="row" onclick="openExpenseByRef(\''+c.id+'\',\''+i.id+'\')" style="cursor:pointer"><div class="rowname"><b>'+labelFor(i)+'</b><small>'+(v?variableInfo:(L.planned+' '+eur(b)))+'</small>'+(v?'':'<div class="itembar"><div class="itemfill '+(x>b&&b?'over':'')+'" style="width:'+p+'%"></div></div>')+'</div><div class="money">'+eur(x)+'</div><div class="expense-actions"><button class="row-action" aria-label="'+L.edit+'" onclick="event.stopPropagation();openExpenseByRef(\''+c.id+'\',\''+i.id+'\')">'+uiIcon('edit')+'</button><button class="row-action danger" aria-label="'+L.delete+'" onclick="event.stopPropagation();deleteExpenseByRef(\''+c.id+'\',\''+i.id+'\')">'+uiIcon('trash')+'</button></div></div>'}
