@@ -701,6 +701,20 @@ body{background:radial-gradient(ellipse at 8% 4%,#fffdf8 0,#faf8f2 44%,#f4f1e8 1
 .fab{background:var(--upvanta-green)!important;box-shadow:0 8px 24px #174b3a35!important}
 .budget-ring.budget-ring-full{background:conic-gradient(from -90deg,var(--upvanta-green) 0 100%)!important}
 @media(max-width:420px){.app{padding-left:14px;padding-right:14px}.top{margin-left:-1px;margin-right:-1px}.brand{font-size:36px}}
+
+/* Stronger visible Upvanta palette */
+body{background:#f3f0e7!important}
+.app{background:transparent}
+.top{background:linear-gradient(115deg,#174b3a 0%,#2f6a50 68%,#527b60 100%);border:0;border-radius:0 0 26px 26px;padding:20px 18px 24px;margin:-22px -18px 20px;box-shadow:0 10px 26px #174b3a20}
+.top:after{background:radial-gradient(ellipse at 70% 50%,#a9c3a866 0 12%,transparent 13%),radial-gradient(ellipse at 58% 68%,#d9c48b99 0 10%,transparent 11%),radial-gradient(ellipse at 83% 75%,#dfc58b88 0 8%,transparent 9%)}
+.brand{color:#fff!important}
+.calendar-btn,.lang{background:#ffffff1c!important;color:#fff!important;border:1px solid #ffffff45!important;box-shadow:none!important}
+.monthbar{background:#e8eee4!important;border-color:#d8e1d4!important}
+.hero{background:#fffdf7!important;border-color:#e6dece!important}
+.card{background:#fffdf8!important;border-color:#e7dfd0!important}
+.sectionhead h2{color:#174b3a!important}
+.emoji{background:#f1ead8!important}
+.reference-nav{background:#fdfbf5!important}
 </style>
 </head>
 <body>
@@ -762,7 +776,8 @@ function categoryIcon(c){
 function render(){
  const remaining=state.income-total();
  const progress=Math.max(0,Math.min(100,Math.round(remaining/Math.max(state.income,1)*100)));
- const preserved=L.preserved.replace('💰 ','').replace('{p}',progress);\n const ringFull=total()===0 && state.income>0 ? ' budget-ring-full' : '';
+ const preserved=L.preserved.replace('💰 ','').replace('{p}',progress);
+ const ringFull=total()===0 && state.income>0 ? ' budget-ring-full' : '';
  document.getElementById('app').innerHTML='<div class="top"><div class="brand">Upvanta</div><div class="top-actions"><button class="calendar-btn" aria-label="'+L.calendar+'" onclick="openCalendar()">'+uiIcon('calendar')+'</button><div class="lang-wrap"><button class="lang" onclick="toggleLangMenu(event)">'+L.lang+' <span class="lang-caret">⌄</span></button><div id="langMenu" class="lang-menu">'+['fr','pt','en'].map(k=>'<button class="lang-option'+(lang===k?' active':'')+'" onclick="setLang(\''+k+'\',event)">'+T[k].lang+'</button>').join('')+'</div></div></div></div>'+
  '<div class="monthbar"><button aria-label="Période précédente" onclick="shift(-1)">‹</button><div class="month">'+cycleLabel()+'</div><button aria-label="Période suivante" onclick="shift(1)">›</button></div><div class="swipehint">'+L.swipe+'</div>'+
  '<section class="hero"><div class="budget-ring'+ringFull+'" style="--progress:'+progress+'%" role="img" aria-label="'+eur(remaining)+' restants sur '+eur(state.income)+'"><div class="budget-ring-inner"><span class="ring-label">'+eur(remaining)+' restants</span><strong class="ring-value">'+eur(remaining)+'</strong><span class="ring-total">sur '+eur(state.income)+'</span><span class="ring-label" style="margin-top:8px;font-size:14px">'+progress+' % disponible'+(progress===1?'':'s')+'</span></div></div><div class="stats"><div class="stat"><small>↑ '+L.income+'</small><b>'+eur(state.income)+'</b></div><div class="stat"><small>↓ Dépenses</small><b>'+eur(total())+'</b></div></div><button class="edit-income" onclick="openIncome()">'+uiIcon('edit')+'<span>'+L.editIncome+'</span></button></section>'+
