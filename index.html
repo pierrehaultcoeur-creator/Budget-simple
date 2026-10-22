@@ -796,6 +796,28 @@ body{background:#f8f5ee!important;color:#15382d!important}
 .fab{background:#2f6a50!important;box-shadow:0 8px 24px #174b3a25!important}
 .budget-ring.budget-ring-full{background:conic-gradient(from -90deg,#2f6a50 0 100%)!important}
 @media(max-width:420px){.app{padding-left:14px!important;padding-right:14px!important}.top{margin-left:-14px!important;margin-right:-14px!important}.brand{font-size:37px!important}.hero:before,.hero:after{width:75px!important;opacity:.7!important}.budget-ring{width:min(66vw,250px)!important}.stats{gap:8px!important}.stat{padding:11px!important}}
+
+/* Final mobile proportions and contrast correction */
+body{background:#f8f5ee!important}
+.app{width:100%!important;max-width:760px!important;margin:0 auto!important;box-sizing:border-box!important}
+.top{background:#fffdf8!important;min-height:142px!important;padding:20px 18px 22px!important;margin:-16px -18px 18px!important;border-radius:0 0 28px 28px!important;box-sizing:border-box!important}
+.top .brand,.top .brand *,.top .greeting,.top .hello,.top .welcome,.top p,.top h1,.top h2{color:#123b2e!important;text-shadow:none!important}
+.top:after{width:210px!important;height:160px!important;right:-18px!important;top:-12px!important}
+.top .calendar-btn,.top .lang,.calendar-btn,.lang{color:#173f32!important;background:#fffdf8!important;border-color:#eae3d7!important}
+.hero{padding:22px 16px 16px!important;overflow:hidden!important}
+.hero .budget-ring{width:260px!important;height:260px!important;min-width:260px!important;max-width:260px!important;min-height:260px!important;max-height:260px!important;aspect-ratio:1!important;box-sizing:border-box!important;margin:0 auto 18px!important;padding:10px!important;transform:none!important;flex:none!important}
+.hero .budget-ring:before{inset:10px!important}
+.hero .budget-ring-inner{width:100%!important;height:100%!important;box-sizing:border-box!important;padding:14px!important;gap:0!important}
+.hero .ring-label.ring-intro{font-size:12px!important;margin:0!important}
+.hero .ring-value{font-size:34px!important;margin-top:6px!important;line-height:1.1!important}
+.hero .ring-total{font-size:13px!important;margin-top:5px!important}
+.hero .budget-ring-inner .ring-label:not(.ring-intro){font-size:13px!important;margin-top:7px!important}
+.hero .stats{grid-template-columns:1fr 1fr!important;gap:10px!important;margin-top:0!important}
+.hero .stat{padding:12px!important;min-height:84px!important;box-sizing:border-box!important}
+.hero .stat small{font-size:12px!important}
+.hero .stat b{font-size:24px!important}
+.hero:before,.hero:after{top:70px!important;height:210px!important;width:84px!important;opacity:.85!important}
+@media(max-width:420px){.app{padding-left:14px!important;padding-right:14px!important}.hero .budget-ring{width: min(68vw,260px)!important;height:min(68vw,260px)!important;min-width:min(68vw,260px)!important;min-height:min(68vw,260px)!important;max-width:min(68vw,260px)!important;max-height:min(68vw,260px)!important}.hero .ring-value{font-size:clamp(28px,7vw,34px)!important}.top{margin-left:-14px!important;margin-right:-14px!important}}
 </style>
 </head>
 <body>
