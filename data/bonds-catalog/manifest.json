@@ -2,129 +2,129 @@
   "version": 1,
   "generatedAt": null,
   "sourceFile": "bonds-catalog.json",
-  "recordCount": 631239,
+  "recordCount": 636348,
   "partCount": 20,
   "hasSearchableNames": true,
   "parts": [
     {
       "file": "part-0001.json",
-      "records": 34211,
-      "bytes": 8388597,
-      "sha256": "020a1c3391fdb48c6221e8bb058ef3a240ab6884643c07e7f10d58f908e0562f"
+      "records": 34209,
+      "bytes": 8388523,
+      "sha256": "d392046bc106f45bf25d488e7978ded96dda381c5fb41a1387a5a317700c89f8"
     },
     {
       "file": "part-0002.json",
-      "records": 33186,
-      "bytes": 8388440,
-      "sha256": "8b238ca6a0ab75d4e62c91eaba0b1275cc9f7904abf069cb6769cc17acc0f17d"
+      "records": 33199,
+      "bytes": 8388491,
+      "sha256": "a7c4f5521cb526b523eb190d172414e38fd7720da20d8661ffd890b93f924520"
     },
     {
       "file": "part-0003.json",
-      "records": 32277,
-      "bytes": 8388383,
-      "sha256": "8a5514ed30639ee496b36580e89d6a1851b0f950bdff24abd56ec4ea2e3ea87e"
+      "records": 32259,
+      "bytes": 8388430,
+      "sha256": "08516043310ac07da0d915b5eb16d8486b44ed8e935becc8110fa947b04e5e67"
     },
     {
       "file": "part-0004.json",
-      "records": 31877,
-      "bytes": 8388564,
-      "sha256": "b1b1a4d689be7c3274936d5dcc43cb13d58f9d094714d709be863d0ed6cb6698"
+      "records": 31907,
+      "bytes": 8388423,
+      "sha256": "3f4fcdcc2c32d2869fd7d16fe8386f55f95176f986004d7d3b0047a3d077cbac"
     },
     {
       "file": "part-0005.json",
-      "records": 32957,
-      "bytes": 8388549,
-      "sha256": "6d6df2e9a9d9c68d8bea67ea8f445fa9897d40b3d1a0bde17cbbe2a42b05e85b"
+      "records": 32748,
+      "bytes": 8388453,
+      "sha256": "cdddc22d1ad06006d22e49b2b60793a6127c8161719ff5cae3048b3ddcc31ab5"
     },
     {
       "file": "part-0006.json",
-      "records": 32321,
-      "bytes": 8388427,
-      "sha256": "ee71d96dda320228212b324adcaa851c50b019574ecccd84e19ffdf327685691"
+      "records": 32602,
+      "bytes": 8388422,
+      "sha256": "1290388f2a7f68ec9e7ddc39ae819deff4ede9287fdb4c62233843312b805358"
     },
     {
       "file": "part-0007.json",
-      "records": 31977,
-      "bytes": 8388481,
-      "sha256": "c982ea6283f3070a5c1f0a52223d53ceb14df8356bb49bd4c65ecde1766f47a1"
+      "records": 31891,
+      "bytes": 8388506,
+      "sha256": "19885147d2373e5740242d20cff02b79aaa96b00961aea4f8ba5877449fcc3e0"
     },
     {
       "file": "part-0008.json",
-      "records": 32209,
-      "bytes": 8388540,
-      "sha256": "4b1d8dc6d1a338968de0b96ccf54d49e223e7a771f372ef95c9ad85b23d8add0"
+      "records": 32149,
+      "bytes": 8388559,
+      "sha256": "0f342fe82f6cfb2d8965978cc3ba277d34c546c0ffb005aac613da3c6e736487"
     },
     {
       "file": "part-0009.json",
-      "records": 32157,
-      "bytes": 8388476,
-      "sha256": "195b35739c972e3c0b807f37dcedd3b488fe8bd9cf90f59fd86666af158b0b30"
+      "records": 32262,
+      "bytes": 8388439,
+      "sha256": "002eb323f84f8e0948c09dbbd5ecb46cc730548406ce50e1eed53479109620a9"
     },
     {
       "file": "part-0010.json",
-      "records": 31706,
-      "bytes": 8388402,
-      "sha256": "7f8d6079a874e99e9d514436029ba80c528b20df9f47fb5015cb248ac63989bd"
+      "records": 31553,
+      "bytes": 8388406,
+      "sha256": "11bb510bee45d3a577d2e5671fb3769ef6037ce089bb138664da8ebd32cb8dac"
     },
     {
       "file": "part-0011.json",
-      "records": 33107,
-      "bytes": 8388435,
-      "sha256": "a5ea0e01897a17b56414a45db0e8a91b8b83c2c770f33250c7473549b132e961"
+      "records": 33268,
+      "bytes": 8388632,
+      "sha256": "41f6ef4f9f3fde9b9c0071fb9c810cfa590fba4289ed928a91f1a696f64e5f06"
     },
     {
       "file": "part-0012.json",
-      "records": 32922,
-      "bytes": 8388402,
-      "sha256": "5b29bbdf0eff29624e9954fc0df7921af69662dc8fcfd246307459a6c1bca243"
+      "records": 32788,
+      "bytes": 8388568,
+      "sha256": "155324517618615316c9d7972f98bc6c7e7a79f1cee9ceeaaf1ba04db079699c"
     },
     {
       "file": "part-0013.json",
-      "records": 35008,
-      "bytes": 8388522,
-      "sha256": "07d2e7ffd493d5c7e1a9632b3c177f9f5ab4fcb999b3093232ef316b4720cc22"
+      "records": 34697,
+      "bytes": 8388416,
+      "sha256": "f4d7671864f1a34f9284e2dee36a7fd203e4f53ae6ac780c1952cdacea3a257d"
     },
     {
       "file": "part-0014.json",
-      "records": 33693,
-      "bytes": 8388556,
-      "sha256": "6b84993d89b2e20f23fd4c0c87793d36eead034fb6cd88b5cc622e8f47777d0b"
+      "records": 34416,
+      "bytes": 8388548,
+      "sha256": "6c5aa823c318eba7e60937b41f034d7368697ba5a40adaa48b1950158feed187"
     },
     {
       "file": "part-0015.json",
-      "records": 31463,
-      "bytes": 8388367,
-      "sha256": "bcea231bdf80294c16756dcb69dd3f9d1a3c02223ad7d06e10e6ccba4db24d06"
+      "records": 31506,
+      "bytes": 8388502,
+      "sha256": "ddf6c467e823553ba3f6527e7d691d597b46d096ea7d9a2e8b56aef0e6dfa3a3"
     },
     {
       "file": "part-0016.json",
-      "records": 31400,
-      "bytes": 8388565,
-      "sha256": "39a9f46c2d8b142dde43721aa336f20803940d41e203ba3c01797bf68a59a052"
+      "records": 31088,
+      "bytes": 8388490,
+      "sha256": "97c2cdf81cea5952b322b95d52fd89d9421d095588be584350d74871e7f8b222"
     },
     {
       "file": "part-0017.json",
-      "records": 31126,
-      "bytes": 8388563,
-      "sha256": "04ec12e7c9e7d1b2bd976f9325366c0ecd85c828120f681d86650f5234394767"
+      "records": 31181,
+      "bytes": 8388535,
+      "sha256": "672a6b37f38ca97791f87bf35ebf43b088290d36d14c7eed775245b497eedb6f"
     },
     {
       "file": "part-0018.json",
-      "records": 32589,
-      "bytes": 8388423,
-      "sha256": "318d40838623bc37cbe0f41c946cc7e923baa5a5b53c4c4f2827e36fa62bbbea"
+      "records": 32283,
+      "bytes": 8388586,
+      "sha256": "9931e30b746d50dcc196df06353ceb9abaf7d4c3bf4957b4063026e43854a43a"
     },
     {
       "file": "part-0019.json",
-      "records": 33511,
-      "bytes": 8388502,
-      "sha256": "b30c888e752bd83554f4cc20079d021a496157027e8691f7ab3d70f88a5a8f03"
+      "records": 33444,
+      "bytes": 8388513,
+      "sha256": "744861d8369689d93ac7e4ac332ade9cee27467d4a6f4e7f07329167256a24af"
     },
     {
       "file": "part-0020.json",
-      "records": 11542,
-      "bytes": 2838476,
-      "sha256": "d8259c0557be3a74ddcec0d2880460f29ed91ea8aa2046cc8ea59e65eb75cf8b"
+      "records": 16898,
+      "bytes": 4161585,
+      "sha256": "7252d2cb62825bee70e3bb26f180b67a31eeeaa5bf1a56dbf0f8fc3d26852a93"
     }
   ],
   "notes": "ISIN discovery catalogue only; an ISIN is not a verified quote or a fully enriched bond record."
